@@ -19,7 +19,7 @@ using Plots
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local"
 
 args = ARGS
-args = ["[0.05, 1, 0.01 , 50, 101, 1, 0.4]"]
+#args = ["[0.05, 1, 0.01 , 50, 101, 1, 0.4]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, NLL, gap_factor = Params.parse_arguments(args)
@@ -45,6 +45,10 @@ gap_threshold = gap_factor*(Hamil.E_LL(1,sqrt(2π/startphi),a) - Hamil.E_LL(0,sq
 end_time_init = time();
 elapsed_time_init = round(end_time_init - start_time_init; digits = 3);
 println("Initialisation done in $elapsed_time_init seconds.")
+println("\n\n==================
+Calculating the spectrum of the first $(NLL+1) Landau levels
+in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr A
+from flux $startphi to flux $endphi. Resolution of the calculation is p=$p.\n")
 # message for size of calculation
 Params.print_size_message(q_list, p, Nky, NLL)
 

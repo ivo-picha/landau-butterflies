@@ -19,7 +19,7 @@ function parse_arguments(args::Vector{String})
     end
 
     if !isprime(Int(args_vec[5]))
-        println("Code is running but it would be nice if you chose a prime p next time...")
+        println("\n Code is running but it would be nice if you chose a prime p next time...\n")
     end
 
     return Any[args_vec[1], args_vec[2], args_vec[3], args_vec[4], Int(args_vec[5]), Int(args_vec[6]), args_vec[7]]
@@ -47,7 +47,7 @@ function print_size_message(q_list::Vector, p::Int64, Nky::Int64, NLL::Int64)
     points_per_q = (Nky-1)*(NLL+1)*p
     Nq = length(q_list)
     num_points_in_plot = points_per_q*Nq
-    println("Calculating spectrum for $points_per_q x $Nq = $num_points_in_plot points.")
+    println("Calculating spectrum for $points_per_q x $Nq = $num_points_in_plot points.\n")
 end
 
 
