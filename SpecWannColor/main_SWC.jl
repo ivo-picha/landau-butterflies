@@ -19,7 +19,7 @@ using Plots
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local"
 
 args = ARGS
-#args = ["[0.05, 1, 0.01 , 50, 29, 1, 0.5]"]
+args = ["[0.05, 1, 0.01 , 50, 101, 1, 0.4]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, NLL, gap_factor = Params.parse_arguments(args)
@@ -102,7 +102,7 @@ start_time_plot = time();
 plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL")
 
 # plot colored Wannier plot
-plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, lines_dict, NLL, plots_title)
+plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, lines_dict, endphi, NLL, plots_title)
 
 # plot only the spectrum
 plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title)
@@ -126,3 +126,5 @@ savefig(plot_w, wannier_plot_path)
 end_time_plot = time();
 elapsed_time_plot = round(end_time_plot - start_time_plot; digits = 3);
 println("All plotting done in $elapsed_time_plot seconds.")
+elapsed_time_all = round(end_time_plot - start_time_init; digits = 3);
+println("Code finished running in $elapsed_time_all seconds. Output files can be found in $plot_save_folder_path.")

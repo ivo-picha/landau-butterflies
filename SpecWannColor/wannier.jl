@@ -28,7 +28,7 @@ function get_densities_gaps(energy_list::Vector{Float64}, min_gap_size_eV::Float
     push!(list_big_gaps, min_gap_size_eV * 5)
     push!(list_energies_gap_lower, energy_list[end])
 
-    norm_factor = NLL*flux/(N_en-1)
+    norm_factor = (NLL+1)*flux/(N_en-1)
     list_densities_norm = list_densities.*norm_factor
 
     return [list_densities_norm, list_big_gaps, list_energies_gap_lower]

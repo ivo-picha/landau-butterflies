@@ -89,12 +89,13 @@ wannier_bare_options = (
     size = (1200,800),
     tickfontsize = 16,
     guidefontsize = 18,
-    margin = 9mm
+    margin = 9mm,
+    ylims = (-1,1)
     #yticks = false
 )
 
 # minimum number of points in a line to color it
-const min_line_points = 15
+const min_line_points = 10
 
 # function for custom coloring
 function gradient_color_plasma(value::Int, max_value::Int) # thanks chatGPT, not actually plasma anymore
@@ -116,7 +117,7 @@ function gradient_color_plasma(value::Int, max_value::Int) # thanks chatGPT, not
     return color
 end
 
-function plot_wannier_all(datapoints::Vector{NTuple{4, Float64}}, gaps_global::Vector{Float64}, lines_dict::Dict, NLL::Int64, plots_title::String)
+function plot_wannier_all(datapoints::Vector{NTuple{4, Float64}}, gaps_global::Vector{Float64}, lines_dict::Dict, endphi::Float64, NLL::Int64, plots_title::String)
 
     println("Plotting an uncolored Wannier diagram.")
     # plot uncolored points
@@ -124,7 +125,7 @@ function plot_wannier_all(datapoints::Vector{NTuple{4, Float64}}, gaps_global::V
     title!(plot_w, plots_title)
 
     # set a limit of Chern numbers to be colored
-    max_colored_chern = NLL+4
+    max_colored_chern = clamp(Int(NLL)+3, 5, 10)
 
     # set up a function to scale point sizes between msmin and msmax; rescale if you change png resolution
     ggmax = maximum(gaps_global)
@@ -140,10 +141,16 @@ function plot_wannier_all(datapoints::Vector{NTuple{4, Float64}}, gaps_global::V
 
     println("Overlaying colored points.")
 
+    phi_list_denser = range(0, endphi, 100) # list of phis for plotting guidelines
+
+
     @showprogress for (line_key, points) in lines_dict
         if length(points) > min_line_points
-            chern = round(line_key[1]; digits = 2)
+            chern = round(line_key[1]; digits = 1)
             if isinteger(chern)
+                #plot guideline
+                line_y_vals = line_key[2] .+ line_key[1].*phi_list_denser
+                plot!(plot_w, phi_list_denser, line_y_vals, color = :gray, alpha = 0.4, lw = 0.5, label = "")
                 for point in points
                     ms_gap = rescale_gap(point[3])
                     scatter!(plot_w, [point[1]], [point[2]], markerstrokewidth = 0, ms = 1.1*ms_gap, label = "", color = gradient_color_plasma(Int(chern), max_colored_chern))
@@ -178,7 +185,7 @@ function color_gaps(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::Ve
     phi_spacings = diff(unique_phis)
     phi_thresh = maximum(phi_spacings)
     # set a limit of Chern numbers to be colored
-    max_colored_chern = NLL+4
+    max_colored_chern = clamp(Int(NLL)+3, 5, 10)
 
     for (line_key, points) in lines_dict
         if length(points) > min_line_points
