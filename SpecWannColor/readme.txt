@@ -14,3 +14,7 @@ where the arguments in the vector are
 7. factor for gap recognition (check code for more details)
 
 Note: time for calculation is approx propto p^3, NLL^2
+
+
+For running on a cluster:
+Execute sub_main_SCWC.jl in frontend node, which generates and submits job files to computational nodes.
