@@ -7,6 +7,7 @@ using Plots
 using Measures
 using ProgressMeter
 using Colors, ColorSchemes
+using Interpolations
 
 spectrum_bare_options = (
     markersize = 0.4,
@@ -218,4 +219,34 @@ function color_gaps(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::Ve
 end
 
  
+
+
+# PLOTTING HEATMAPS OF ELECTRONIC densities
+
+# settings for plot
+density_options = (
+    xlabel = "x",
+    ylabel = "y",
+    framestyle = :box,
+    size = (1200,800),
+    tickfontsize = 16,
+    guidefontsize = 18,
+    margin = 9mm
+    #ylims = (-1,1)
+    #yticks = false
+)
+
+function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64})
+    itp = interpolate(density_grid, BSpline(Linear()))
+    xgrid_denser = range(xgrid[1], xgrid[end], length = 250)
+    ygrid_denser = range(ygrid[1], ygrid[end], length = 250)
+    density_grid_denser = [itp(xi, yi) for xi in xgrid_denser for yi in ygrid_denser]
+    plot1 = heatmap(xgrid_denser, ygrid_denser, density_grid_denser; density_options...)
+    return plot1
+end
+
+
+
+
+
 end

@@ -5,6 +5,8 @@ using .Hamil
 
 using Polynomials, SpecialPolynomials
 using LinearAlgebra
+using ProgressMeter
+using NPZ
 
 
 function landau_lvl_wf(x::Float64, y::Float64, n::Int64, ky::Float64, phi::Float64, a::Float64)::ComplexF64
@@ -53,8 +55,26 @@ function get_el_density(x::Float64, y::Float64, vectors::Vector{Vector{ComplexF6
                     for i in eachindex(qnumb_list) for j in eachindex(qnumb_list)])
         tot = tot + sum1
     end
+    if imag(tot)/real(tot) > 1e-2 && imag(tot) > 1e-5
+        println("Imaginary part is non-zero! at position ($x, $y).")
+    end
     return real(tot)
 end
+
+
+function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, vectors::Vector{Vector{ComplexF64}}, ky_list::Vector{Float64}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
+    xgrid = range(0, N_uc_x*a, N_uc_x*Nppuc)
+    ygrid = range(0, N_uc_y*a, N_uc_y*Nppuc)
+    grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)
+    density_list = Float64[];
+    @showprogress for xy in grid_list
+        push!(density_list, get_el_density(xy[1], xy[2], vectors, collect(ky_list), phi, a, p, NLL))
+    end
+    density_grid = transpose(reshape(density_list, N_uc_x*Nppuc, N_uc_y*Nppuc))
+    return [collect(xgrid), collect(ygrid), Float64.(density_grid)]
+end
+
+
 
     
 end
