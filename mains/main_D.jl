@@ -21,7 +21,7 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local"
 
 args = ARGS
-args = ["[101, 100, 0.01, 50, 4, 1]"]
+args = ["[5, 6, 0.1, 50, 5, 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np = Params.parse_arguments_D(args)
@@ -76,9 +76,9 @@ println("Spectrum has been calculated in $elapsed_time_diag seconds. Calculating
 start_time_grid = time();
 
 # create a grid and plot the spectrum point by point
-N_uc_x = 101                 # number of unit lengths to be plotted in x
-N_uc_y = 1
-Nppuc = 5                 # number of points per unit length
+N_uc_x = 4                 # number of unit lengths to be plotted in x
+N_uc_y = 4
+Nppuc = 20                  # number of points per unit length
 xgrid, ygrid, density_grid = States.get_density_grids(N_uc_x, N_uc_y, Nppuc, vectors, collect(ky_list), phi, a, p, NLL)
 
 end_time_grid = time();
@@ -92,9 +92,9 @@ npzwrite(joinpath(data_save_folder_path, "dens_grids_$p-$q-$U0-$a_in_angstr-$NLL
 
 # WORKING fine up to here
 
-
-
-heatmap(xgrid, ygrid, log.(round.(density_grid; digits=10)))
+plot_ed = Plt.plot_density(xgrid, ygrid, density_grid, a)
+plots_title = string("ϕ=$p/$q, nₚ=$np, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL")
+title!(plot_ed, plots_title)
 
 
 

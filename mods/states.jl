@@ -63,8 +63,8 @@ end
 
 
 function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, vectors::Vector{Vector{ComplexF64}}, ky_list::Vector{Float64}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
-    xgrid = range(0, N_uc_x*a, N_uc_x*Nppuc)
-    ygrid = range(0, N_uc_y*a, N_uc_y*Nppuc)
+    xgrid = range(a, (N_uc_x+1)*a, N_uc_x*Nppuc)
+    ygrid = range(a, (N_uc_y+1)*a, N_uc_y*Nppuc)
     grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)
     density_list = Float64[];
     @showprogress for xy in grid_list

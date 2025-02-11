@@ -107,9 +107,11 @@ plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL")
 
 # plot colored Wannier plot
 plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, lines_dict, endphi, NLL, plots_title)
+title!(plot_w, plots_title)
 
 # plot only the spectrum
 plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title)
+title!(plot_s, plots_title)
 
 # plot colors in the gaps of the spectrum
 Plt.color_gaps(plot_s, lines_dict, unique_phis, NLL)
