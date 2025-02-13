@@ -1,9 +1,9 @@
-## landau-butterflies
+# landau-butterflies
 Code in julia that considers electrons in a periodic potential in a large magnetic field.
 Working files to be executed are in the "mains" folder.
 If you want to submit to cluster, use the "sub_..." files instead.
 
-# SCWC
+## SCWC
 This is code, written in julia, which calculate the spectrum of Landau levels in a cosine periodic potential in 2D,
 calculate its topological properties based on a generated Wannier plot, and color the gaps in the spectrum according to Chern.
 
@@ -24,7 +24,7 @@ For running on a cluster:
 Execute sub_main_SCWC.jl in frontend node, which generates and submits job files to computational nodes.
 
 
-# D
+## D
 Code in julia, which finds the electronic density in real space of the same system.
 
 How to run: _(typical run command from terminal)_
@@ -36,3 +36,6 @@ where the arguments in the vector are
 4. periodicity of the potential (unit length) in Ansgstrom
 5. NLL - n of the last Landau level included
 6. np - particle density
+
+## D_npz
+Plots heatmap / density map of the electronic density from a pre-saved .npz file
