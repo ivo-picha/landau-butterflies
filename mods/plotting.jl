@@ -54,7 +54,7 @@ end
 
 
 # add LL guides to spectrum plot
-function plot_add_LL_guide(plot_name::Plots.Plot, startphi::Float64, endphi::Float64, a::Float64, NLL::Int64)
+function plot_add_LL_guide!(plot_name::Plots.Plot, startphi::Float64, endphi::Float64, a::Float64, NLL::Int64)
     phi_list_denser = range(startphi, endphi, 300)
     xi0_list_denser = sqrt(2π)./ sqrt.(phi_list_denser)
     for n = 0:NLL
@@ -64,7 +64,7 @@ function plot_add_LL_guide(plot_name::Plots.Plot, startphi::Float64, endphi::Flo
 end
 
 # add LL guides AND enveloping functions to spectrum plot
-function plot_add_LL_guide_env(plot_name::Plots.Plot, startphi::Float64, endphi::Float64, U0::Float64, a::Float64, NLL::Int64)
+function plot_add_LL_guide_env!(plot_name::Plots.Plot, startphi::Float64, endphi::Float64, U0::Float64, a::Float64, NLL::Int64)
     phi_list_denser = range(startphi, endphi, 300)
     xi0_list_denser = sqrt(2π)./ sqrt.(phi_list_denser)
     for n = 0:NLL
@@ -180,7 +180,7 @@ function plot_wannier_all(datapoints::Vector{NTuple{4, Float64}}, gaps_global::V
 end
 
 # color the plot of the spectrum
-function color_gaps(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::Vector{Float64}, NLL::Int64)
+function color_gaps!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::Vector{Float64}, NLL::Int64)
 
     # min distance under which lists of points aren't broken in sublists
     phi_spacings = diff(unique_phis)
@@ -231,7 +231,8 @@ density_options = (
     size = (1200,800),
     tickfontsize = 16,
     guidefontsize = 18,
-    margin = 9mm
+    margin = 9mm,
+    color = :viridis
     #ylims = (-1,1)
     #yticks = false
 )

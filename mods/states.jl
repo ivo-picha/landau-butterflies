@@ -18,6 +18,7 @@ function landau_lvl_wf(x::Float64, y::Float64, n::Int64, ky::Float64, phi::Float
     return 1/sqrt(lB*a) * An * Hn(xix) * exp(-xix^2 /2) * exp(im * ky * y)
 end
 
+
 function landau_lvl_wf_c(x::Float64, y::Float64, n::Int64, ky::Float64, phi::Float64, a::Float64)::ComplexF64
     lB = a / sqrt(2π * phi)
     xix = x/lB - ky*lB
@@ -61,6 +62,27 @@ function get_el_density(x::Float64, y::Float64, vectors::Vector{Vector{ComplexF6
     return real(tot)
 end
 
+function get_el_density2(x::Float64, y::Float64, vectors::Vector{Vector{ComplexF64}}, ky_list::Vector{Float64}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
+    tot = 0.0; # total density at point; to be added
+    n_per_ky = Int(length(vectors)/length(ky_list)) # number of states per ky_star after cutoff
+
+    qnumb_list = [(n, ky) for n=0:NLL for ky=1:p] # ordered list of quantum numbers, as in the eigenvectors
+
+    for k in eachindex(ky_list)
+        vs = vectors[(k-1)*n_per_ky + 1 : k*n_per_ky]
+
+        for vec in vs
+            wf_j = sum([vec[i]*landau_lvl_wf(x,y,qnumb_list[i][1],(ky_list[k]+(qnumb_list[i][2])*2π/a),phi,a) for i in eachindex(qnumb_list)])
+            tot = tot + wf_j*conj(wf_j)
+        end
+    end
+    if imag(tot)/real(tot) > 1e-2 && imag(tot) > 1e-5
+        println("Imaginary part is non-zero! at position ($x, $y).")
+    end
+    return real(tot)
+end
+
+
 
 function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, vectors::Vector{Vector{ComplexF64}}, ky_list::Vector{Float64}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
     xgrid = range(a, (N_uc_x+1)*a, N_uc_x*Nppuc)
@@ -68,7 +90,7 @@ function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, vectors::
     grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)
     density_list = Float64[];
     @showprogress for xy in grid_list
-        push!(density_list, get_el_density(xy[1], xy[2], vectors, collect(ky_list), phi, a, p, NLL))
+        push!(density_list, get_el_density2(xy[1], xy[2], vectors, collect(ky_list), phi, a, p, NLL))
     end
     density_grid = transpose(reshape(density_list, N_uc_x*Nppuc, N_uc_y*Nppuc))
     return [collect(xgrid), collect(ygrid), Float64.(density_grid)]

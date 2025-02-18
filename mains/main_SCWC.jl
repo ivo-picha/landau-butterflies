@@ -45,10 +45,8 @@ gap_threshold = gap_factor*(Hamil.E_LL(1,sqrt(2π/startphi),a) - Hamil.E_LL(0,sq
 end_time_init = time();
 elapsed_time_init = round(end_time_init - start_time_init; digits = 3);
 println("Initialisation done in $elapsed_time_init seconds.")
-println("\n\n==================
-Calculating the spectrum of the first $(NLL+1) Landau levels
-in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr A
-from flux $startphi to flux $endphi. Resolution of the calculation is p=$p.\n")
+
+Params.startmessage_SCWC(startphi, endphi, U0, a_in_angstr, p, NLL)
 # message for size of calculation
 Params.print_size_message(q_list, p, Nky, NLL)
 
@@ -114,17 +112,17 @@ plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title)
 title!(plot_s, plots_title)
 
 # plot colors in the gaps of the spectrum
-Plt.color_gaps(plot_s, lines_dict, unique_phis, NLL)
+Plt.color_gaps!(plot_s, lines_dict, unique_phis, NLL)
 
 # add guiding lines
-Plt.plot_add_LL_guide(plot_s, startphi, endphi, a, NLL)
+Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, NLL)
 
 
 # save plots
-spectrum_plot_name = string("SWC_S_NLL", NLL, "_U0", U0, "_a", a_in_angstr, "_p", p, "_from", startphi, "_to", endphi)
+spectrum_plot_name = string("SCWC_S_N$NLL-U$U0-a$a_in_angstr-p$p-phi$startphi-phf$endphi")
 spectrum_plot_path = string(joinpath(plot_save_folder_path, spectrum_plot_name), ".png")
 savefig(plot_s, spectrum_plot_path)
-wannier_plot_name = string("SWC_W_NLL", NLL, "_U0", U0, "_a", a_in_angstr, "_p", p, "_from", startphi, "_to", endphi)
+wannier_plot_name = string("SCWC_W_N$NLL-U$U0-a$a_in_angstr-p$p-phi$startphi-phf$endphi")
 wannier_plot_path = string(joinpath(plot_save_folder_path, wannier_plot_name), ".png")
 savefig(plot_w, wannier_plot_path)
 

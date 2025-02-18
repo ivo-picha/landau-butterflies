@@ -7,7 +7,7 @@ If you want to submit to cluster, use the "sub_..." files instead.
 This is code, written in julia, which calculate the spectrum of Landau levels in a cosine periodic potential in 2D,
 calculate its topological properties based on a generated Wannier plot, and color the gaps in the spectrum according to Chern.
 
-How to run: _(typical run command from terminal)_
+How to run: _(typical run command from terminal)_ 
 julia main_SCWC.jl "[0.05, 1.1, 0.015, 50, 499, 3, 0.4]"
 where the arguments in the vector are
 1. starting flux (x axis lower limit)
@@ -27,7 +27,7 @@ Execute sub_main_SCWC.jl in frontend node, which generates and submits job files
 ## D
 Code in julia, which finds the electronic density in real space of the same system.
 
-How to run: _(typical run command from terminal)_
+How to run: _(typical run command from terminal)_ 
 julia main_SCWC.jl "[101, 100, 0.015, 50, 5, 1]"
 where the arguments in the vector are
 1. p -- number of bands

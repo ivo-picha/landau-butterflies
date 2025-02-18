@@ -63,6 +63,25 @@ function print_size_message(q_list::Vector, p::Int64, Nky::Int64, NLL::Int64)
     println("Calculating spectrum for $points_per_q x $Nq = $num_points_in_plot points.\n")
 end
 
+# extract value of "a" from a filename
+function get_a_value(filename::String)
+    m = match(r"-a([0-9]+\.[0-9]+)", filename)
+    return m !== nothing ? parse(Float64, m.captures[1]) : nothing
+end
 
+
+function startmessage_D(p, phi, U0, a_in_angstr, NLL, np)
+    println("\n\n==================
+    Calculating the total electronic density of the first $(NLL+1) Landau levels
+    in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr Å
+    at flux $phi with particle density $np. Resolution of the calculation is p=$p.\n")
+end
+
+function startmessage_SCWC(startphi, endphi, U0, a_in_angstr, p, NLL)
+    println("\n\n==================
+    Calculating the spectrum of the first $(NLL+1) Landau levels
+    in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr A
+    from flux $startphi to flux $endphi. Resolution of the calculation is p=$p.\n")
+end
 
 end
