@@ -21,7 +21,7 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local"
 
 args = ARGS
-args = ["[10, 31, 0.1, 50, 10, 1]"]
+args = ["[15, 7, -0.1, 50, 10, 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np = Params.parse_arguments_D(args)
@@ -74,9 +74,9 @@ println("\nSpectrum has been calculated in $elapsed_time_diag seconds. Calculati
 start_time_plot = time();
 
 # create a grid and plot the spectrum point by point
-N_uc_x = 15                 # number of unit lengths to be plotted in x
+N_uc_x = 3                 # number of unit lengths to be plotted in x
 N_uc_y = 3
-Nppuc = 10                  # number of points per unit length
+Nppuc = 20                  # number of points per unit length
 xgrid, ygrid, density_grid = States.get_density_grids(N_uc_x, N_uc_y, Nppuc, vectors, collect(ky_list), phi, a, p, NLL)
 
 # save data so it can be accessed later; npz format, readable by python as well

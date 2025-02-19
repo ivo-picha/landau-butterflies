@@ -90,7 +90,7 @@ function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, vectors::
     grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)
     density_list = Float64[];
     @showprogress for xy in grid_list
-        push!(density_list, get_el_density2(xy[1], xy[2], vectors, collect(ky_list), phi, a, p, NLL))
+        push!(density_list, get_el_density2(xy[1], xy[2], vectors, ky_list, phi, a, p, NLL))
     end
     density_grid = transpose(reshape(density_list, N_uc_x*Nppuc, N_uc_y*Nppuc))
     return [collect(xgrid), collect(ygrid), Float64.(density_grid)]
