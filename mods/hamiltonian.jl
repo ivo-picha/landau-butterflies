@@ -41,7 +41,7 @@ function matA(n::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64,
     f = U0 * Tyn / 2
 
     #construct matrix
-    mat = diagm(0 => [d(j) for j = 1:p], 1 => f * ones(p-1), -1 => f * ones(p-1))
+    mat = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => f * ones(p-1))
     mat[1, p] = f 
     mat[p, 1] = f 
 
@@ -64,7 +64,7 @@ function matB(n::Int64, m::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a
     f1 = U0 * Tymn / 2
 
     #construct matrix
-    mat = diagm(0 => [d(j) for j = 1:p], 1 => f1 * ones(p-1), -1 => f2 * ones(p-1))
+    mat = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f1 * ones(p-1), -1 => f2 * ones(p-1))
     mat[1, p] = f2
     mat[p, 1] = f1
 

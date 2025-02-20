@@ -29,73 +29,105 @@ function landau_lvl_wf_c(x::Float64, y::Float64, n::Int64, ky::Float64, phi::Flo
 end
 
 # cut off spectrum and eigenvectors to only ones below a given filling np 
-function discard_high_energies(energies::Vector{Float64}, vectors::Matrix{ComplexF64}, phi::Float64, NLL::Int64, np::Float64)
-    N_en = length(energies)
+function discard_high_energies_sharp(states_vec_sorted::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, NLL::Int64, np::Float64)
+    N_en = length(states_vec_sorted)
     np_max = phi * (NLL+1)
     N_cut = round(Int, N_en * np / np_max)
     if N_cut >= N_en
         println("$np particles per unit cell is more than the allowed maximum ($np_max) at given flux, NLL. Taking $np_max particles per unit cell instead.")
-        return [energies, vectors]
+        return states_vec_sorted
     else
-        return [energies[1:N_cut], vectors[:,1:N_cut]]
+        return states_vec_sorted[1:N_cut]
     end
 end
 
-# get total electronic density at position x,y
-function get_el_density(x::Float64, y::Float64, vectors::Vector{Vector{ComplexF64}}, ky_list::Vector{Float64}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
+# get the el density at xy
+function get_el_density_sharp(x::Float64, y::Float64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
     tot = 0.0; # total density at point; to be added
-    n_per_ky = Int(length(vectors)/length(ky_list)) # number of states per ky_star after cutoff
 
-    qnumb_list = [(n, ky) for n=0:NLL for ky=1:p] # ordered list of quantum numbers, as in the eigenvectors
-
-    for k in eachindex(ky_list)
-        vs = sum(vectors[(k-1)*n_per_ky + 1 : k*n_per_ky])
-        vs_c = conj.(vs)
-
-        sum1 = sum([vs[i]*vs_c[j] * landau_lvl_wf(x,y,qnumb_list[i][1],(ky_list[k]+(qnumb_list[i][2])*2π/a),phi,a) * landau_lvl_wf_c(x,y,qnumb_list[j][1],(ky_list[k]+(qnumb_list[j][2])*2π/a),phi,a) 
-                    for i in eachindex(qnumb_list) for j in eachindex(qnumb_list)])
-        tot = tot + sum1
+    for state in states_vec_cut
+        qnumb_list = [(nj, state[2] + pj*2π/a) for nj=0:NLL for pj=0:(p-1)] # set up the quantum number basis of state
+        wf = sum([state[3][i] * landau_lvl_wf(x,y,qnumb_list[i][1],qnumb_list[i][2],phi,a) for i in eachindex(qnumb_list)]) # wavefunction of state at xy
+        tot = tot + wf*conj(wf) # add |wf|^2 to total density
     end
+
     if imag(tot)/real(tot) > 1e-2 && imag(tot) > 1e-5
-        println("Imaginary part is non-zero! at position ($x, $y).")
+        println("Imaginary part of the density is non-zero! at position ($x, $y).")
     end
-    return real(tot)
+    return Float64(real(tot))
 end
 
-function get_el_density2(x::Float64, y::Float64, vectors::Vector{Vector{ComplexF64}}, ky_list::Vector{Float64}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
-    tot = 0.0; # total density at point; to be added
-    n_per_ky = Int(length(vectors)/length(ky_list)) # number of states per ky_star after cutoff
+# ================= SMEARING / T-dep ===========================
 
-    qnumb_list = [(n, ky) for n=0:NLL for ky=1:p] # ordered list of quantum numbers, as in the eigenvectors
+# Fermi-Dirac distribution
+function fermi_dirac(en::Float64, eF::Float64, eT::Float64)
+    return 1/(exp((en-eF)/eT)+1)
+end
 
-    for k in eachindex(ky_list)
-        vs = vectors[(k-1)*n_per_ky + 1 : k*n_per_ky]
-
-        for vec in vs
-            wf_j = sum([vec[i]*landau_lvl_wf(x,y,qnumb_list[i][1],(ky_list[k]+(qnumb_list[i][2])*2π/a),phi,a) for i in eachindex(qnumb_list)])
-            tot = tot + wf_j*conj(wf_j)
+# cut off with a bonus so that spectrum can be smeared later without a sharp cutoff
+function discard_high_energies_smear(states_vec_sorted::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, NLL::Int64, np::Float64, TeV::Float64)
+    N_en = length(states_vec_sorted)
+    np_max = phi * (NLL+1)
+    N_cut = round(Int, N_en * np / np_max)
+    # find position on which energy is suff large
+    if N_cut >= N_en
+        println("$np particles per unit cell is more than the allowed maximum ($np_max) at given flux, NLL. Taking $np_max particles per unit cell instead. Add more LLs to the calculation!")
+        return (states_vec_sorted, states_vec_sorted[end][1])
+    else
+        EF = states_vec_sorted[N_cut][1] # Fermi energy
+        E_cutoff = EF + 4*TeV
+        energies_sorted = first.(states_vec_sorted)
+        N_cut_plus = searchsortedlast(energies_sorted, E_cutoff; lt = <)
+        if N_cut_plus >= N_en
+            println("Temperature smear clips the end of the spectrum. Add more LLs to the calculation!")
+            return (states_vec_sorted, EF)
+        else
+            return (states_vec_sorted[1:N_cut_plus], EF) # returns the list of states + fermi energy 
         end
     end
-    if imag(tot)/real(tot) > 1e-2 && imag(tot) > 1e-5
-        println("Imaginary part is non-zero! at position ($x, $y).")
-    end
-    return real(tot)
 end
 
+# get the el density at xy and smear mid-band states at cutoff
+function get_el_density_smear(x::Float64, y::Float64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, EF::Float64, TeV::Float64)
+    tot = 0.0; # total density at point; to be added
+
+    for state in states_vec_cut
+        qnumb_list = [(nj, state[2] + pj*2π/a) for nj=0:NLL for pj=0:(p-1)] # set up the quantum number basis of state
+        wf = sum([state[3][i] * landau_lvl_wf(x,y,qnumb_list[i][1],qnumb_list[i][2],phi,a) for i in eachindex(qnumb_list)]) # wavefunction of state at xy
+        tot = tot + fermi_dirac(state[1],EF,TeV) * wf*conj(wf) # add |wf|^2 to total density with a weight given by FD distribution
+    end
+
+    if imag(tot)/real(tot) > 1e-2 && imag(tot) > 1e-5
+        println("Imaginary part of the density is non-zero! at position ($x, $y).")
+    end
+    return Float64(real(tot))
+end
+# ============================================================
 
 
-function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, vectors::Vector{Vector{ComplexF64}}, ky_list::Vector{Float64}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
+function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
     xgrid = range(a, (N_uc_x+1)*a, N_uc_x*Nppuc)
     ygrid = range(a, (N_uc_y+1)*a, N_uc_y*Nppuc)
     grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)
     density_list = Float64[];
     @showprogress for xy in grid_list
-        push!(density_list, get_el_density2(xy[1], xy[2], vectors, collect(ky_list), phi, a, p, NLL))
+        push!(density_list, get_el_density_sharp(xy[1], xy[2], states_vec_cut, phi, a, p, NLL))
     end
     density_grid = transpose(reshape(density_list, N_uc_x*Nppuc, N_uc_y*Nppuc))
     return [collect(xgrid), collect(ygrid), Float64.(density_grid)]
 end
-
+# add a method to include T --> smearing
+function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, EF::Float64, TeV::Float64)
+    xgrid = range(a, (N_uc_x+1)*a, N_uc_x*Nppuc)
+    ygrid = range(a, (N_uc_y+1)*a, N_uc_y*Nppuc)
+    grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)
+    density_list = Float64[];
+    @showprogress for xy in grid_list
+        push!(density_list, get_el_density_smear(xy[1], xy[2], states_vec_cut, phi, a, p, NLL, EF, TeV))
+    end
+    density_grid = transpose(reshape(density_list, N_uc_x*Nppuc, N_uc_y*Nppuc))
+    return [collect(xgrid), collect(ygrid), Float64.(density_grid)]
+end
 
 
     
