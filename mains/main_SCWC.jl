@@ -17,6 +17,7 @@ using LinearAlgebra
 using Plots
 
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local"
+#plot_save_folder_path = "/users/ivoga/lh/plts"
 
 args = ARGS
 #args = ["[0.05, 1, 0.01 , 50, 101, 1, 0.4]"]

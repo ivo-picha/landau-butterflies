@@ -39,3 +39,8 @@ where the arguments in the vector are
 
 ## D_npz
 Plots heatmap / density map of the electronic density from a pre-saved .npz file
+
+## Dsm
+Same as main_D.jl but adds a smearing function / temperature dependence to the calculation
+takes an additional ARGS input 
+7. T -- temperature in Kelvin
