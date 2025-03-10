@@ -16,11 +16,11 @@ using ProgressMeter
 using LinearAlgebra
 using Plots
 
-plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local"
+plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
 #plot_save_folder_path = "/users/ivoga/lh/plts"
 
-args = ARGS
-#args = ["[0.05, 1, 0.01 , 50, 101, 1, 0.4]"]
+#args = ARGS
+args = ["[0.2, 1.5, 0.0085 , 50, 199, 9, 0.1]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, NLL, gap_factor = Params.parse_arguments(args)

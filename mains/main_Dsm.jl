@@ -17,13 +17,13 @@ using LinearAlgebra
 using Plots
 using NPZ
 
-plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local"
+plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/densities"
 data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local"
 # plot_save_folder_path = "/users/ivoga/lh/plts"
 # data_save_folder_path = "/users/ivoga/lh/data"
 
 args = ARGS
-args = ["[34, 31, 0.1, 50, 9, 1, 100]"]
+args = ["[15, 7, 0.1, 50, 3, 1, 50]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_Dsm(args)
@@ -78,7 +78,7 @@ start_time_plot = time();
 N_uc_x = 3                 # number of unit lengths to be plotted in x
 N_uc_y = 3
 Nppuc = 30                  # number of points per unit length
-xgrid, ygrid, density_grid = States.get_density_grids(N_uc_x, N_uc_y, Nppuc, states_vec_cut, phi, a, p, NLL, EF, TeV)
+xgrid, ygrid, density_grid = States.get_density_grids(N_uc_x, N_uc_y, Nppuc, states_vec_cut, phi, a, p, NLL, np, EF, TeV)
 
 # save data so it can be accessed later; npz format, readable by python as well
 npzwrite(joinpath(data_save_folder_path, "dens_grids_sm_p$p-q$q-U$U0-a$a_in_angstr-N$NLL-n$np-T$TK.npz"),

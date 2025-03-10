@@ -77,7 +77,7 @@ start_time_plot = time();
 N_uc_x = 3                 # number of unit lengths to be plotted in x
 N_uc_y = 3
 Nppuc = 20                  # number of points per unit length
-xgrid, ygrid, density_grid = States.get_density_grids(N_uc_x, N_uc_y, Nppuc, states_vec_cut, phi, a, p, NLL)
+xgrid, ygrid, density_grid = States.get_density_grids(N_uc_x, N_uc_y, Nppuc, states_vec_cut, phi, a, p, NLL, np)
 
 # save data so it can be accessed later; npz format, readable by python as well
 npzwrite(joinpath(data_save_folder_path, "dens_grids_p$p-q$q-U$U0-a$a_in_angstr-N$NLL-n$np.npz"),
