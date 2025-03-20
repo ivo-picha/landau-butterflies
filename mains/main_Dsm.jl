@@ -23,7 +23,7 @@ data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/loc
 # data_save_folder_path = "/users/ivoga/lh/data"
 
 args = ARGS
-args = ["[15, 7, 0.1, 50, 3, 1, 50]"]
+args = ["[5, 8, 0.1, 50, 8, 1, 10]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_Dsm(args)
@@ -33,7 +33,7 @@ phi = p/q                                   # unit flux per unit cell
 xi0 = sqrt(2π / phi)
 
 # get lists of ky values to iterate over
-Nky = 20;                                   # number of ky* points; independent calculations; variation on scale of U0
+Nky = 50;                                   # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
 
 # message for time it took to initialise

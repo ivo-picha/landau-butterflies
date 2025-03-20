@@ -43,7 +43,7 @@ function matA(n::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64,
     #construct matrix
     mat = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => f * ones(p-1))
     mat[1, p] = f 
-    mat[p, 1] = f 
+    mat[p, 1] = f
 
     return mat
 end
@@ -52,7 +52,7 @@ end
 function matB(n::Int64, m::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64, p::Int64)
     # get elements from above for LL n and m
     Txnm = Tx(n, m, ξ0)
-    Txmn_conj = Tx(m, n, -ξ0)
+    Txmn_conj = conj(Txnm)
     Tynm = Ty(n, m, ξ0)
     Tymn = Ty(m, n, ξ0)
 
