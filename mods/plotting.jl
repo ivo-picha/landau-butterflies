@@ -181,6 +181,7 @@ end
 
 # color the plot of the spectrum
 function color_gaps!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::Vector{Float64}, NLL::Int64)
+    println("Coloring gaps on the spectrum according to Chern number.")
 
     # min distance under which lists of points aren't broken in sublists
     phi_spacings = diff(unique_phis)
@@ -225,8 +226,8 @@ end
 
 # settings for plot
 density_options = (
-    xlabel = "x",
-    ylabel = "y",
+    xlabel = "x/a",
+    ylabel = "y/a",
     framestyle = :box,
     size = (1200,800),
     tickfontsize = 16,
@@ -239,16 +240,16 @@ density_options = (
 
 
 function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64}, a::Float64)
-    plot1 = heatmap(xgrid, ygrid, density_grid.*(a^2); density_options...)
+    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options...)
 
-    xsteps = xgrid[1]:a:xgrid[end]
-    xticklist = [string(i,"a") for i in eachindex(xsteps)]
-    my_xticks = (xsteps, xticklist)
-    xticks!(plot1, my_xticks)
-    ysteps = ygrid[1]:a:ygrid[end]
-    yticklist = [string(i,"a") for i in eachindex(ysteps)]
-    my_yticks = (ysteps, yticklist)
-    yticks!(plot1, my_yticks)
+    # xsteps = xgrid[1]:a:xgrid[end]
+    # xticklist = [string(i,"a") for i in eachindex(xsteps)]
+    # my_xticks = (xsteps, xticklist)
+    # xticks!(plot1, my_xticks)
+    # ysteps = ygrid[1]:a:ygrid[end]
+    # yticklist = [string(i,"a") for i in eachindex(ysteps)]
+    # my_yticks = (ysteps, yticklist)
+    # yticks!(plot1, my_yticks)
 
     return plot1
 end

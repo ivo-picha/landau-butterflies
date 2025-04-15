@@ -3,34 +3,37 @@ module States
 include(joinpath(@__DIR__,"hamiltonian.jl"))
 using .Hamil
 
-using Polynomials, SpecialPolynomials
 using LinearAlgebra
 using ProgressMeter
 using NPZ
-using Statistics # used only for one mean()
+using Statistics: mean # used only for one mean()
 
-
-function landau_lvl_wf(x::Float64, y::Float64, n::Int64, ky::Float64, phi::Float64, a::Float64)::ComplexF64
-    lB = a / sqrt(2π * phi)
-    xix = x/lB - ky*lB
-    Hn = Hermite(n)
-    An = 1/sqrt(2^n * factorial(n) * sqrt(π))
-
-    return 1/sqrt(lB*a) * An * Hn(xix) * exp(-xix^2 /2) * exp(im * ky * y)
+# recursively define a hermite polynomial
+function hermite_r(x::Float64, n::Int)::Float64
+    if n == 0
+        return 1.0
+    elseif n == 1
+        return 2*x
+    else
+        return 2*x* hermite_r(x, n-1) - 2*(n-1)* hermite_r(x, n-2)
+    end
 end
 
-
-function landau_lvl_wf_c(x::Float64, y::Float64, n::Int64, ky::Float64, phi::Float64, a::Float64)::ComplexF64
-    lB = a / sqrt(2π * phi)
-    xix = x/lB - ky*lB
-    Hn = Hermite(n)
+# orthogonal hermite function
+function hermite_function(x::Float64, n::Int64)
     An = 1/sqrt(2^n * factorial(n) * sqrt(π))
+    return An * hermite_r(x,n) * exp(-x^2 /2)
+end
 
-    return 1/sqrt(lB*a) * An * Hn(xix) * exp(-xix^2 /2) * exp(-im * ky * y)
+function landau_lvl_wf(x::Float64, y::Float64, n::Int, m::Int, ky0::Float64, Ky::Float64, phi::Float64, a::Float64, p::Int)::ComplexF64
+    lB = a / sqrt(2π * phi)
+    ky = ky0 + 2π*m/a + 2π*p*Ky/a
+    xix = x/lB - ky*lB
+    return 1/a * hermite_function(xix, n) * exp(im * ky * y)
 end
 
 # cut off spectrum and eigenvectors to only ones below a given filling np 
-function discard_high_energies_sharp(states_vec_sorted::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, NLL::Int64, np::Float64)
+function discard_high_energies_sharp(states_vec_sorted::Vector{Tuple{Float64, Float64, Float64, Vector{ComplexF64}}}, phi::Float64, NLL::Int64, np::Float64)
     N_en = length(states_vec_sorted)
     np_max = phi * (NLL+1)
     N_cut = round(Int, N_en * np / np_max)
@@ -43,12 +46,12 @@ function discard_high_energies_sharp(states_vec_sorted::Vector{Tuple{Float64, Fl
 end
 
 # get the el density at xy
-function get_el_density_sharp(x::Float64, y::Float64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
+function get_el_density_sharp(x::Float64, y::Float64, states_vec_cut::Vector{Tuple{Float64, Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64)
     tot = 0.0; # total density at point; to be added
 
     for state in states_vec_cut
-        qnumb_list = [(nj, state[2] + pj*2π/a) for nj=0:NLL for pj=0:(p-1)] # set up the quantum number basis of state
-        wf = sum([state[3][i] * landau_lvl_wf(x,y,qnumb_list[i][1],qnumb_list[i][2],phi,a) for i in eachindex(qnumb_list)]) # wavefunction of state at xy
+        qnumb_list = [(nj, mj) for nj=0:NLL for mj=0:(p-1)] # set up the quantum number basis of state
+        wf = sum([state[4][i] * landau_lvl_wf_Y(x,y,qnumb_list[i][1],qnumb_list[i][2],state[2],state[3],phi,a,p) for i in eachindex(qnumb_list)]) # wavefunction of state at xy
         tot = tot + wf*conj(wf) # add |wf|^2 to total density
     end
 
@@ -66,7 +69,7 @@ function fermi_dirac(en::Float64, eF::Float64, eT::Float64)
 end
 
 # cut off with a bonus so that spectrum can be smeared later without a sharp cutoff
-function discard_high_energies_smear(states_vec_sorted::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, NLL::Int64, np::Float64, TeV::Float64)
+function discard_high_energies_smear(states_vec_sorted::Vector{Tuple{Float64, Float64, Float64, Vector{ComplexF64}}}, phi::Float64, NLL::Int64, np::Float64, TeV::Float64)
     N_en = length(states_vec_sorted)
     np_max = phi * (NLL+1)
     N_cut = round(Int, N_en * np / np_max)
@@ -89,12 +92,13 @@ function discard_high_energies_smear(states_vec_sorted::Vector{Tuple{Float64, Fl
 end
 
 # get the el density at xy and smear mid-band states at cutoff
-function get_el_density_smear(x::Float64, y::Float64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, EF::Float64, TeV::Float64)
+function get_el_density_smear(x::Float64, y::Float64, states_vec_cut::Vector{Tuple{Float64, Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, EF::Float64, TeV::Float64)
     tot = 0.0; # total density at point; to be added
 
+    qnumb_list = [(nj, mj) for nj=0:NLL for mj=0:(p-1)] # set up the quantum number basis of state
+    
     for state in states_vec_cut
-        qnumb_list = [(nj, state[2] + pj*2π/a) for nj=0:NLL for pj=0:(p-1)] # set up the quantum number basis of state
-        wf = sum([state[3][i] * landau_lvl_wf(x,y,qnumb_list[i][1],qnumb_list[i][2],phi,a) for i in eachindex(qnumb_list)]) # wavefunction of state at xy
+        wf = sum([state[4][i] * landau_lvl_wf_Y(x,y,qnumb_list[i][1],qnumb_list[i][2],state[2],state[3],phi,a,p) for i in eachindex(qnumb_list)]) # wavefunction of state at xy
         tot = tot + fermi_dirac(state[1],EF,TeV) * wf*conj(wf) # add |wf|^2 to total density with a weight given by FD distribution
     end
 
@@ -106,7 +110,7 @@ end
 # ============================================================
 
 
-function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, np::Float64)
+function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, states_vec_cut::Vector{Tuple{Float64, Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, np::Float64)
     xgrid = range(a, (N_uc_x+1)*a, N_uc_x*Nppuc)
     ygrid = range(a, (N_uc_y+1)*a, N_uc_y*Nppuc)
     grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)
@@ -119,7 +123,7 @@ function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, states_ve
     return [collect(xgrid), collect(ygrid), Float64.(density_grid)]
 end
 # add a method to include T --> smearing
-function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, states_vec_cut::Vector{Tuple{Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, np::Float64, EF::Float64, TeV::Float64)
+function get_density_grids(N_uc_x::Int64, N_uc_y::Int64, Nppuc::Int64, states_vec_cut::Vector{Tuple{Float64, Float64, Float64, Vector{ComplexF64}}}, phi::Float64, a::Float64, p::Int64, NLL::Int64, np::Float64, EF::Float64, TeV::Float64)
     xgrid = range(a, (N_uc_x+1)*a, N_uc_x*Nppuc)
     ygrid = range(a, (N_uc_y+1)*a, N_uc_y*Nppuc)
     grid_list = reshape(collect(Base.product(xgrid, ygrid)), :)

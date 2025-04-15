@@ -20,16 +20,18 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts"
 
 #args = ARGS
-args = ["[0.2, 1.5, 0.0085 , 50, 199, 9, 0.1]"]
+args = ["[0.05, 0.5, 0.1 , 50, 199, 3, 0.3]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, NLL, gap_factor = Params.parse_arguments(args)
 a = a_in_angstr * 1e-10                     # lattice const in meters
 
-# get lists of q and ky values to iterate over
+# get lists of q, ky0 and Y values to iterate over
 q_list = Params.get_q_list(startphi, endphi, p)
-Nky = 4;                                    # number of ky* points; independent calculations; variation on scale of U0
+Nky = 6;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
+NY = 6;
+Y_list = Params.get_Y_list(NY)
 
 # empty lists to store coordinates for plot
 energies = Float64[];                       # all energies 
@@ -49,7 +51,7 @@ println("Initialisation done in $elapsed_time_init seconds.")
 
 Params.startmessage_SCWC(startphi, endphi, U0, a_in_angstr, p, NLL)
 # message for size of calculation
-Params.print_size_message(q_list, p, Nky, NLL)
+Params.print_size_message(q_list, p, Nky, NY, NLL)
 
 # iterate over lists and diagonalise hamiltonians
 start_time_diag = time();                   # set up a clock to monitor elapsed time
@@ -60,11 +62,13 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
     energies_at_phi = Float64[];            # to be appended to global energies list
 
     for ky in ky_list
+        for Y in Y_list
 
-        H = Hamil.get_full_ham(xi0, ky, U0, a, p, NLL)
+        H = Hamil.get_full_ham(xi0, ky, Y, U0, a, p, NLL)
         evalsH = eigvals(H)
         energies_at_phi = [energies_at_phi; evalsH] #add eigenvalues to list of energies
 
+        end
     end
 
     global energies

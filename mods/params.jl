@@ -70,8 +70,14 @@ function get_ky_list(a::Float64, Nky::Int64)
     return (-1.).*ky_list1[1:end-1]
 end
 
-function print_size_message(q_list::Vector, p::Int64, Nky::Int64, NLL::Int64)
-    points_per_q = (Nky-1)*(NLL+1)*p
+# get a list of Y values 
+function get_Y_list(NY::Int64)
+    Ylist1 = range(0, 2π*100, NY) #TEST
+    return Ylist1[1:end-1]
+end
+
+function print_size_message(q_list::Vector, p::Int64, Nky::Int64, NY::Int64, NLL::Int64)
+    points_per_q = (Nky-1)*(NY-1)*(NLL+1)*p
     Nq = length(q_list)
     num_points_in_plot = points_per_q*Nq
     println("Calculating spectrum for $points_per_q x $Nq = $num_points_in_plot points.\n")

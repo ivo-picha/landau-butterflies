@@ -27,7 +27,7 @@ Ty(n::Int64, m::Int64, ξ0::Float64) = exp(- ξ0^2 / 4) * sqrt(factorial(n))/sqr
 # hamiltonian is composed of A(on diagional) and B matrices that are nonzero on the 3 diagonals
 
 # block matrices on the diagonal -- correspond to (n,k)*(n,k') elements
-function matA(n::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64, p::Int64)
+function matA(n::Int64, ξ0::Float64, ky_star::Float64, Y::Float64, U0::Float64, a::Float64, p::Int64)
     # get elements from above for LL n
     Txn = Tx(n, n, ξ0)
     Txn_conj = Tx(n, n, -ξ0)
@@ -42,14 +42,14 @@ function matA(n::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64,
 
     #construct matrix
     mat = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => f * ones(p-1))
-    mat[1, p] = f 
-    mat[p, 1] = f
+    mat[1, p] = f * exp(-im*Y)
+    mat[p, 1] = f * exp(im*Y)
 
     return mat
 end
 
 # matrix elements away from diagonal; LL mixing
-function matB(n::Int64, m::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64, p::Int64)
+function matB(n::Int64, m::Int64, ξ0::Float64, ky_star::Float64, Y::Float64, U0::Float64, a::Float64, p::Int64)
     # get elements from above for LL n and m
     Txnm = Tx(n, m, ξ0)
     Txmn_conj = conj(Txnm)
@@ -65,30 +65,30 @@ function matB(n::Int64, m::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a
 
     #construct matrix
     mat = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f1 * ones(p-1), -1 => f2 * ones(p-1))
-    mat[1, p] = f2
-    mat[p, 1] = f1
+    mat[1, p] = f2 * exp(-im*Y)
+    mat[p, 1] = f1 * exp(im*Y)
 
     return mat
 end
 
 # row n of the hamiltonian matrix
-function get_ham_row(n::Int64, ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64, p::Int64, NLL::Int64)
+function get_ham_row(n::Int64, ξ0::Float64, ky_star::Float64, Y::Float64, U0::Float64, a::Float64, p::Int64, NLL::Int64)
     if n == 0
-        arrayB2 = reduce(hcat, [matB(n, m, ξ0, ky_star, U0, a, p) for m = n+1:NLL])
-        return [matA(n, ξ0, ky_star, U0, a, p) arrayB2]
+        arrayB2 = reduce(hcat, [matB(n, m, ξ0, ky_star, Y, U0, a, p) for m = n+1:NLL])
+        return [matA(n, ξ0, ky_star, Y, U0, a, p) arrayB2]
     elseif n == NLL
-        arrayB1 = reduce(hcat, [matB(n, m, ξ0, ky_star, U0, a, p) for m = 0:n-1])
-        return [arrayB1 matA(n, ξ0, ky_star, U0, a, p)]
+        arrayB1 = reduce(hcat, [matB(n, m, ξ0, ky_star, Y, U0, a, p) for m = 0:n-1])
+        return [arrayB1 matA(n, ξ0, ky_star, Y, U0, a, p)]
     else
-        arrayB1 = reduce(hcat, [matB(n, m, ξ0, ky_star, U0, a, p) for m = 0:n-1])
-        arrayB2 = reduce(hcat, [matB(n, m, ξ0, ky_star, U0, a, p) for m = n+1:NLL])
-        return [arrayB1 matA(n, ξ0, ky_star, U0, a, p) arrayB2]
+        arrayB1 = reduce(hcat, [matB(n, m, ξ0, ky_star, Y, U0, a, p) for m = 0:n-1])
+        arrayB2 = reduce(hcat, [matB(n, m, ξ0, ky_star, Y, U0, a, p) for m = n+1:NLL])
+        return [arrayB1 matA(n, ξ0, ky_star, Y, U0, a, p) arrayB2]
     end    
 end
 
 # full hamiltonian matrix
-function get_full_ham(ξ0::Float64, ky_star::Float64, U0::Float64, a::Float64, p::Int64, NLL::Int64)
-    rows_vector = [get_ham_row(n, ξ0, ky_star, U0, a, p, NLL) for n = 0:NLL]
+function get_full_ham(ξ0::Float64, ky_star::Float64, Y::Float64, U0::Float64, a::Float64, p::Int64, NLL::Int64)
+    rows_vector = [get_ham_row(n, ξ0, ky_star, Y, U0, a, p, NLL) for n = 0:NLL]
     ham = reduce(vcat, rows_vector)
     return Hermitian(ham)
 end
