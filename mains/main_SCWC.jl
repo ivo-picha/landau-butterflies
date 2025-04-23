@@ -20,7 +20,7 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts"
 
 #args = ARGS
-args = ["[0.05, 0.5, 0.1 , 50, 199, 3, 0.3]"]
+args = ["[0.05, 1.0, 0.01 , 50, 199, 3, 0.3]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, NLL, gap_factor = Params.parse_arguments(args)

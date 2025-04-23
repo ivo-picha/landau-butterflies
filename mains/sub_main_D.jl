@@ -8,8 +8,9 @@ list_U0 = [0.015]
 list_a = [50]
 list_NLL = [5]
 list_np = [1]
+list_T = [10]
 
-ip = collect(Base.product(list_p, list_q, list_U0, list_a, list_NLL, list_np))
+ip = collect(Base.product(list_p, list_q, list_U0, list_a, list_NLL, list_np, list_T))
 param_list_tuple = reshape(ip, :)
 param_list_str = replace.(string.(param_list_tuple), "(" => "[", ")" => "]")
 

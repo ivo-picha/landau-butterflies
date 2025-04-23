@@ -67,12 +67,12 @@ end
 # get a list of ky* values 
 function get_ky_list(a::Float64, Nky::Int64)
     ky_list1 = range(0, 2π/a, Nky)
-    return (-1.).*ky_list1[1:end-1]
+    return ky_list1[1:end-1]
 end
 
 # get a list of Y values 
 function get_Y_list(NY::Int64)
-    Ylist1 = range(0, 2π*100, NY) #TEST
+    Ylist1 = range(0, 2π, NY) 
     return Ylist1[1:end-1]
 end
 

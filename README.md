@@ -28,7 +28,7 @@ Execute sub_main_SCWC.jl in frontend node, which generates and submits job files
 Code in julia, which finds the electronic density in real space of the same system.
 
 How to run: _(typical run command from terminal)_ 
-julia main_SCWC.jl "[101, 100, 0.015, 50, 5, 1]"
+julia main_SCWC.jl "[101, 100, 0.015, 50, 5, 1, 10]"
 where the arguments in the vector are
 1. p -- number of bands
 2. q; flux is p/q
@@ -36,11 +36,9 @@ where the arguments in the vector are
 4. periodicity of the potential (unit length) in Ansgstrom
 5. NLL - n of the last Landau level included
 6. np - particle density
+7. T -- temperature in Kelvin (used for smearing)
 
 ## D_npz
 Plots heatmap / density map of the electronic density from a pre-saved .npz file
 
-## Dsm
-Same as main_D.jl but adds a smearing function / temperature dependence to the calculation
-takes an additional ARGS input 
-7. T -- temperature in Kelvin
+

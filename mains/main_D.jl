@@ -25,7 +25,7 @@ data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/loc
 # data_save_folder_path = "/users/ivoga/lh/data"
 
 args = ARGS
-args = ["[21, 40, 0.01, 50, 3, 0.5, 10]"]
+args = ["[3, 4, 0.001, 50, 5, 1., 10]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_Dsm(args)
@@ -35,10 +35,10 @@ phi = p/q                                   # unit flux per unit cell
 xi0 = sqrt(2π / phi)
 
 # get lists of ky0 and Y values to iterate over
-Nky = 16;                                   # number of ky* points; independent calculations; variation on scale of U0
+Nky = 17;                                   # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 64;
-Y_list = Params.get_Y_list(NY) .*2
+NY = 17;
+Y_list = Params.get_Y_list(NY)
 
 # message for time it took to initialise
 end_time_init = time();
@@ -98,13 +98,17 @@ tot_dens = zeros(Float64,length(xyplotlist))
 end
 tot_dens_N = tot_dens .* (np/mean(tot_dens)) # normalize
 
+x_grid = collect(xplotrange)
+y_grid = collect(yplotrange)
+dens_grid = Float64.(transpose(reshape(tot_dens_N,Ngrid,Ngrid)))
+
 # save data so it can be accessed later; npz format, readable by python as well
-# npzwrite(joinpath(data_save_folder_path, "dens_grids_sm_p$p-q$q-U$U0-a$a_in_angstr-N$NLL-n$np-T$TK.npz"),
-#         Dict("x" => collect(xgrid), "y" => collect(ygrid), "z" => Float64.(density_grid))
-# )
+npzwrite(joinpath(data_save_folder_path, "dens_grids_p$p-q$q-U$U0-a$a_in_angstr-N$NLL-n$np-T$TK.npz"),
+        Dict("x" => x_grid, "y" => y_grid, "z" => dens_grid)
+)
 
 # generate plot
-plot_d = Plt.plot_density(collect(xplotrange), collect(yplotrange), Float64.(transpose(reshape(tot_dens_N,Ngrid,Ngrid))), a)
+plot_d = Plt.plot_density(x_grid, y_grid, dens_grid, a)
 plots_title = string("ϕ=$p/$q, nₚ=$np, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL, T=$TK K") # add title to plot
 title!(plot_d, plots_title)
 
