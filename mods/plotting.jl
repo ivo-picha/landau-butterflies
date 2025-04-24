@@ -229,18 +229,21 @@ density_options = (
     xlabel = "x/a",
     ylabel = "y/a",
     framestyle = :box,
-    size = (1200,800),
-    tickfontsize = 16,
-    guidefontsize = 18,
+    size = (800,820),
+    tickfontsize = 18,
+    guidefontsize = 20,
     margin = 9mm,
-    color = :viridis
+    color = :viridis,
+    aspect_ratio = 1,
+    titlefontsize = 16,
+    titlelocation = :center
     #ylims = (-1,1)
     #yticks = false
 )
 
 
-function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64}, a::Float64)
-    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options...)
+function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64}, a::Float64, nu::Number)
+    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options..., clim = (clamp((nu-1), 0, nu), nu+1.5))
 
     # xsteps = xgrid[1]:a:xgrid[end]
     # xticklist = [string(i,"a") for i in eachindex(xsteps)]

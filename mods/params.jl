@@ -84,9 +84,29 @@ function print_size_message(q_list::Vector, p::Int64, Nky::Int64, NY::Int64, NLL
 end
 
 # extract value of "a" from a filename
-function get_a_value(filename::String)
-    m = match(r"-a([0-9]+\.[0-9]+)", filename)
-    return m !== nothing ? parse(Float64, m.captures[1]) : nothing
+# function get_a_value(filename::String)
+#     m = match(r"-a([0-9]+\.[0-9]+)", filename)
+#     return m !== nothing ? parse(Float64, m.captures[1]) : nothing
+# end
+
+# function extracting parameters from file name
+function extract_params(filename::String)
+    pattern = r"p(?<p>[^-]+)-q(?<q>[^-]+)-U(?<U0>[^-]+)-a(?<a_in_angstr>[^-]+)-N(?<NLL>[^-]+)-n(?<np>[^-]+)-T(?<TK>[^.]+)"
+    m = match(pattern, filename)
+    
+    if m !== nothing
+        return Dict(
+            :p => m[:p],
+            :q => m[:q],
+            :U0 => m[:U0],
+            :a_in_angstr => m[:a_in_angstr],
+            :NLL => m[:NLL],
+            :np => m[:np],
+            :TK => m[:TK]
+        )
+    else
+        error("Filename does not match expected pattern.")
+    end
 end
 
 

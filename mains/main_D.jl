@@ -25,7 +25,7 @@ data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/loc
 # data_save_folder_path = "/users/ivoga/lh/data"
 
 args = ARGS
-args = ["[3, 4, 0.001, 50, 5, 1., 10]"]
+args = ["[1, 1, 0.01, 50, 5, 1., 10]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_Dsm(args)
@@ -94,6 +94,7 @@ tot_dens = zeros(Float64,length(xyplotlist))
 @showprogress for n in eachindex(states_vec_cut)
     dens_n = Dens.get_density_list(xyplotlist,states_vec_cut[n],nmlist,phi,a,p)
     dens_n_FD = dens_n.*Dens.fermi_dirac(states_vec_cut[n][1],EF,TeV) # add Fermi-Dirac smearing
+    global tot_dens
     tot_dens = tot_dens .+ dens_n_FD
 end
 tot_dens_N = tot_dens .* (np/mean(tot_dens)) # normalize
@@ -108,12 +109,12 @@ npzwrite(joinpath(data_save_folder_path, "dens_grids_p$p-q$q-U$U0-a$a_in_angstr-
 )
 
 # generate plot
-plot_d = Plt.plot_density(x_grid, y_grid, dens_grid, a)
+plot_d = Plt.plot_density(x_grid, y_grid, dens_grid, a, np)
 plots_title = string("ϕ=$p/$q, nₚ=$np, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL, T=$TK K") # add title to plot
 title!(plot_d, plots_title)
 
 # save plot
-savefig(plot_d, joinpath(plot_save_folder_path, "DsmT_p$p-q$q-U$U0-a$a_in_angstr-N$NLL-n$np-T$TK.png"))
+savefig(plot_d, joinpath(plot_save_folder_path, "D_p$p-q$q-U$U0-a$a_in_angstr-N$NLL-n$np-T$TK.png"))
 
 end_time_plot = time();
 elapsed_time_plot = round(end_time_plot - start_time_plot; digits = 3);
