@@ -21,11 +21,11 @@ using Statistics: mean
 
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/densities"
 data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local"
-# plot_save_folder_path = "/users/ivoga/lh/plts"
+# plot_save_folder_path = "/users/ivoga/lh/plts/densities"
 # data_save_folder_path = "/users/ivoga/lh/data"
 
-args = ARGS
-args = ["[1, 1, 0.01, 50, 5, 1., 10]"]
+# args = ARGS
+args = ["[1, 1, 0.005, 50, 5, 1, 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_Dsm(args)
@@ -110,7 +110,7 @@ npzwrite(joinpath(data_save_folder_path, "dens_grids_p$p-q$q-U$U0-a$a_in_angstr-
 
 # generate plot
 plot_d = Plt.plot_density(x_grid, y_grid, dens_grid, a, np)
-plots_title = string("ϕ=$p/$q, nₚ=$np, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL, T=$TK K") # add title to plot
+plots_title = string("ϕ=$p/$q, nₚ=$np, Eₙ=$(round(EF;digits=3)) eV, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL, T=$TK K") # add title to plot
 title!(plot_d, plots_title)
 
 # save plot

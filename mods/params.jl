@@ -58,6 +58,30 @@ function get_q_list(startphi::Number, endphi::Number, p::Int64)
     return unique(Int.(round.([p/(startphi + n*(endphi-startphi)/Nq) for n = range(0, Nq)])))
 end
 
+# get a reduced q list that is more equally spaced
+function get_q_list_red(startphi::Number, endphi::Number, p::Int64)
+    Nq = Int(round(2*p))
+    qlist = unique(Int.(round.([p/(startphi + n*(endphi-startphi)/Nq) for n = range(0, Nq)])))
+    philist = p./qlist
+    phi_d = diff(philist)
+    max_phi_d = maximum(phi_d)
+    newqlist = [qlist[1]];
+    f=2
+    c = 0.0;
+    for n in eachindex(phi_d)
+        if phi_d[n] >= max_phi_d/f
+            push!(newqlist, qlist[n+1])
+        elseif c < max_phi_d/f
+            c += phi_d[n]
+            continue
+        else
+            push!(newqlist, qlist[n+1])
+            c = 0.0
+        end
+    end
+    return Int.(newqlist)
+end
+
 # get a list of q values to interate over when plotting in phi_inv=q/p
 function get_q_list_inv(startphi_inv::Number, endphi_inv::Number, p::Int64)
     Nq = Int(round(2*p))
@@ -129,6 +153,13 @@ function startmessage_SCWC(startphi, endphi, U0, a_in_angstr, p, NLL)
     Calculating the spectrum of the first $(NLL+1) Landau levels
     in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr A
     from flux $startphi to flux $endphi. Resolution of the calculation is p=$p.\n")
+end
+
+function startmessage_S_fixE(startphi, endphi, U0, a_in_angstr, p, Nmin)
+    println("\n\n==================
+    Calculating the spectrum for a minimum of $(Nmin+1) Landau levels and a maximum of 14
+    in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr A
+    from flux $startphi to flux $endphi. Resolution of the calculation is p=$p.\n Number of LLs varies at each flux.")
 end
 
 end

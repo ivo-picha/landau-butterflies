@@ -91,7 +91,7 @@ wannier_bare_options = (
     tickfontsize = 16,
     guidefontsize = 18,
     margin = 9mm,
-    ylims = (-1,1)
+    ylims = (0,3)
     #yticks = false
 )
 
@@ -235,7 +235,7 @@ density_options = (
     margin = 9mm,
     color = :viridis,
     aspect_ratio = 1,
-    titlefontsize = 16,
+    titlefontsize = 14,
     titlelocation = :center
     #ylims = (-1,1)
     #yticks = false
@@ -243,7 +243,7 @@ density_options = (
 
 
 function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64}, a::Float64, nu::Number)
-    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options..., clim = (clamp((nu-1), 0, nu), nu+1.5))
+    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options..., clim = (clamp((nu-1), 0, nu), nu+1.5)) 
 
     # xsteps = xgrid[1]:a:xgrid[end]
     # xticklist = [string(i,"a") for i in eachindex(xsteps)]

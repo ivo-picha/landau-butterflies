@@ -58,7 +58,7 @@ function landau_lvl_wf(x::Float64, y::Float64, n::Int, m::Int, ky0::Float64, Ky:
 end
 
 
-function get_density_list(xyplotlist::Vector{Tuple{Float64,Float64}}, state::Tuple{Float64, Float64, Float64, Vector{ComplexF64}}, nm_list::Vector{Tuple{Int,Int}}, phi::Float64, a::Float64, p::Int, NKy::Int=5)
+function get_density_list(xyplotlist::Vector{Tuple{Float64,Float64}}, state::Tuple{Float64, Float64, Float64, Vector{ComplexF64}}, nm_list::Vector{Tuple{Int,Int}}, phi::Float64, a::Float64, p::Int, NKy::Int=2)
     dens_list = Float64[];
     for xy in xyplotlist
         x = xy[1]

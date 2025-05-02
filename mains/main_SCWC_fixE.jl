@@ -1,5 +1,5 @@
 # find the spectrum of Landau levels in a cosine potential in 2D as a function of flux
-# find the corresponding Wannier plot and color gaps in the spectrum according to Chern number
+# set a max E and calculate different number of landau levels for each flux 
 
 start_time_init = time();
 
@@ -20,18 +20,19 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[0.9, 1.1, 0.005 , 50, 199, 4, 0.2]"]
+args = ["[0.5, 2.0, 0.015 , 50, 77, 3, 0.01]"]
 
 # get parameters from ARGS
-startphi, endphi, U0, a_in_angstr, p, NLL, gap_factor = Params.parse_arguments(args)
+startphi, endphi, U0, a_in_angstr, p, Nmin, gap_factor = Params.parse_arguments(args)
 a = a_in_angstr * 1e-10                     # lattice const in meters
 
 # get lists of q, ky0 and Y values to iterate over
-q_list = Params.get_q_list(startphi, endphi, p)
+q_list = Params.get_q_list_red(startphi, endphi, p)
 Nky = 10;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
 NY = 10;
 Y_list = Params.get_Y_list(NY)
+
 
 # empty lists to store coordinates for plot
 energies = Float64[];                       # all energies 
@@ -44,14 +45,16 @@ energies_lower_gaps_global = Float64[];     # indexing at what energy at a given
 # set up a threshold for what is identified as a gap; factor of difference in LLs at start
 gap_threshold = gap_factor*(Hamil.E_LL(1,sqrt(2π/startphi),a) - Hamil.E_LL(0,sqrt(2π/startphi),a))
 
+# set up an energy limit
+Emax = Hamil.E_LL(Nmin,sqrt(2π/endphi), a) + U0
+
 # message for time it took to initialise
 end_time_init = time();
 elapsed_time_init = round(end_time_init - start_time_init; digits = 3);
 println("Initialisation done in $elapsed_time_init seconds.")
 
-Params.startmessage_SCWC(startphi, endphi, U0, a_in_angstr, p, NLL)
-# message for size of calculation
-Params.print_size_message(q_list, p, Nky, NY, NLL)
+Params.startmessage_SCWC(startphi, endphi, U0, a_in_angstr, p, Nmin)
+println("Number of LLs at each flux varies.")
 
 # iterate over lists and diagonalise hamiltonians
 start_time_diag = time();                   # set up a clock to monitor elapsed time
@@ -60,6 +63,14 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
     phi = p/q                               # unit flux per unit cell
     xi0 = sqrt(2π / phi)
     energies_at_phi = Float64[];            # to be appended to global energies list
+
+    # find the max NLL to be plotted at that energy;
+    # never go past 14
+    NLL::Int = 0;
+    while Hamil.E_LL(NLL,xi0,a) < Emax && NLL < 15
+        NLL += 1
+    end
+
 
     for ky in ky_list
         for Y in Y_list
@@ -104,32 +115,33 @@ lines_dict = Dict{Tuple{Float64, Float64}, Vector{NTuple{4, Float64}}}()
 # update dictionary with all available lines
 Wannier.identify_lines(lines_dict, unique_phis, wannier_points, phis_w)
 
+
 # =============================== PLOTTING ===============================
 start_time_plot = time();
-plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL")
+plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å")
 
 # plot colored Wannier plot
-plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, lines_dict, endphi, NLL, plots_title)
+plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, lines_dict, endphi, 14, plots_title)
 title!(plot_w, plots_title)
 
 # plot only the spectrum
-plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title)
-title!(plot_s, plots_title)
+plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title, (0.0, endphi), (minimum(energies), Emax))
 
 # plot colors in the gaps of the spectrum
-Plt.color_gaps!(plot_s, lines_dict, unique_phis, NLL)
+Plt.color_gaps!(plot_s, lines_dict, unique_phis, 14)
 
 # add guiding lines
-Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, NLL)
+Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, 14)
 
 
 # save plots
-spectrum_plot_name = string("SCWC_S_N$NLL-U$U0-a$a_in_angstr-p$p-phi$startphi-phf$endphi")
+spectrum_plot_name = string("SCWC_fixE_S_U$U0-a$a_in_angstr-p$p-phi$startphi-phf$endphi")
 spectrum_plot_path = string(joinpath(plot_save_folder_path, spectrum_plot_name), ".png")
 savefig(plot_s, spectrum_plot_path)
-wannier_plot_name = string("SCWC_W_N$NLL-U$U0-a$a_in_angstr-p$p-phi$startphi-phf$endphi")
+wannier_plot_name = string("SCWC_fixE_W_U$U0-a$a_in_angstr-p$p-phi$startphi-phf$endphi")
 wannier_plot_path = string(joinpath(plot_save_folder_path, wannier_plot_name), ".png")
 savefig(plot_w, wannier_plot_path)
+
 
 
 end_time_plot = time();
@@ -137,3 +149,4 @@ elapsed_time_plot = round(end_time_plot - start_time_plot; digits = 3);
 println("All plotting done in $elapsed_time_plot seconds.")
 elapsed_time_all = round(end_time_plot - start_time_init; digits = 3);
 println("Code finished running in $elapsed_time_all seconds. Output files can be found in $plot_save_folder_path.")
+
