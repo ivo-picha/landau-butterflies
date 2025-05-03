@@ -20,14 +20,14 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[0.5, 2.0, 0.01 , 50, 50, 3, 0.1]"]
+args = ["[0.5, 2.0, 0.015 , 50, 200, 3, 0.1]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, q, Nmin, gap_factor = Params.parse_arguments(args)
 a = a_in_angstr * 1e-10                     # lattice const in meters
 
 # get lists of q, ky0 and Y values to iterate over
-p_list = Int.(collect(range(round(q*startphi),round(q*endphi))))
+p_list = unique(Int.(collect(range(round(q*startphi),round(q*endphi)))))
 Nky = 10;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
 NY = 10;
@@ -154,4 +154,3 @@ elapsed_time_plot = round(end_time_plot - start_time_plot; digits = 3);
 println("All plotting done in $elapsed_time_plot seconds.")
 elapsed_time_all = round(end_time_plot - start_time_init; digits = 3);
 println("Code finished running in $elapsed_time_all seconds. Output files can be found in $plot_save_folder_path.")
-

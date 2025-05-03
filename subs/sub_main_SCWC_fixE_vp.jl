@@ -1,29 +1,29 @@
-# job file that runs the main_D.jl for sets of parameters
-# arguments should be in the format [p, q, U0_in_eV, a_in_Å, N_LLs, np-fillingfactor]
+# job file that runs the main_SCWC.jl for sets of parameters
+# arguments should be in the format [start_phi_inv, end_phi_inv, U0_in_eV, a_in_Å, p_bands, N_LLs, gap_factor]
 
-list_p = [31]
-list_q = [15]
+list_startphi = [0.25]
+list_endphi = [2.0]
 # list_U0 = collect(range(0.0010, 0.0645, step = 0.0005))
-list_U0 = [0.015]
+list_U0 = [0.05, 0.01, 0.015, 0.02]
 list_a = [50]
-list_NLL = [5]
-list_np = [1]
-list_T = [10]
+list_q = [360]
+list_Nmin = [3]
+list_gf = [0.08]
 
-ip = collect(Base.product(list_p, list_q, list_U0, list_a, list_NLL, list_np, list_T))
+ip = collect(Base.product(list_startphi, list_endphi, list_U0, list_a, list_q, list_Nmin, list_gf))
 param_list_tuple = reshape(ip, :)
 param_list_str = replace.(string.(param_list_tuple), "(" => "[", ")" => "]")
 
 n_cpus = 4 #number of cpus per job
 
-folder_path = "/users/ivoga/lh/jobs"
-output_msgs_path = "/users/ivoga/lh/msgs"
+folder_path = "/users/ivoga/lh/SCWC/jobs"
+output_msgs_path = "/users/ivoga/lh/SCWC/msgs"
 
 for params in param_list_str
     #check that an output hasn't already been generated for these parameters?? to be added
     println("working on the set of parameters $params")
     params_str = replace(params, "[" => "", "]" => "", ", " => "_", "," => "_")
-    jobname = string("D_", params_str, ".job")
+    jobname = string("SCWC_fixE_vp_", params_str, ".job")
     path_job = joinpath(folder_path, jobname)
 
     # create job file
@@ -36,9 +36,9 @@ for params in param_list_str
         write(job, "#\$ -v OMP_DYNAMIC=FALSE \n\n")
 
         #run file
-        write(job, "julia ../mains/main_D.jl \"$params\" \n")
+        write(job, "julia ../mains/main_SCWC_fixE_vp.jl \"$params\" \n")
     end
 
-    run(`qsub $path_job`)
+    run(`qsub $path_job`)    # could be replaced by $jobname if working in same folder
 end
 

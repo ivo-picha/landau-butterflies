@@ -36,7 +36,7 @@ for params in param_list_str
         write(job, "#\$ -v OMP_DYNAMIC=FALSE \n\n")
 
         #run file
-        write(job, "julia main_SCWC.jl \"$params\" \n")
+        write(job, "julia ../mains/main_SCWC.jl \"$params\" \n")
     end
 
     run(`qsub $path_job`)    # could be replaced by $jobname if working in same folder
