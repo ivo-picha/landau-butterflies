@@ -16,8 +16,8 @@ param_list_str = replace.(string.(param_list_tuple), "(" => "[", ")" => "]")
 
 n_cpus = 4 #number of cpus per job
 
-folder_path = "/users/ivoga/lh/SCWC/jobs"
-output_msgs_path = "/users/ivoga/lh/SCWC/msgs"
+folder_path = "/users/ivoga/lh/jobs"
+output_msgs_path = "/users/ivoga/lh/msgs"
 
 for params in param_list_str
     #check that an output hasn't already been generated for these parameters?? to be added

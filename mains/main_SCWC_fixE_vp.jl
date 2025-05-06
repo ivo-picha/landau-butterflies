@@ -20,7 +20,7 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[0.5, 2.0, 0.015 , 50, 200, 3, 0.1]"]
+args = ["[0.3, 1.0, 0.01 , 50, 100, 1, 0.05]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, q, Nmin, gap_factor = Params.parse_arguments(args)
@@ -28,9 +28,9 @@ a = a_in_angstr * 1e-10                     # lattice const in meters
 
 # get lists of q, ky0 and Y values to iterate over
 p_list = unique(Int.(collect(range(round(q*startphi),round(q*endphi)))))
-Nky = 10;                                    # number of ky* points; independent calculations; variation on scale of U0
+Nky = 33;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 10;
+NY = 33;
 Y_list = Params.get_Y_list(NY)
 
 
@@ -70,6 +70,7 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
 
     # find the max NLL to be plotted at that energy;
     # never go past 14
+    local NLL
     NLL::Int = 0;
     while Hamil.E_LL(NLL,xi0,a) < Emax && NLL < 15
         NLL += 1
@@ -119,6 +120,7 @@ lines_dict = Dict{Tuple{Float64, Float64}, Vector{NTuple{4, Float64}}}()
 # update dictionary with all available lines
 Wannier.identify_lines(lines_dict, unique_phis, wannier_points, phis_w)
 
+merged_dict = Wannier.merge_round_keys(lines_dict)
 
 
 
@@ -127,14 +129,14 @@ start_time_plot = time();
 plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å")
 
 # plot colored Wannier plot
-plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, lines_dict, endphi, 14, plots_title)
+plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, merged_dict, endphi, 14, plots_title)
 title!(plot_w, plots_title)
 
 # plot only the spectrum
 plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title, (0.0, endphi), (minimum(energies), Emax))
 
 # plot colors in the gaps of the spectrum
-Plt.color_gaps!(plot_s, lines_dict, unique_phis, 14)
+Plt.color_gaps_vp!(plot_s, merged_dict, unique_phis, 14)
 
 # add guiding lines
 Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, 14)
@@ -154,3 +156,10 @@ elapsed_time_plot = round(end_time_plot - start_time_plot; digits = 3);
 println("All plotting done in $elapsed_time_plot seconds.")
 elapsed_time_all = round(end_time_plot - start_time_init; digits = 3);
 println("Code finished running in $elapsed_time_all seconds. Output files can be found in $plot_save_folder_path.")
+
+# for (key,value) in merged_dict
+#     if 0.98 < key[1] < 1.02 && abs(key[2])<0.1
+#         println("$key : $value")
+#     end
+        
+# end

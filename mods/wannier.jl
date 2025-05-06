@@ -22,14 +22,14 @@ function get_densities_gaps(energy_list::Vector{Float64}, min_gap_size_eV::Float
             push!(list_energies_gap_lower, energy_list[n]) #such that the upper value of the gap is this + gap
         end
     end
-    push!(list_densities, N_en-1)
+    push!(list_densities, N_en)
 
     # get some artificial gap size for the last density and gap lower energy
     push!(list_big_gaps, min_gap_size_eV * 5)
     push!(list_energies_gap_lower, energy_list[end])
 
-    norm_factor = (NLL+1)*flux/(N_en-1)
-    list_densities_norm = round.(list_densities.*norm_factor; digits = 3)
+    norm_factor = (NLL+1)*flux/(N_en)
+    list_densities_norm = list_densities.*norm_factor #round.(list_densities.*norm_factor; digits = 3)
 
     return [list_densities_norm, list_big_gaps, list_energies_gap_lower]
     
@@ -42,7 +42,7 @@ function get_points_distance_sq(p1::Tuple, p2::Tuple)
     d_sq = (p2[1]-p1[1])^2 + (p2[2]-p1[2])^2
     return d_sq
 end
-const PRECISION = 4 # slope and intercept precision
+const PRECISION = 7 # slope and intercept precision
 function get_slope_intercept_tuple(p1::Tuple, p2::Tuple, precision = PRECISION)
     slope = round( (p2[2]-p1[2])/(p2[1]-p1[1]) ; digits = precision)
     intercept = round( p1[2] - slope*p1[1] ; digits = precision)
@@ -108,5 +108,26 @@ function identify_lines(lines_dict::Dict, unique_phis::Vector{Float64}, datapoin
         end
     end
 end
+
+
+# merge approximate keys of the lines dictionary and only keep the ones with integer slope and intercept
+function merge_round_keys(input_dict::Dict{Tuple{Float64, Float64}, Vector{NTuple{4, Float64}}}; dig::Int = 3)
+
+    merged_dict = Dict{Tuple{Float64, Float64}, Vector{NTuple{4, Float64}}}()
+
+    for (key, vec) in input_dict
+
+        rounded_key = (round(key[1]; digits=dig), round(key[2]; digits=dig))
+
+        if haskey(merged_dict, rounded_key)
+            append!(merged_dict[rounded_key], vec)
+        elseif isinteger(rounded_key[1]) && isinteger(rounded_key[2])
+            merged_dict[rounded_key] = vec
+        end
+    end
+
+    return merged_dict
+end
+
 
 end

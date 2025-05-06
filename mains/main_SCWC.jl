@@ -20,7 +20,7 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[0.9, 1.1, 0.005 , 50, 199, 4, 0.2]"]
+args = ["[0.05, 1.0, 0.01 , 50, 51, 2, 0.2]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, NLL, gap_factor = Params.parse_arguments(args)
@@ -104,12 +104,14 @@ lines_dict = Dict{Tuple{Float64, Float64}, Vector{NTuple{4, Float64}}}()
 # update dictionary with all available lines
 Wannier.identify_lines(lines_dict, unique_phis, wannier_points, phis_w)
 
+merged_dict = Wannier.merge_round_keys(lines_dict)
+
 # =============================== PLOTTING ===============================
 start_time_plot = time();
 plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL")
 
 # plot colored Wannier plot
-plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, lines_dict, endphi, NLL, plots_title)
+plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, merged_dict, endphi, NLL, plots_title)
 title!(plot_w, plots_title)
 
 # plot only the spectrum
@@ -117,7 +119,7 @@ plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title)
 title!(plot_s, plots_title)
 
 # plot colors in the gaps of the spectrum
-Plt.color_gaps!(plot_s, lines_dict, unique_phis, NLL)
+Plt.color_gaps!(plot_s, merged_dict, unique_phis, NLL)
 
 # add guiding lines
 Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, NLL)
@@ -137,3 +139,15 @@ elapsed_time_plot = round(end_time_plot - start_time_plot; digits = 3);
 println("All plotting done in $elapsed_time_plot seconds.")
 elapsed_time_all = round(end_time_plot - start_time_init; digits = 3);
 println("Code finished running in $elapsed_time_all seconds. Output files can be found in $plot_save_folder_path.")
+
+
+# for (key,value) in merged_dict
+#     if 0.98 < key[1] < 1.02 && abs(key[2])<0.001
+#         println("$key : $value")
+#     end
+        
+# end
+
+# length(merged_dict[(1.0,0.0)])
+# length(lines_dict[(1.0,0.0)])
+# length(unique_phis)

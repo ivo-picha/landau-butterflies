@@ -202,6 +202,12 @@ function color_gaps!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::V
                     push!(gap_upper_energy, Float64.(upper_energy))
                     push!(phis_overlay, Float64.(point[1]))
                 end
+
+                # sort lists by phi
+                perm = sortperm(phis_overlay)
+                phis_overlay = phis_overlay[perm]
+                gap_lower_energy = gap_lower_energy[perm]
+                gap_upper_energy = gap_upper_energy[perm]
     
                 # SPLIT THE LISTS INTO SUBLISTS WITHOUT LARGE ENERGY JUMPS
                 gaps = diff(phis_overlay)
@@ -218,6 +224,53 @@ function color_gaps!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::V
         end
     end
 end
+
+
+# simplify the code for the case of equal spacings of points in flux
+function color_gaps_vp!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis::Vector{Float64}, NLL::Int64)
+    println("Coloring gaps on the spectrum according to Chern number.")
+
+    # min distance under which lists of points aren't broken in sublists
+    phi_spacing = unique_phis[2] - unique_phis[1]
+    # set a limit of Chern numbers to be colored
+    max_colored_chern = clamp(Int(NLL)+3, 5, 10)
+
+    for (line_key, points) in lines_dict
+        if length(points) > min_line_points
+            chern = round(line_key[1]; digits = 2)
+            if isinteger(chern)
+                gap_lower_energy = Float64[]
+                gap_upper_energy = Float64[]
+                phis_overlay = Float64[]
+                for point in points
+                    push!(gap_lower_energy, Float64.(point[4]))
+                    upper_energy = point[4] + point[3]
+                    push!(gap_upper_energy, Float64.(upper_energy))
+                    push!(phis_overlay, Float64.(point[1]))
+                end
+
+                # sort lists by phi
+                perm = sortperm(phis_overlay)
+                phis_overlay = phis_overlay[perm]
+                gap_lower_energy = gap_lower_energy[perm]
+                gap_upper_energy = gap_upper_energy[perm]
+    
+                # SPLIT THE LISTS INTO SUBLISTS WITHOUT LARGE ENERGY JUMPS
+                phigaps = diff(phis_overlay)
+                split_indices = findall(phigaps .> phi_spacing)
+                split_points = vcat(0, split_indices, length(phis_overlay))
+                phis_sublists = [phis_overlay[(split_points[i]+1):split_points[i+1]] for i in 1:length(split_points)-1]
+                gap_lower_energy_sublists = [gap_lower_energy[split_points[i]+1:split_points[i+1]] for i in 1:length(split_points)-1]
+                gap_upper_energy_sublists = [gap_upper_energy[split_points[i]+1:split_points[i+1]] for i in 1:length(split_points)-1]
+    
+                for (phis_sublist, gap_lower_energy_sublist, gap_upper_energy_sublist) in zip(phis_sublists, gap_lower_energy_sublists, gap_upper_energy_sublists)
+                    plot!(plot_spectrum, phis_sublist, gap_lower_energy_sublist, fillrange = Float64.(gap_upper_energy_sublist), color = gradient_color_plasma(Int(chern), max_colored_chern), fillalpha = 0.5, lw = 0, label = "")
+                end
+            end
+        end
+    end
+end
+
 
  
 
