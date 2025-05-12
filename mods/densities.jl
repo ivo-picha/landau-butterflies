@@ -1,7 +1,11 @@
 module Dens
 
 using LinearAlgebra
-
+using Dierckx
+using NPZ
+using Peaks
+using Interpolations
+using Statistics: mean, std
 
 # Fermi-Dirac distribution
 function fermi_dirac(en::Float64, eF::Float64, eT::Float64)
@@ -30,7 +34,6 @@ function discard_high_energies_smear(states_vec_sorted::Vector{Tuple{Float64, Fl
         end
     end
 end
-
 
 
 # recursively define a hermite polynomial
@@ -67,6 +70,131 @@ function get_density_list(xyplotlist::Vector{Tuple{Float64,Float64}}, state::Tup
         push!(dens_list, real(wf*conj(wf)))
     end
     return dens_list
+end
+
+
+# interpolate the electronic density data
+function square_interpolate_d(data_x::Vector{Float64}, data_y::Vector{Float64}, data_z::Matrix{Float64}, Nnew::Int=256)
+    
+    spline_d = Spline2D(data_x, data_y, copy(transpose(data_z)))
+
+    data_x_new = range(data_x[1], data_x[end], Nnew)
+    data_y_new = range(data_y[1], data_y[end], Nnew)
+
+    data_z_new = evalgrid(spline_d, data_x_new, data_y_new)
+
+    return [collect(data_x_new), collect(data_y_new), data_z_new]
+end
+
+# exract the second main diagonal of a matrix
+function antidiag(A::Matrix)
+    rows, cols = size(A)
+    len = min(rows, cols)
+    return [A[i, cols - i + 1] for i in 1:len]
+end
+
+
+# analyze the density data and output prominence and width mean and standard deviation in xy or diagonal
+function get_proms_widths(data_x::Vector{Float64}, data_y::Vector{Float64}, data_z::Matrix{Float64}, Nuc::Int)
+    fm = findmax(data_z)
+    translation_index = round(Int, length(data_x)/Nuc)
+
+    # set the number of steps for an interpolation of the cross-sections
+    Nitp = 512
+    
+    # vertical cross-sections
+    x_peaks_data = [];
+    x_interp = range(data_x[1], data_x[end], Nitp)
+    for i = 1:Nuc
+        cs = data_z[Int(mod( fm[2][1] + translation_index*i, translation_index*Nuc)),:]
+        itp_i = Interpolations.CubicSplineInterpolation(range(data_x[1], data_x[end], length(data_x)), cs)
+        itp_data = itp_i.(x_interp)
+    
+        #Peaks.jl for analysing cross-sections
+        ind_i, heights_i = findmaxima(itp_data)
+        ind_i, proms_i = peakproms(ind_i, itp_data)
+        ind_i, widths_i, edges_i = peakwidths(ind_i, itp_data, proms_i)
+    
+        widths_i_a = widths_i .* ((data_x[end]-data_x[1])/length(itp_data))
+        for j in eachindex(ind_i)
+            push!(x_peaks_data, (proms_i[j], widths_i_a[j]))
+        end
+    end
+    
+    # vertical cross-sections
+    y_peaks_data = [];
+    y_interp = range(data_y[1], data_y[end], Nitp)
+    for i = 1:Nuc
+        cs = data_z[:, Int(mod( fm[2][2] + translation_index*i, translation_index*Nuc))]
+        itp_i = Interpolations.CubicSplineInterpolation(range(data_y[1], data_y[end], length(data_y)), cs)
+        itp_data = itp_i.(y_interp)
+    
+        #Peaks.jl for analysing cross-sections
+        ind_i, heights_i = findmaxima(itp_data)
+        ind_i, proms_i = peakproms(ind_i, itp_data)
+        ind_i, widths_i, edges_i = peakwidths(ind_i, itp_data, proms_i)
+    
+        widths_i_a = widths_i .* ((data_y[end]-data_y[1])/length(itp_data))
+        for j in eachindex(ind_i)
+            push!(y_peaks_data, (proms_i[j], widths_i_a[j]))
+        end
+    end
+    
+    
+    # diagonal cross-sections on the two main diagonals 
+    d_peaks_data = [];
+    d_interp = range(sqrt(data_x[1]^2 + data_y[1]^2), sqrt(data_x[end]^2 + data_y[end]^2), Nitp)
+    d1 = diag(data_z)
+    d2 = antidiag(data_z)
+    itp_d1 = Interpolations.CubicSplineInterpolation(range(d_interp[1], d_interp[end], length(data_x)), d1)
+    itp_d2 = Interpolations.CubicSplineInterpolation(range(d_interp[1], d_interp[end], length(data_x)), d2)
+    itp_data_d1 = itp_d1.(d_interp)
+    itp_data_d2 = itp_d2.(d_interp)
+    # analyze peaks
+    ind_d1, heights_d1 = findmaxima(itp_data_d1)
+    ind_d1, proms_d1 = peakproms(ind_d1, itp_data_d1)
+    ind_d1, widths_d1, edges_d1 = peakwidths(ind_d1, itp_data_d1, proms_d1)
+    widths_d1_a = widths_d1 .* ((d_interp[end]-d_interp[1])/length(itp_data_d1))
+    for j in eachindex(ind_d1)
+        push!(d_peaks_data, (proms_d1[j], widths_d1_a[j]))
+    end
+    ind_d2, heights_d2 = findmaxima(itp_data_d2)
+    ind_d2, proms_d2 = peakproms(ind_d2, itp_data_d2)
+    ind_d2, widths_d2, edges_d2 = peakwidths(ind_d2, itp_data_d2, proms_d2)
+    widths_d2_a = widths_d2 .* ((d_interp[end]-d_interp[1])/length(itp_data_d2))
+    for j in eachindex(ind_d2)
+        push!(d_peaks_data, (proms_d2[j], widths_d2_a[j]))
+    end
+    
+    
+    # present results
+    # prominences
+    # av_prom_x = mean([x_peaks_data[j][1] for j in eachindex(x_peaks_data)])
+    # std_prom_x = std([x_peaks_data[j][1] for j in eachindex(x_peaks_data)])
+    
+    # av_prom_y = mean([y_peaks_data[j][1] for j in eachindex(y_peaks_data)])
+    # std_prom_y = std([y_peaks_data[j][1] for j in eachindex(y_peaks_data)])
+    
+    av_prom_xy = mean([[x_peaks_data[j][1] for j in eachindex(x_peaks_data)]; [y_peaks_data[j][1] for j in eachindex(y_peaks_data)]])
+    std_prom_xy = std([[x_peaks_data[j][1] for j in eachindex(x_peaks_data)]; [y_peaks_data[j][1] for j in eachindex(y_peaks_data)]])
+    
+    av_prom_d = mean([d_peaks_data[j][1] for j in eachindex(d_peaks_data)])
+    std_prom_d = std([d_peaks_data[j][1] for j in eachindex(d_peaks_data)])
+    
+    # widths in units of unit cell length
+    # av_width_x = mean([x_peaks_data[j][2] for j in eachindex(x_peaks_data)])
+    # std_width_x = std([x_peaks_data[j][2] for j in eachindex(x_peaks_data)])
+    
+    # av_width_y = mean([y_peaks_data[j][2] for j in eachindex(y_peaks_data)])
+    # std_width_y = std([y_peaks_data[j][2] for j in eachindex(y_peaks_data)])
+    
+    av_width_xy = mean([[x_peaks_data[j][2] for j in eachindex(x_peaks_data)]; [y_peaks_data[j][2] for j in eachindex(y_peaks_data)]])
+    std_width_xy = std([[x_peaks_data[j][2] for j in eachindex(x_peaks_data)]; [y_peaks_data[j][2] for j in eachindex(y_peaks_data)]])
+    
+    av_width_d = mean([d_peaks_data[j][2] for j in eachindex(d_peaks_data)])
+    std_width_d = std([d_peaks_data[j][2] for j in eachindex(d_peaks_data)])
+
+    return (av_prom_xy, std_prom_xy, av_width_xy, std_width_xy, av_prom_d, std_prom_d, av_width_d, std_width_d)
 end
 
 

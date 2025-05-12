@@ -25,7 +25,7 @@ data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/loc
 # data_save_folder_path = "/users/ivoga/lh/data"
 
 # args = ARGS
-args = ["[1, 1, 0.005, 50, 5, 1, 1]"]
+args = ["[2, 1, 0.05, 50, 1, 0.5, 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_Dsm(args)
@@ -35,9 +35,9 @@ phi = p/q                                   # unit flux per unit cell
 xi0 = sqrt(2π / phi)
 
 # get lists of ky0 and Y values to iterate over
-Nky = 17;                                   # number of ky* points; independent calculations; variation on scale of U0
+Nky = 33;                                   # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 17;
+NY = 33;
 Y_list = Params.get_Y_list(NY)
 
 # message for time it took to initialise
@@ -108,9 +108,16 @@ npzwrite(joinpath(data_save_folder_path, "dens_grids_p$p-q$q-U$U0-a$a_in_angstr-
         Dict("x" => x_grid, "y" => y_grid, "z" => dens_grid)
 )
 
+# interpolate data for smoother plotting
+x_grid_new, y_grid_new, dens_grid_new = Dens.square_interpolate_d(x_grid, y_grid, dens_grid)
+
+# analyze density, get prominence and width of the density in x and y
+av_prom_xy, std_prom_xy, av_width_xy, std_width_xy = Dens.get_proms_widths(x_grid_new ./a, y_grid_new ./a, dens_grid_new, N_uc_x)
+
 # generate plot
-plot_d = Plt.plot_density(x_grid, y_grid, dens_grid, a, np)
-plots_title = string("ϕ=$p/$q, nₚ=$np, Eₙ=$(round(EF;digits=3)) eV, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL, T=$TK K") # add title to plot
+plot_d = Plt.plot_density(x_grid_new, y_grid_new, dens_grid_new, a, np)
+plots_title = string("ϕ=$p/$q, nₚ=$np, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL, T=$TK K \n 
+     E=$(round(EF;digits=3)) eV, w/a = $(round(av_width_xy; digits = 3)), pr = $(round(av_prom_xy;digits=3))") # add title to plot
 title!(plot_d, plots_title)
 
 # save plot

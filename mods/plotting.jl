@@ -296,7 +296,7 @@ density_options = (
 
 
 function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64}, a::Float64, nu::Number)
-    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options..., clim = (clamp((nu-1), 0, nu), nu+1.5)) 
+    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options..., clim = (clamp((nu-1.0), 0.0, nu), nu+1.5)) 
 
     # xsteps = xgrid[1]:a:xgrid[end]
     # xticklist = [string(i,"a") for i in eachindex(xsteps)]
@@ -307,25 +307,6 @@ function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_gr
     # my_yticks = (ysteps, yticklist)
     # yticks!(plot1, my_yticks)
 
-    return plot1
-end
-
-
-# DOESNT WORK CURRENTLY; includes interpolation
-function plot_density_smooth(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64})
-
-    grid_length = 250 # change for denser grid
-
-    xgrid_denser = range(xgrid[1], xgrid[end], length = grid_length)
-    ygrid_denser = range(ygrid[1], ygrid[end], length = grid_length)
-
-    itp = interpolate(density_grid, BSpline(Linear()))
-    sizemat = size(density_grid)
-    xgrid_denser_itp = range(1, sizemat[2], length = grid_length)
-    ygrid_denser_itp = range(1, sizemat[1], length = grid_length)
-    density_grid_denser = [itp(yi, xi) for xi in xgrid_denser_itp for yi in ygrid_denser_itp] # itp() needs matrix element index!
-
-    plot1 = heatmap(xgrid_denser_itp, ygrid_denser_itp, density_grid_denser; density_options...)
     return plot1
 end
 
