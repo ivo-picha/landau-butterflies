@@ -25,10 +25,10 @@ data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/loc
 # data_save_folder_path = "/users/ivoga/lh/data"
 
 # args = ARGS
-args = ["[2, 1, 0.05, 50, 1, 0.5, 1]"]
+args = ["[1, 1, 0.001, 50, 1, 1., 1]"]
 
 # get parameters from ARGS
-p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_Dsm(args)
+p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_D(args)
 a = a_in_angstr * 1e-10                     # lattice const in meters
 TeV = TK * Params.kB                        # temperature in eV
 phi = p/q                                   # unit flux per unit cell

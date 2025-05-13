@@ -20,17 +20,17 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[0.5, 2.0, 0.01 , 50, 50, 3, 0.0]"]
+args = ["[0.2, 0.5, 0.05 , 50, 12, 1, 0.0]"]
 
 # get parameters from ARGS
-startphi, endphi, U0, a_in_angstr, q, Nmin = Params.parse_arguments(args)[1:end-1]
+startphi, endphi, U0, a_in_angstr, q, Nmin = Params.parse_arguments(args)
 a = a_in_angstr * 1e-10                     # lattice const in meters
 
 # get lists of q, ky0 and Y values to iterate over
 p_list = Int.(collect(range(round(q*startphi),round(q*endphi))))
-Nky = 10;                                    # number of ky* points; independent calculations; variation on scale of U0
+Nky = 33;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 10;
+NY = 33;
 Y_list = Params.get_Y_list(NY)
 
 
@@ -63,9 +63,9 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
     energies_at_phi = Float64[];            # to be appended to global energies list
 
     # find the max NLL to be plotted at that energy;
-    # never go past 14
+    # never go past 30
     NLL::Int = 0;
-    while Hamil.E_LL(NLL,xi0,a) < Emax && NLL < 15
+    while Hamil.E_LL(NLL,xi0,a) < Emax && NLL < 31
         NLL += 1
     end
 
@@ -102,7 +102,7 @@ plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å")
 plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title, (0.0, endphi), (minimum(energies), Emax))
 
 # add guiding lines
-Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, 14)
+Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, 30)
 
 
 # save plots

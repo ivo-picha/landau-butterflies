@@ -23,24 +23,11 @@ function parse_arguments(args::Vector{String})
         println("\n Code is running but it would be nice if you chose a prime p next time...\n")
     end
 
-    return Any[args_vec[1], args_vec[2], args_vec[3], args_vec[4], Int(args_vec[5]), Int(args_vec[6]), args_vec[7]]
-end
-
-# called in main_D.jl file for density calculations
-function parse_arguments_D(args::Vector{String})
-    args1 = replace(args[1], "[" => "", "]" => "")
-    args2 = split(args1, ",")
-    args_vec = parse.(Float64, args2)
-
-    if length(args_vec) != 6
-        println("Error: Arguments should be of the format [1.p, 2.q, 3.U0_in_eV, 4.a_in_Å, 5.N_LLs, 6.max_particle_density]")
-        exit(1)
-    end
-    return Any[Int(args_vec[1]), Int(args_vec[2]), Float64(args_vec[3]), Float64(args_vec[4]), Int(args_vec[5]), Float64(args_vec[6])]
+    return (args_vec[1], args_vec[2], args_vec[3], args_vec[4], Int(args_vec[5]), Int(args_vec[6]), args_vec[7])
 end
 
 # called in main_Dsm.jl file for density calculations
-function parse_arguments_Dsm(args::Vector{String})
+function parse_arguments_D(args::Vector{String})
     args1 = replace(args[1], "[" => "", "]" => "")
     args2 = split(args1, ",")
     args_vec = parse.(Float64, args2)
@@ -49,7 +36,7 @@ function parse_arguments_Dsm(args::Vector{String})
         println("Error: Arguments should be of the format [1.p, 2.q, 3.U0_in_eV, 4.a_in_Å, 5.N_LLs, 6.max_particle_density, 7. T]")
         exit(1)
     end
-    return Any[Int(args_vec[1]), Int(args_vec[2]), Float64(args_vec[3]), Float64(args_vec[4]), Int(args_vec[5]), Float64(args_vec[6]), Float64(args_vec[7])]
+    return (Int(args_vec[1]), Int(args_vec[2]), Float64(args_vec[3]), Float64(args_vec[4]), Int(args_vec[5]), Float64(args_vec[6]), Float64(args_vec[7]))
 end
 
 # get a list of q values to interate over when plotting in phi=p/q

@@ -65,9 +65,9 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
     energies_at_phi = Float64[];            # to be appended to global energies list
 
     # find the max NLL to be plotted at that energy;
-    # never go past 14
+    # never go past 30
     NLL::Int = 0;
-    while Hamil.E_LL(NLL,xi0,a) < Emax && NLL < 15
+    while Hamil.E_LL(NLL,xi0,a) < Emax && NLL < 31
         NLL += 1
     end
 
@@ -131,7 +131,7 @@ plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title, (0.0, endphi), (min
 Plt.color_gaps!(plot_s, lines_dict, unique_phis, 14)
 
 # add guiding lines
-Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, 14)
+Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, 30)
 
 
 # save plots
