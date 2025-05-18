@@ -19,13 +19,13 @@ using Plots
 using NPZ
 using Statistics: mean
 
-plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/densities"
-data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local"
-# plot_save_folder_path = "/users/ivoga/lh/plts/densities"
-# data_save_folder_path = "/users/ivoga/lh/data"
+#plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/densities"
+#data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/N1/varyphi_U0.01"
+plot_save_folder_path = "/users/ivoga/lh/plts/densities"
+data_save_folder_path = "/users/ivoga/lh/data"
 
-# args = ARGS
-args = ["[1, 1, 0.001, 50, 1, 1., 1]"]
+args = ARGS
+#args = ["[1, 2, 0.029, 50, 20, 1., 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_D(args)
@@ -81,9 +81,9 @@ println("\nSpectrum has been calculated and cut off in $elapsed_time_diag second
 start_time_plot = time();
 
 # create a grid and plot the spectrum point by point
-N_uc_x = 2                 # number of unit lengths to be plotted in x and y
+N_uc_x = 1                 # number of unit lengths to be plotted in x and y
 N_uc_y = N_uc_x
-Ngrid = 32                  # number of points in each dimension
+Ngrid = 16                  # number of points in each dimension
 xplotrange = range(0,N_uc_x*a,Ngrid)
 yplotrange = range(0,N_uc_y*a,Ngrid)
 xyplotlist = reshape(collect(Iterators.product(xplotrange,yplotrange)),:)

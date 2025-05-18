@@ -33,7 +33,8 @@ for params in param_list_str
         write(job, "#\$ -o $output_msgs_path -e $output_msgs_path \n")
         write(job, "#\$ -pe openmp $n_cpus \n")
         write(job, "#\$ -v OMP_NUM_THREADS=$n_cpus \n")
-        write(job, "#\$ -v OMP_DYNAMIC=FALSE \n\n")
+        write(job, "#\$ -v OMP_DYNAMIC=FALSE \n")
+        write(job, "export JULIA_NUM_THREADS=$n_cpus \n\n")
 
         #run file
         write(job, "julia ../mains/main_SCWC_fixE_vp.jl \"$params\" \n")

@@ -15,12 +15,13 @@ using .Plt                          # functions for different kinds of plots
 using ProgressMeter
 using LinearAlgebra
 using Plots
+using Base.Threads
 
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[0.75, 1.0, 0.005 , 50, 100, 2, 0.05]"]
+args = ["[0.25, 0.5, 0.01, 50, 120, 1, 0.05]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, q, Nmin, gap_factor = Params.parse_arguments(args)

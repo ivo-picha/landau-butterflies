@@ -257,7 +257,7 @@ function color_gaps_vp!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phis
     
                 # SPLIT THE LISTS INTO SUBLISTS WITHOUT LARGE ENERGY JUMPS
                 phigaps = diff(phis_overlay)
-                split_indices = findall(phigaps .> phi_spacing)
+                split_indices = findall(phigaps .> (phi_spacing*1.05))
                 split_points = vcat(0, split_indices, length(phis_overlay))
                 phis_sublists = [phis_overlay[(split_points[i]+1):split_points[i+1]] for i in 1:length(split_points)-1]
                 gap_lower_energy_sublists = [gap_lower_energy[split_points[i]+1:split_points[i+1]] for i in 1:length(split_points)-1]

@@ -2,10 +2,9 @@ module Dens
 
 using LinearAlgebra
 using Dierckx
-using NPZ
 using Peaks
 using Interpolations
-using Statistics: mean, std
+using Statistics: mean, std, cor
 
 # Fermi-Dirac distribution
 function fermi_dirac(en::Float64, eF::Float64, eT::Float64)
@@ -86,6 +85,83 @@ function square_interpolate_d(data_x::Vector{Float64}, data_y::Vector{Float64}, 
     return [collect(data_x_new), collect(data_y_new), data_z_new]
 end
 
+
+
+
+# FUNCTIONS THAT ANALYZE THE ELECTRONIC DENSITY
+
+########################## standard dev in R
+function get_exp_R(dxn, dyn, dzn)
+    norm = sum(dzn)
+    Rx = sum([dzn[i,j] * dxn[i] for i in eachindex(dxn) for j in eachindex(dyn)])
+    Ry = sum([dzn[i,j] * dyn[j] for i in eachindex(dxn) for j in eachindex(dyn)])
+    return (Rx/norm, Ry/norm)
+end
+
+function get_exp_Rsq(dxn, dyn, dzn)
+    norm = sum(dzn)
+    Rsq = sum([dzn[i,j] * (dxn[i]^2 + dyn[j]^2) for i in eachindex(dxn) for j in eachindex(dyn)])
+    return Rsq/norm    
+end
+
+function get_sigmaR(dxn,dyn,dzn)
+    exp_R = get_exp_R(dxn,dyn,dzn)
+    return sqrt(get_exp_Rsq(dxn,dyn,dzn)-(exp_R[1]^2 + exp_R[2]^2))
+end
+
+########################## prominence
+function get_dens_ratio(dzn)
+    d_p0, maxind = findmax(dzn)
+    d_px1 = dzn[1, maxind[2]]
+    d_px2 = dzn[end, maxind[2]]
+    d_py1 = dzn[maxind[1], 1]
+    d_py2 = dzn[maxind[1], end]
+    return 4*d_p0/(d_px1+d_px2+d_py1+d_py2)
+end
+
+########################## diamondness
+function rotational_symmetry_score(data::Matrix{Float64}; angles=0:5:345)
+    rows, cols = size(data)
+
+    (maxval, maxidx) = findmax(data)
+    cy, cx = Tuple(maxidx)
+
+    # Convert matrix to centered coordinate grid
+    function rotate_coords(y, x, angle_rad, cy, cx)
+        # Shift to origin, rotate, shift back
+        dy, dx = y - cy, x - cx
+        y_rot = cos(angle_rad)*dy - sin(angle_rad)*dx + cy
+        x_rot = sin(angle_rad)*dy + cos(angle_rad)*dx + cx
+        return round(Int, y_rot), round(Int, x_rot)  # Nearest-neighbor
+    end
+
+    # Compute average correlation over rotations
+    corrs = Float64[]
+
+    for θ_deg in angles
+        θ_rad = θ_deg * π / 180
+        rotated = fill(NaN, rows, cols)
+
+        for y in 1:rows, x in 1:cols
+            y_r, x_r = rotate_coords(y, x, θ_rad, cy, cx)
+            if 1 ≤ y_r ≤ rows && 1 ≤ x_r ≤ cols
+                rotated[y, x] = data[y_r, x_r]
+            end
+        end
+
+        # Compare only valid (non-NaN) entries
+        valid_mask = .!isnan.(rotated)
+        orig_vals = data[valid_mask]
+        rot_vals = rotated[valid_mask]
+
+        push!(corrs, cor(orig_vals, rot_vals))
+    end
+
+    return mean(corrs)
+end
+
+
+# USING PEAKS.JL
 # exract the second main diagonal of a matrix
 function antidiag(A::Matrix)
     rows, cols = size(A)
