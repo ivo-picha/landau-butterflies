@@ -14,7 +14,7 @@ ip = collect(Base.product(list_startphi, list_endphi, list_U0, list_a, list_q, l
 param_list_tuple = reshape(ip, :)
 param_list_str = replace.(string.(param_list_tuple), "(" => "[", ")" => "]")
 
-n_cpus = 4 #number of cpus per job
+n_cpus = 16 #number of cpus per job
 
 folder_path = "/users/ivoga/lh/jobs"
 output_msgs_path = "/users/ivoga/lh/msgs"
@@ -34,10 +34,10 @@ for params in param_list_str
         write(job, "#\$ -pe openmp $n_cpus \n")
         write(job, "#\$ -v OMP_NUM_THREADS=$n_cpus \n")
         write(job, "#\$ -v OMP_DYNAMIC=FALSE \n")
-        write(job, "export JULIA_NUM_THREADS=$n_cpus \n\n")
+        #write(job, "export JULIA_NUM_THREADS=$n_cpus \n\n")
 
         #run file
-        write(job, "julia ../mains/main_SCWC_fixE_vp.jl \"$params\" \n")
+        write(job, "julia -t $n_cpus ../mains/main_SCWC_fixE_vp.jl \"$params\" \n")
     end
 
     run(`qsub $path_job`)    # could be replaced by $jobname if working in same folder

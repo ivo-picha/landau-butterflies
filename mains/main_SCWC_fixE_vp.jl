@@ -17,11 +17,11 @@ using LinearAlgebra
 using Plots
 using Base.Threads
 
-plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
-#plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
+#plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
+plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
-#args = ARGS
-args = ["[0.25, 0.5, 0.01, 50, 120, 1, 0.05]"]
+args = ARGS
+#args = ["[0.25, 0.5, 0.01, 50, 120, 1, 0.05]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, q, Nmin, gap_factor = Params.parse_arguments(args)
@@ -59,6 +59,7 @@ println(" p/q is simplified to an irrational fraction.")
 
 # iterate over lists and diagonalise hamiltonians
 start_time_diag = time();                   # set up a clock to monitor elapsed time
+nt = nthreads() # number of threads
 @showprogress for p in p_list
 
     gcdpq = gcd(p,q)
@@ -77,16 +78,23 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
         NLL += 1
     end
 
+    # set up list for each thread
+    tlists = [Vector{Float64}() for _ in 1:nt]
 
-    for ky in ky_list
+    @threads for ky in ky_list
+        tid = threadid()
+
         for Y in Y_list
 
         H = Hamil.get_full_ham(xi0, ky, Y, U0, a, pn, NLL)
         evalsH = eigvals(H)
-        energies_at_phi = [energies_at_phi; evalsH] #add eigenvalues to list of energies
+        append!(tlists[tid], evalsH) #add eigenvalues to list of energies
 
         end
     end
+
+    # combine buffer lists
+    energies_at_phi = reduce(vcat, tlists)
 
     global energies
     energies = [energies; energies_at_phi]

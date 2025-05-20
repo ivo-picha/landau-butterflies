@@ -15,12 +15,13 @@ using .Plt                          # functions for different kinds of plots
 using ProgressMeter
 using LinearAlgebra
 using Plots
+using Base.Threads
 
-plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
-#plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
+#plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
+plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
-#args = ARGS
-args = ["[0.5, 2.0, 0.015 , 50, 77, 3, 0.01]"]
+args = ARGS
+#args = ["[0.5, 2.0, 0.015 , 50, 77, 3, 0.01]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, Nmin, gap_factor = Params.parse_arguments(args)
@@ -28,9 +29,9 @@ a = a_in_angstr * 1e-10                     # lattice const in meters
 
 # get lists of q, ky0 and Y values to iterate over
 q_list = Params.get_q_list_red(startphi, endphi, p)
-Nky = 10;                                    # number of ky* points; independent calculations; variation on scale of U0
+Nky = 33;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 10;
+NY = 33;
 Y_list = Params.get_Y_list(NY)
 
 
@@ -58,6 +59,7 @@ println("Number of LLs at each flux varies.")
 
 # iterate over lists and diagonalise hamiltonians
 start_time_diag = time();                   # set up a clock to monitor elapsed time
+nt = nthreads() # number of threads
 @showprogress for q in q_list
 
     phi = p/q                               # unit flux per unit cell
@@ -71,16 +73,23 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
         NLL += 1
     end
 
+    # set up list for each thread
+    tlists = [Vector{Float64}() for _ in 1:nt]
 
-    for ky in ky_list
+    @threads for ky in ky_list
+        tid = threadid()
+
         for Y in Y_list
 
         H = Hamil.get_full_ham(xi0, ky, Y, U0, a, p, NLL)
         evalsH = eigvals(H)
-        energies_at_phi = [energies_at_phi; evalsH] #add eigenvalues to list of energies
+        append!(tlists[tid], evalsH) #add eigenvalues to list of energies
 
         end
     end
+
+    # combine buffer lists
+    energies_at_phi = reduce(vcat, tlists)
 
     global energies
     energies = [energies; energies_at_phi]

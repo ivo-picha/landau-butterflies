@@ -15,6 +15,7 @@ using .Plt                          # functions for different kinds of plots
 using ProgressMeter
 using LinearAlgebra
 using Plots
+using Base.Threads
 
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
@@ -55,21 +56,30 @@ Params.print_size_message(q_list, p, Nky, NY, NLL)
 
 # iterate over lists and diagonalise hamiltonians
 start_time_diag = time();                   # set up a clock to monitor elapsed time
+nt = nthreads() # number of threads
 @showprogress for q in q_list
 
     phi = p/q                               # unit flux per unit cell
     xi0 = sqrt(2π / phi)
     energies_at_phi = Float64[];            # to be appended to global energies list
 
-    for ky in ky_list
+    # set up list for each thread
+    tlists = [Vector{Float64}() for _ in 1:nt]
+
+    @threads for ky in ky_list
+        tid = threadid()
+
         for Y in Y_list
 
         H = Hamil.get_full_ham(xi0, ky, Y, U0, a, p, NLL)
         evalsH = eigvals(H)
-        energies_at_phi = [energies_at_phi; evalsH] #add eigenvalues to list of energies
+        append!(tlists[tid], evalsH) #add eigenvalues to list of energies
 
         end
     end
+
+    # combine buffer lists
+    energies_at_phi = reduce(vcat, tlists)
 
     global energies
     energies = [energies; energies_at_phi]
