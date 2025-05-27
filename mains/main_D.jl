@@ -18,14 +18,16 @@ using LinearAlgebra
 using Plots
 using NPZ
 using Statistics: mean
+using Base.Threads
+nt = nthreads()
 
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/densities"
-data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/N1/varyphi_U0.01"
+data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/N1/test/"
 #plot_save_folder_path = "/users/ivoga/lh/plts/densities"
 #data_save_folder_path = "/users/ivoga/lh/data"
 
 #args = ARGS
-args = ["[1, 1, 0.005, 50, 10, 1., 1]"]
+args = ["[10, 10, 0.005, 50, 10, 1., 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_D(args)
@@ -90,13 +92,30 @@ xyplotlist = reshape(collect(Iterators.product(xplotrange,yplotrange)),:)
 
 nmlist = [(n,m) for n = 0:NLL for m = 0:(p-1)]
 
-tot_dens = zeros(Float64,length(xyplotlist))
-@showprogress for n in eachindex(states_vec_cut)
+#calculate densities point by point (multithreaded)
+tot_dens = zeros(Float64, length(xyplotlist))
+buffers_dens = [zeros(Float64, size(tot_dens)) for _ in 1:nt]
+n_total = length(states_vec_cut) # for counting progress
+next_percent = 0
+@Threads.threads for n in 1:n_total
+    tid = threadid()
     dens_n = Dens.get_density_list(xyplotlist,states_vec_cut[n],nmlist,phi,a,p)
     dens_n_FD = dens_n.*Dens.fermi_dirac(states_vec_cut[n][1],EF,TeV) # add Fermi-Dirac smearing
-    global tot_dens
-    tot_dens = tot_dens .+ dens_n_FD
+    buffers_dens[tid] .+= dens_n_FD
+
+    # custom progress meter
+    # percent_complete = Int(round(100 * n / n_total))
+    # if percent_complete >= next_percent
+    #     println("Progress: $(next_percent)%")
+    #     next_percent += 10
+    # end
 end
+
+# sum up multithreaded results
+for buffer in buffers_dens
+    tot_dens .+= buffer
+end
+
 tot_dens_N = tot_dens .* (np/mean(tot_dens)) # normalize
 
 x_grid = collect(xplotrange)

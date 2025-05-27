@@ -46,7 +46,7 @@ for (j,params) in enumerate(param_list_str)
         #write(job, "export JULIA_NUM_THREADS=$n_cpus \n\n")
 
         #run file
-        write(job, "julia ../mains/main_D.jl \"$params\" \n")
+        write(job, "julia -t $n_cpus ../mains/main_D.jl \"$params\" \n")
     end
 
     run(`qsub $path_job`)
