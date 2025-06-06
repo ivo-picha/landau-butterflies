@@ -50,6 +50,7 @@ where the arguments in the vector are
 ## D_npz
 Plots heatmap / density map of the electronic density from a pre-saved .npz file
 
-## 
+## short folder
+shorter mostly single file scripts for various jobs
 
 

@@ -27,7 +27,7 @@ data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/loc
 #data_save_folder_path = "/users/ivoga/lh/data"
 
 #args = ARGS
-args = ["[10, 10, 0.005, 50, 10, 1., 1]"]
+args = ["[10, 10, 0.029, 50, 14, 1., 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_D(args)
