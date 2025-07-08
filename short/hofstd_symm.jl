@@ -3,7 +3,7 @@ using LinearAlgebra
 using ProgressMeter
 
 
-q = 40
+q = 32
 plist = Int.(0:q)
 
 NK = 2
@@ -18,23 +18,23 @@ function get_Hsymm(p::Int,q::Int,Kx::Float64,Ky::Float64)
     ekx = exp(im*Kx)
     eky = exp(im*Ky)
 
-    # some lazy programming
+    # lazy programming
     for (i,nm1) in enumerate(nm_list)
         m1 = nm1[1]
         n1 = nm1[2]
-        em = exp(im*π*phi*m1)
-        en = exp(im*π*phi*n1)
+        em = exp(im*π*phi*(m1-1))
+        en = exp(im*π*phi*(n1-1))
         for (j,nm2) in enumerate(nm_list)
             m2 = nm2[1]
             n2 = nm2[2]
             if n1 == n2 + 1 && m1 == m2
-                H[i,j] += em
+                H[i,j] += em 
             elseif n1 == n2 - 1 && m1 == m2
-                H[i,j] += conj(em)
+                H[i,j] += conj(em) 
             elseif n1 == n2 && m1 == m2 + 1
-                H[i,j] += conj(en)
+                H[i,j] += conj(en) 
             elseif n1 == n2 && m1 == m2 - 1
-                H[i,j] += en
+                H[i,j] += en 
             elseif n1 == 2q && n2 == 1 && m1 == m2
                 H[i,j] += em * eky
             elseif n1 == 1 && n2 == 2q && m1 == m2
@@ -71,4 +71,17 @@ end
 
 p1 = scatter(philist, elist, markersize = 0.4, color = :black, label = "", xlabel = "ϕ = p/q", ylabel = "ε", framestyle = :box);
 
-savefig(p1, "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/hofstdt/symm$(NK-1)-q$q.png")
+savefig(p1, "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/hofstdt/symm-NK$(NK-1)-q$q.png")
+
+
+# krange = range(0,2π,50)
+# ens = Float64[];
+# for kx in krange
+#     for ky in krange
+#         en = eigvals(get_Hsymm(1,2,kx,ky))
+#         append!(ens, en)
+#     end
+# end
+# histogram(ens, bins=-4:0.1:4)
+
+# round.(get_Hsymm(1,2,0.0,0.0); digits = 4)

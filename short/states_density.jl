@@ -19,7 +19,7 @@ using Plots
 using NPZ
 using Statistics: mean
 
-args = [1, 2, 0.005, 50, 9]
+args = [1, 4, 0.02, 50, 14]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL = args                     
@@ -77,7 +77,7 @@ println("\nSpectrum has been calculated and cut off in $elapsed_time_diag second
 start_time_plot = time();
 
 # create a grid and plot the spectrum point by point
-N_uc_x = 5                 # number of unit lengths to be plotted in x and y
+N_uc_x = 4                 # number of unit lengths to be plotted in x and y
 N_uc_y = N_uc_x
 Ngrid = 128                # number of points in each dimension
 xplotrange = range(0,N_uc_x*a,Ngrid)
@@ -86,7 +86,7 @@ xyplotlist = reshape(collect(Iterators.product(xplotrange,yplotrange)),:)
 
 nmlist = [(n,m) for n = 0:NLL for m = 0:(p-1)]
 
-nn=1;
+nn=4;
 
 println("Plotting density of state $nn:\n ky0=$(states_vec[nn][2]), Y=$(states_vec[nn][3]), energy $(states_vec[nn][1])eV")
 
@@ -94,7 +94,7 @@ dens_n = Dens.get_density_list(xyplotlist,states_vec[nn],nmlist,phi,a,p);
 dens_N = dens_n .* (1/mean(dens_n)); # normalize
 
 # generate plot
-plot_d = Plt.plot_density(collect(xplotrange), collect(yplotrange), Float64.(transpose(reshape(dens_N,Ngrid,Ngrid))), a, 1.);
+plot_d = Plt.plot_density(collect(xplotrange), collect(yplotrange), Float64.(transpose(reshape(dens_N,Ngrid,Ngrid))), a, 4.);
 plots_title = string("ϕ=$p/$q, U₀=$U0 eV,  a=$a_in_angstr Å,  Nₗₗ=$NLL, state #$nn"); # add title to plot
 title!(plot_d, plots_title)
 

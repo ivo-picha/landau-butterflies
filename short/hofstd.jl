@@ -3,10 +3,10 @@ using LinearAlgebra
 using ProgressMeter
 
 
-q = 240
+q = 1023
 plist = 0:q
 
-NK = 17
+NK = 10
 listKx = range(0,2π,NK)[1:end-1]
 listKy = range(0,2π,NK)[1:end-1]
 

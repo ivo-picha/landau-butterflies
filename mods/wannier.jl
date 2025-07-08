@@ -35,6 +35,59 @@ function get_densities_gaps(energy_list::Vector{Float64}, min_gap_size_eV::Float
     
 end
 
+# make a histogram output out of intput of energy list, for DOS
+function histogram_data(data::Vector, N::Int, np::Float64)
+    # Compute min and max of the data
+    min_val = data[1]
+    max_val = data[end]
+    
+    # Compute bin edges and centers
+    edges = range(min_val, max_val; length=N+1)
+    bin_centers = 0.5 .* (edges[1:end-1] .+ edges[2:end])
+
+    # Initialize frequency vector
+    counts = zeros(Int, N)
+
+    # Bin the data manually
+    for x in data
+        if x == max_val
+            # put max value in last bin
+            counts[end] += 1
+        elseif x == min_val
+            counts[1] += 1
+        else
+            bin_index = searchsortedfirst(edges, x)
+            counts[bin_index - 1] += 1
+        end
+    end
+
+    # Normalize frequencies to sum to np
+    total = sum(counts)
+    frequencies = counts .* (np / total)
+
+    return (bin_centers, frequencies)
+end
+# function which outputs the density of states up to a specified filling
+function get_DOS_upto_np(energy_list::Vector{Float64}, flux::Float64, NLL::Int64, np::Float64=1.0, nbins::Int=50)
+
+    sort!(energy_list)
+    N_en = length(energy_list)
+    norm_factor = (NLL+1)*flux/(N_en)
+
+    energies_upto_np = Float64[];
+    n_j = 0.0;
+    for energy in energy_list
+        n_j =+ norm_factor
+        push!(energies_upto_np, energy)
+        if n_j >= np
+            break
+        end
+    end
+
+    return histogram_data(energies_upto_np, nbins, np) 
+end
+
+
 # function which identifies points on the same line in Wannier plot and calculates slope + intercept
 # updates a dictionary with the coordinates of each unique line and coordinates of each point on the line
 # support functions
