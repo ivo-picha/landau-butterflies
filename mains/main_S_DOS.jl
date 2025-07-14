@@ -1,5 +1,5 @@
-# find the spectrum of Landau levels in a cosine potential in 2D as a function of flux
-# set a max E and calculate different number of landau levels for each flux 
+# code which takes a U₀ and an a, and for a set of fluxes computes the DOS per energy up to
+# some specified filling (set to 1 automatically). outputs a 3D lineplot of DOS lines for each flux
 
 start_time_init = time();
 
@@ -16,22 +16,24 @@ using ProgressMeter
 using LinearAlgebra
 using Plots
 using Base.Threads
+using FileIO
 
 #plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
-plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
+plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/DOS"
 
 #args = ARGS
-args = ["[0.75, 2.0, 0.05, 50, 20, 1, 1.0]"]
+args = ["[1.5, 2.0, 0.05, 50, 51, 4, 1.0]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, q, Nmin, np = Params.parse_arguments_DOS(args)
 a = a_in_angstr * 1e-10                     # lattice const in meters
 
 # get lists of q, ky0 and Y values to iterate over
-p_list = unique(Int.(collect(range(round(q*startphi),round(q*endphi)))))
-Nky = 33;                                    # number of ky* points; independent calculations; variation on scale of U0
+Npp = 15 # number of desired lines in phi in the 3d plot
+p_list = unique(Int.(round.(collect(range(q*startphi,q*endphi, Npp)))))
+Nky = 65;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 33;
+NY = Nky;
 Y_list = Params.get_Y_list(NY)
 
 
@@ -45,8 +47,7 @@ Emax = Hamil.E_LL(Nmin,sqrt(2π/endphi), a) + U0
 end_time_init = time();
 elapsed_time_init = round(end_time_init - start_time_init; digits = 3);
 println("Initialisation done in $elapsed_time_init seconds.")
-
-Params.startmessage_S_fixE(startphi, endphi, U0, a_in_angstr, q, Nmin)
+println("Calculating DOS up to filling $np from flux $startphi to $endphi.")
 println(" p/q is simplified to an irrational fraction.")
 
 # iterate over lists and diagonalise hamiltonians
@@ -96,7 +97,7 @@ nt = nthreads() # number of threads
 end
 end_time_diag = time();
 elapsed_time_diag = round(end_time_diag - start_time_diag; digits = 3);
-println("Spectrum and Wannier plot have been calculated in $elapsed_time_diag seconds.")
+println("Spectrum and DOS have been calculated in $elapsed_time_diag seconds.")
 
 # list of phi values used in plotting
 unique_phis = p_list ./ q
@@ -109,6 +110,8 @@ unique_phis = p_list ./ q
 
 
 pltDOS = Plt.plot_3D_DOS(DOSs, unique_phis)
+
+FileIO.save(joinpath(plot_save_folder_path, "dos_U$U0-a$a_in_angstr-n$np-Nk$Nky.svg"), pltDOS)
 
 end_time = time();
 elapsed_time_all = round(end_time - start_time_init; digits = 3);

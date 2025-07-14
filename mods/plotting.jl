@@ -315,7 +315,7 @@ end
 
 
 
-# function that plots a 3D lines plot of the DOS as a function of flux; used in S_DOS
+# function that plots a 3D lines plot of the DOS as a function of flux; used in main_S_DOS.jl
 function plot_3D_DOS(DOSs::Vector{Tuple{Vector{Float64},Vector{Float64}}}, phis::Vector{Float64})
     figDOS = Makie.Figure()
     ax = Axis3(figDOS[1, 1], ylabel="ϕ = p/q", xlabel="ϵ [eV]", zlabel="DOS", azimuth = 1.4*π, elevation = 0.2*π)
@@ -328,6 +328,34 @@ function plot_3D_DOS(DOSs::Vector{Tuple{Vector{Float64},Vector{Float64}}}, phis:
     return figDOS
 end
 
+
+
+
+
+# function that plots the band structure of the spectrum with Makie; used in main_S_bands.jl
+function plot_band_structure(xvec::Vector{Float64}, yvec::Vector{Float64}, band_energies::Vector{Matrix{Float64}}, nplotted::Int=0)
+
+    # figure out how many bands to plot: nbands_plot
+    nbands_tot = length(band_energies)
+    if nplotted !=0 
+        if nplotted > nbands_tot
+            error("You wanted to plot $nplotted bands when only $nbands_tot exist.")
+        else
+            nbands_plot = nplotted
+        end
+    else
+        nbands_plot = nbands_tot
+    end
+
+    figBS = CairoMakie.Figure()
+    ax = Axis3(figBS[1,1], xlabel = "ky0*a", ylabel = "Y", zlabel = "ϵ [eV]")
+
+    for n in 1:nbands_plot
+        CairoMakie.surface!(ax, xvec, yvec, band_energies[n])
+    end
+    
+    return figBS
+end
 
 
 

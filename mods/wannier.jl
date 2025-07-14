@@ -77,7 +77,7 @@ function get_DOS_upto_np(energy_list::Vector{Float64}, flux::Float64, NLL::Int64
     energies_upto_np = Float64[];
     n_j = 0.0;
     for energy in energy_list
-        n_j =+ norm_factor
+        n_j += norm_factor
         push!(energies_upto_np, energy)
         if n_j >= np
             break

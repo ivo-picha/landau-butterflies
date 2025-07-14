@@ -40,6 +40,19 @@ function parse_arguments_DOS(args::Vector{String})
     return (args_vec[1], args_vec[2], args_vec[3], args_vec[4], Int(args_vec[5]), Int(args_vec[6]), args_vec[7])
 end
 
+# function to extract parameters from ARGS; called in main_SCWC_DOS.jl 
+function parse_arguments_bands(args::Vector{String})
+    args1 = replace(args[1], "[" => "", "]" => "")
+    args2 = split(args1, ",")
+    args_vec = parse.(Float64, args2)
+
+    if length(args_vec) != 5
+        println("Error: Arguments should be of the format [1.p, 2.q, 3.U0_in_eV, 4.a_in_Å, 5.N_LLs]")
+        exit(1)
+    end
+    return (Int(args_vec[1]), Int(args_vec[2]), Float64(args_vec[3]), Float64(args_vec[4]), Int(args_vec[5]))
+end
+
 # called in main_Dsm.jl file for density calculations
 function parse_arguments_D(args::Vector{String})
     args1 = replace(args[1], "[" => "", "]" => "")
