@@ -21,7 +21,7 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[3, 3, 0.01, 50, 10]"]
+args = ["[2, 2, 0.03, 50, 14]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL = Params.parse_arguments_bands(args)
@@ -33,7 +33,7 @@ phi = p/q
 xi0 = sqrt(2π / phi)
 
 # get lists of ky0 and Y values to iterate over
-Nky = 100;                                    # number of ky* points; independent calculations; variation on scale of U0
+Nky = 64;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky+1)
 NY = Nky;
 Y_list = Params.get_Y_list(NY+1)
@@ -75,7 +75,7 @@ println("Band structure has been calculated in $elapsed_time_diag seconds. \nPlo
 
 xgrid = collect(ky_list).*a # ky*a
 ygrid = collect(Y_list) # Y
-plotBS = Plt.plot_band_structure(xgrid, ygrid, band_energies, p)
+plotBS = Plt.plot_band_structure(xgrid, ygrid, band_energies, 1)
 #last argument tells how many of the bottom bands to plot; leave empty or 0 for all bands
 
 FileIO.save(joinpath(plot_save_folder_path, "bs_p$p-q$q-U$U0-a$a_in_angstr-NLL$NLL-Nk$Nky.png"), plotBS)
