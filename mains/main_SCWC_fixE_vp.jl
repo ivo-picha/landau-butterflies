@@ -17,8 +17,8 @@ using LinearAlgebra
 using Plots
 using Base.Threads
 
-#plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
-plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
+plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
+#plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 args = ARGS
 #args = ["[0.25, 0.5, 0.01, 50, 120, 1, 0.05]"]

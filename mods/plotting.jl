@@ -26,7 +26,7 @@ spectrum_bare_options = (
 function plot_spectrum_bare(plot_name::Plots.Plot, phi_list::Vector{Float64}, en_list::Vector{Float64}, plots_title::String)
     println("Plotting bare spectrum.")
     spectrum_bare = Plots.scatter(plot_name, phi_list, en_list; spectrum_bare_options...)
-    title!(spectrum_bare, plots_title)
+    Plots.title!(spectrum_bare, plots_title)
     return spectrum_bare
 end
 # mulitple dispatch in case plot limits are provided
@@ -34,7 +34,7 @@ function plot_spectrum_bare(plot_name::Plots.Plot, phi_list::Vector{Float64}, en
     println("Plotting bare spectrum.")
     spectrum_bare = Plots.scatter(plot_name, phi_list, en_list; spectrum_bare_options...,
                             xlims = x_lims, ylims = y_lims)
-    title!(spectrum_bare, plots_title)
+    Plots.title!(spectrum_bare, plots_title)
     return spectrum_bare
 end
 # multiple dispatch in case plot doesn't already exist
@@ -42,13 +42,13 @@ function plot_spectrum_bare(phi_list::Vector{Float64}, en_list::Vector{Float64},
     println("Plotting bare spectrum.")
     spectrum_bare = Plots.scatter(phi_list, en_list; spectrum_bare_options...,
                             xlims = x_lims, ylims = y_lims)
-    title!(spectrum_bare, plots_title)
+    Plots.title!(spectrum_bare, plots_title)
     return spectrum_bare
 end
 function plot_spectrum_bare(phi_list::Vector{Float64}, en_list::Vector{Float64}, plots_title::String)
     println("Plotting bare spectrum.")
     spectrum_bare = Plots.scatter(phi_list, en_list; spectrum_bare_options...)
-    title!(spectrum_bare, plots_title)
+    Plots.title!(spectrum_bare, plots_title)
     return spectrum_bare
 end
 
@@ -124,7 +124,7 @@ function plot_wannier_all(datapoints::Vector{NTuple{4, Float64}}, gaps_global::V
     println("Plotting an uncolored Wannier diagram.")
     # plot uncolored points
     plot_w = Plots.plot(;wannier_bare_options...)
-    title!(plot_w, plots_title)
+    Plots.title!(plot_w, plots_title)
 
     # set a limit of Chern numbers to be colored
     max_colored_chern = clamp(Int(NLL)+3, 5, 10)
@@ -167,8 +167,8 @@ function plot_wannier_all(datapoints::Vector{NTuple{4, Float64}}, gaps_global::V
 
     # Create discrete squares for the legend
     legend_plot = Plots.plot(legend=false, xaxis = false, size=(130, 800), xlims=(0, 2), ylims=(-max_colored_chern, max_colored_chern), tickfontsize = 16, guidefontsize = 18, margin=9mm)
-    xlabel!(legend_plot, "C")
-    yticks!(legend_plot, legend_values)
+    Plots.xlabel!(legend_plot, "C")
+    Plots.yticks!(legend_plot, legend_values)
     # Plot each value in the legend as a colored square
     for (i, val) in enumerate(legend_values)
         rect_color = legend_colors[i]

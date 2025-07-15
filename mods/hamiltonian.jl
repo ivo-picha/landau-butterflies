@@ -45,12 +45,12 @@ function matA(n::Int64, ξ0::Float64, ky0::Float64, Y::Float64, U0::Float64, a::
     d(j) = En + U0 * Tnn * cos(ξ0^2 * a /(2π) * (ky0 + j * 2π/a))
 
     # elements on the two second diagonals
-    f = U0 * Tnn / 2
+    f = exp(-im*Y/p) * U0 * Tnn / 2
 
     #construct matrix
-    mat::Matrix{ComplexF64} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => f * ones(p-1))
-    mat[1, p] += f * exp(-im*Y)
-    mat[p, 1] += f * exp(im*Y)
+    mat::Matrix{ComplexF64} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => conj(f) * ones(p-1))
+    mat[1, p] += conj(f)
+    mat[p, 1] += f
 
     return mat
 end
@@ -67,13 +67,13 @@ function matB(n::Int64, m::Int64, ξ0::Float64, ky0::Float64, Y::Float64, U0::Fl
     d(j) = U0/2 * (Txnm * exp(im * ξ0^2 * a /(2π) * (ky0 + j * 2π/a)) + Txmn_conj * exp(-im * ξ0^2 * a /(2π) * (ky0 + j * 2π/a)) )
 
     # elements on the two second diagonals
-    f1 = U0 * Tynm / 2
-    f2 = U0 * Tymn / 2
+    f1 = exp(-im*Y/p) * U0 * Tynm / 2
+    f2 = exp(im*Y/p) * U0 * Tymn / 2
 
     #construct matrix
     mat::Matrix{ComplexF64} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f1 * ones(p-1), -1 => f2 * ones(p-1))
-    mat[1, p] += f2 * exp(im*Y)
-    mat[p, 1] += f1 * exp(-im*Y)
+    mat[1, p] += f2
+    mat[p, 1] += f1
 
     return mat
 end
