@@ -1,5 +1,6 @@
 # find the spectrum of Landau levels in a cosine potential in 2D as a function of flux
-# set a max E and calculate different number of landau levels for each flux 
+# set a max E and calculate different number of landau levels for each flux; vary p to simplest coprime with q
+# only plot 
 
 start_time_init = time();
 
@@ -16,12 +17,15 @@ using ProgressMeter
 using LinearAlgebra
 using Plots
 using Base.Threads
+using NPZ
 
-plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/SCWC/"
-#plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
+#plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/S_LB/"
+plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
+#data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/LB_spectra/"
+data_save_folder_path = "/users/ivoga/lh/data_LB"
 
 args = ARGS
-#args = ["[0.25, 0.5, 0.01, 50, 120, 1, 0.05]"]
+#args = ["[0.25, 0.5, 0.01, 50, 48, 1, 0.05]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, q, Nmin, gap_factor = Params.parse_arguments(args)
@@ -29,7 +33,7 @@ a = a_in_angstr * 1e-10                     # lattice const in meters
 
 # get lists of q, ky0 and Y values to iterate over
 p_list = unique(Int.(collect(range(round(q*startphi),round(q*endphi)))))
-Nky = 10;                                    # number of ky* points; independent calculations; variation on scale of U0
+Nky = 16;                                    # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
 NY = Nky;
 Y_list = Params.get_Y_list(NY)
@@ -129,35 +133,32 @@ lines_dict = Dict{Tuple{Float64, Float64}, Vector{NTuple{4, Float64}}}()
 # update dictionary with all available lines
 Wannier.identify_lines(lines_dict, unique_phis, wannier_points, phis_w)
 
+# merge lines that are similar enough
 merged_dict = Wannier.merge_round_keys(lines_dict)
-
-
 
 # =============================== PLOTTING ===============================
 start_time_plot = time();
 plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å")
 
-# plot colored Wannier plot
-plot_w = Plt.plot_wannier_all(wannier_points, gaps_global, merged_dict, endphi, 14, plots_title)
-title!(plot_w, plots_title)
+# maximum energy of the lowest band (defined by 1 particle per unit cell); take only points in LB for simplicity
+Emax_LB = maximum(t[4] for t in merged_dict[(0.0,1.0)])
+enmask = energies .< Emax_LB
+phis_LB = phis[enmask]
+energies_LB = energies[enmask]
+
+# save data so it can be accessed later; npz format, readable by python as well
+npzwrite(joinpath(data_save_folder_path, "LB_S_U$U0-a$a_in_angstr-q$q-phi$startphi-phf$endphi.npz"),
+        Dict("x" => phis_LB, "y" => energies_LB))
 
 # plot only the spectrum
-plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title, (0.0, endphi), (minimum(energies), Emax))
+plot_s = Plt.plot_spectrum_bare(phis, energies, plots_title, (0.0, endphi), (minimum(energies_LB), Emax_LB))
 
-# plot colors in the gaps of the spectrum
-Plt.color_gaps_vp!(plot_s, merged_dict, unique_phis, 14)
-
-# add guiding lines
-Plt.plot_add_LL_guide!(plot_s, startphi, endphi, a, 30)
 
 
 # save plots
-spectrum_plot_name = string("SCWC_fixE_vp_S_U$U0-a$a_in_angstr-q$q-phi$startphi-phf$endphi")
+spectrum_plot_name = string("SCWC_fixE_vp_LB_S_U$U0-a$a_in_angstr-q$q-phi$startphi-phf$endphi")
 spectrum_plot_path = string(joinpath(plot_save_folder_path, spectrum_plot_name), ".png")
 savefig(plot_s, spectrum_plot_path)
-wannier_plot_name = string("SCWC_fixE_vp_W_U$U0-a$a_in_angstr-q$q-phi$startphi-phf$endphi")
-wannier_plot_path = string(joinpath(plot_save_folder_path, wannier_plot_name), ".png")
-savefig(plot_w, wannier_plot_path)
 
 
 end_time_plot = time();

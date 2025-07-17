@@ -31,6 +31,7 @@ Does the same as SCWC but doesn't color the gaps and doesn't produce a Wannier p
 
 1. fixE -- Varies number of LLs at each flux so that a fixed upper energy limit is produced. NLL argument turns to max n of LL at final flux. 
 2. vp -- Argument 5 takes q instead of p. At each flux, the ratio p/q is simplified. Gives even spacing in p and faster computation at given fluxes.
+3. LB -- only plots the lowest band. saves as npz
 
 
 ## D

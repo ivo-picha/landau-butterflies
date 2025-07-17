@@ -20,13 +20,13 @@ function parse_arguments(args::Vector{String})
     end
 
     if !isprime(Int(args_vec[5]))
-        println("\n Code is running but it would be nice if you chose a prime p next time...\n")
+        println("\n p is not prime. Choosing a prime p can give consistency in calculations and time \n")
     end
 
     return (args_vec[1], args_vec[2], args_vec[3], args_vec[4], Int(args_vec[5]), Int(args_vec[6]), args_vec[7])
 end
 
-# function to extract parameters from ARGS; called in main_SCWC_DOS.jl 
+# function to extract parameters from ARGS; called in main_SCWC_DOS.jl  
 function parse_arguments_DOS(args::Vector{String})
     args1 = replace(args[1], "[" => "", "]" => "")
     args2 = split(args1, ",")

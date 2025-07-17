@@ -1,4 +1,6 @@
 module Wannier
+
+using ProgressMeter
     
 # function which takes spectrum at given ϕ, finds gaps above critical size, 
 # and finds number of states below gap, normalised to particle densities;
@@ -112,7 +114,8 @@ end
 function identify_lines(lines_dict::Dict, unique_phis::Vector{Float64}, datapoints::Vector{NTuple{4, Float64}}, phis_w::Vector{Float64})
     # points at previous n for first iteration; gets updated later
     points_at_n_prev = datapoints[1:searchsortedlast(phis_w, unique_phis[1])]
-    for n in eachindex(unique_phis)
+    println("Identifying Wannier diagram lines...")
+    @showprogress for n in eachindex(unique_phis)
         if n != 1
             # create list of y values at given x
             index_first = searchsortedfirst(phis_w, unique_phis[n])
