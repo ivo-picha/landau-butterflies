@@ -3,33 +3,41 @@ using Plots
 using Measures
 
 
-filepath = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/LB_spectra/LB_S_U0.05-a50.0-q120-phi0.25-phf2.0.npz"
-npzfile = npzread(filepath)
+folder_path_in = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/LB_BFs/U0.07/"
+folder_path_out = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/S_LB_npz/"
 
-phis = npzfile["x"]
-energies = npzfile["y"]
+#specify manually parameters
+U0 = 0.07;
+a_aa = 50;
+q = 120;
 
-defect = minimum(energies)
-dmask = energies .!= defect
-ennew = energies[dmask]
-phnew = phis[dmask]
+read_folder = readdir(folder_path_in)
+energies_v = [Vector{Float64}() for _ in 1:length(read_folder)]
+phis_v = [Vector{Float64}() for _ in 1:length(read_folder)]
 
-filepath2 = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/LB_spectra/LB_S_U0.05-a50.0-q72-phi2.0-phf3.0.npz"
-npzfile2 = npzread(filepath2)
+for (fj,file) in enumerate(read_folder)
+    if fj == 1
+        continue
+    end
+    filenpz = npzread(joinpath(folder_path_in, file))
+    energies_v[fj] = filenpz["y"]
+    phis_v[fj] = filenpz["x"]
+end
 
-phis2 = npzfile2["x"]
-energies2 = npzfile2["y"]
+energies = reduce(vcat, energies_v)
+phis = reduce(vcat, phis_v)
 
-entot = [ennew; energies2]
-phtot = [phnew; phis2]
+startphi = minimum(phis)
+endphi = maximum(phis)
 
 spectrum_bare_options = (
     markersize = 0.4,
+    markerstrokewidth = 0.0,
     color = :black,
     label = "",
     xlabel = "ϕ = p/q",
     ylabel = "E [eV]",
-    title = "Lowest Band; U₀ = 0.05 eV, a = 5 nm",
+    title = "Lowest Band Spectrum; U₀ = $U0 eV, a = $a_aa Å",
     framestyle = :box,
     size = (1200,800),
     tickfontsize = 16,
@@ -38,15 +46,7 @@ spectrum_bare_options = (
 )
 
 
-plt_s = scatter(phtot, entot; spectrum_bare_options...);
+plt_s = scatter(phis, energies; spectrum_bare_options...);
 
-savefig(plt_s, "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/S_LB/SCWC_fixE_vp_LB_S_U0.05-a50.0-qmix-phi0.25-phf3.0.png")
-
-
-count1 = 0;
-for phi in phnew
-    if phi == 59/60
-        count1 += 1
-    end
-end
-count1/81
+plt_name = "LB_npz_sphi$startphi-ephi$endphi-U0$U0-a$a_aa-q$q.png"
+savefig(plt_s, joinpath(folder_path_out, plt_name))
