@@ -16,9 +16,9 @@ energies_v = [Vector{Float64}() for _ in 1:length(read_folder)]
 phis_v = [Vector{Float64}() for _ in 1:length(read_folder)]
 
 for (fj,file) in enumerate(read_folder)
-    if fj == 1
-        continue
-    end
+    # if fj == 1 || fj == 4
+    #     continue
+    # end
     filenpz = npzread(joinpath(folder_path_in, file))
     energies_v[fj] = filenpz["y"]
     phis_v[fj] = filenpz["x"]
