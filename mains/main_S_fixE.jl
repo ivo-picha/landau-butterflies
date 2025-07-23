@@ -20,7 +20,7 @@ plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/lo
 #plot_save_folder_path = "/users/ivoga/lh/plts/spectra"
 
 #args = ARGS
-args = ["[0.5, 2.0, 0.01 , 50, 51, 3, 0.0]"]
+args = ["[0.1, 2.0, 0.01 , 50, 51, 3, 0.0]"]
 
 # get parameters from ARGS
 startphi, endphi, U0, a_in_angstr, p, Nmin = Params.parse_arguments(args)[1:end-1]

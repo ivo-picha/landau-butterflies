@@ -1,9 +1,10 @@
 using NPZ
 using Plots
 using Measures
+using Statistics:mean
 
 
-folder_path_in = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/LB_BFs/U0.07/"
+folder_path_in = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/LB_highLLtest/U0.07/"
 folder_path_out = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/S_LB_npz/"
 
 #specify manually parameters
@@ -30,6 +31,9 @@ phis = reduce(vcat, phis_v)
 startphi = minimum(phis)
 endphi = maximum(phis)
 
+#remove outliers
+mean
+
 spectrum_bare_options = (
     markersize = 0.4,
     markerstrokewidth = 0.0,
@@ -45,8 +49,9 @@ spectrum_bare_options = (
     margin = 9mm
 )
 
+mean([energies[1], energies[end]])
 
 plt_s = scatter(phis, energies; spectrum_bare_options...);
 
-plt_name = "LB_npz_sphi$startphi-ephi$endphi-U0$U0-a$a_aa-q$q.png"
+plt_name = "LB_npz_hLL_sphi$startphi-ephi$endphi-U0$U0-a$a_aa-q$q.png"
 savefig(plt_s, joinpath(folder_path_out, plt_name))

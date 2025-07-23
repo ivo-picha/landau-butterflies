@@ -26,8 +26,8 @@ end
 Tx(n::Int64, m::Int64, ξ0::Float64) = exp(- ξ0^2 / 4) * (sqrt((bigpw2(n+m)))/(sqrt(bigfac(n)) * sqrt(bigfac(m))))*
     sum([bigbinomial(n,k)*bigbinomial(m,k) * (1/(bigpw2(k))) * bigfac(k) * (im*big(ξ0)/2)^(n + m - 2*k) for k = 0:minimum([n,m])])
 
-for n=0:100
-    for m=0:100
+for n=0:150
+    for m=0:150
         # if n<m
         #     continue
         # end
