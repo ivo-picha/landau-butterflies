@@ -40,6 +40,20 @@ function parse_arguments_DOS(args::Vector{String})
     return (args_vec[1], args_vec[2], args_vec[3], args_vec[4], Int(args_vec[5]), Int(args_vec[6]), args_vec[7])
 end
 
+# function to extract parameters from ARGS; called in main_S_LBq.jl  
+function parse_arguments_vp_LBq(args::Vector{String})
+    args1 = replace(args[1], "[" => "", "]" => "")
+    args2 = split(args1, ",")
+    args_vec = parse.(Float64, args2)
+
+    if length(args_vec) != 6
+        println("Error: Arguments should be of the format [1.start_field, 2.end_field, 3.U0_in_eV, 4.a_in_Å, 5.q_fixed, 6.NminLLs]")
+        exit(1)
+    end
+
+    return (args_vec[1], args_vec[2], args_vec[3], args_vec[4], Int(args_vec[5]), Int(args_vec[6]))
+end
+
 # function to extract parameters from ARGS; called in main_SCWC_DOS.jl 
 function parse_arguments_bands(args::Vector{String})
     args1 = replace(args[1], "[" => "", "]" => "")
@@ -165,15 +179,22 @@ end
 function startmessage_SCWC(startphi, endphi, U0, a_in_angstr, p, NLL)
     println("\n\n==================
     Calculating the spectrum of the first $(NLL+1) Landau levels
-    in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr A
+    in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr Å
     from flux $startphi to flux $endphi. Resolution of the calculation is p=$p.\n")
 end
 
 function startmessage_S_fixE(startphi, endphi, U0, a_in_angstr, p, Nmin)
     println("\n\n==================
-    Calculating the spectrum for a minimum of $(Nmin+1) Landau levels and a maximum of 14
-    in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr A
+    Calculating the spectrum for a minimum of $(Nmin+1) Landau levels
+    in a 2D cos potential with strength U=$U0 eV and lattice constant a=$a_in_angstr Å
     from flux $startphi to flux $endphi. Resolution of the calculation is p=$p.\n Number of LLs varies at each flux.")
+end
+
+function startmessage_S_vp(startphi, endphi, U0, a_in_angstr, q, NLL)
+    println("\n\n==================
+    Calculating the spectrum of the first $(NLL+1) Landau levels in a 2D cos potential
+    with strength U=$U0 eV and lattice constant a=$a_in_angstr Å from
+    flux $startphi to flux $endphi. Resolution of the calculation varies with fixed q=$q.")
 end
 
 end

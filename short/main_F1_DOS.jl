@@ -96,5 +96,5 @@ p2 = Plots.plot(bins,freqs,
     ylims=(0,maximum(freqs)), title = "ϕ = $p/$q, U₀ = $U0 eV, a = $(a*1e10) Å")
 
 #save plot
-plot_name = "DOS_F$phi-U$U0.png"
+plot_name = "DOS_F$phi-U$U0-N$NLL.png"
 savefig(p2, joinpath(plot_save_folder_path,plot_name))

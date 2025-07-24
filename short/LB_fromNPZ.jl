@@ -4,11 +4,11 @@ using Measures
 using Statistics:mean
 
 
-folder_path_in = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/LB_highLLtest/U0.07/"
+folder_path_in = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/LB_highLLtest/U0.05/"
 folder_path_out = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/S_LB_npz/"
 
 #specify manually parameters
-U0 = 0.07;
+U0 = 0.05;
 a_aa = 50;
 q = 120;
 

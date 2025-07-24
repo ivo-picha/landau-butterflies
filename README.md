@@ -31,7 +31,8 @@ Does the same as SCWC but doesn't color the gaps and doesn't produce a Wannier p
 
 1. fixE -- Varies number of LLs at each flux so that a fixed upper energy limit is produced. NLL argument turns to max n of LL at final flux. 
 2. vp -- Argument 5 takes q instead of p. At each flux, the ratio p/q is simplified. Gives even spacing in p and faster computation at given fluxes.
-3. LB -- only plots the lowest band. saves as npz
+3. LB -- only plots the lowest band based on all energies below the Fermi energy of filling 1. saves as npz
+4. LBq -- only plots the lowest band based on the bottom q bands at each flux, which participate in the LB hofstadter butterfly. saves as npz
 
 
 ## D
@@ -52,6 +53,6 @@ where the arguments in the vector are
 Plots heatmap / density map of the electronic density from a pre-saved .npz file
 
 ## short folder
-shorter mostly single file scripts for various jobs
+shorter mostly single file scripts for various jobs. they are usually self-explanatory
 
 

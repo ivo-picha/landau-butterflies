@@ -24,7 +24,7 @@ function bigfac(n::Int)
 end
 
 function bigbinomial(n::Int, m::Int)
-        if n > 60
+        if n > 30
         return binomial(big(n),big(m))
     else
         return binomial(n,m)
@@ -32,13 +32,17 @@ function bigbinomial(n::Int, m::Int)
 end
 
 function bigpw2(n::Int)
-        if n > 60
+        if n > 30
         return big(2)^n
     else
         return 2^n
     end    
 end
 
+# define an easier to use laguerre polynomial which can handle big numbers without overflow
+function mylaguerre2big(α::Number, n::Int64, x::Number)
+    return sum([(-1)^k * bigbinomial(n+α,n-k) * big(x)^k /(bigfac(k)) for k=0:n])    
+end
 
 # LL energy in eV
 E_LL(n::Int64, ξ0::Float64, a::Float64) = (n + 0.5) * ħ^2 / (e * m_e * (ξ0 * a / (2π))^2)
@@ -47,7 +51,7 @@ E_LL(n::Int64, ξ0::Float64, a::Float64) = (n + 0.5) * ħ^2 / (e * m_e * (ξ0 * 
 Tx(n::Int64, m::Int64, ξ0::Float64) = exp(- ξ0^2 / 4) * (sqrt((bigpw2(n+m)))/(sqrt(bigfac(n)) * sqrt(bigfac(m))))*
     sum([bigbinomial(n,k)*bigbinomial(m,k) * (1/(bigpw2(k))) * bigfac(k) * (im*big(ξ0)/2)^(n + m - 2*k) for k = 0:minimum([n,m])])
 
-Ty(n::Int64, m::Int64, ξ0::Float64) = exp(- ξ0^2 / 4) * sqrt(bigfac(n))/sqrt(bigfac(m)) * big(-ξ0/sqrt(2))^(m-n) * mylaguerre(m-n, n, ξ0^2 /2)
+Ty(n::Int64, m::Int64, ξ0::Float64) = exp(- ξ0^2 / 4) * sqrt(bigfac(n))/sqrt(bigfac(m)) * big(-ξ0/sqrt(2))^(m-n) * mylaguerre2big(m-n, n, big(ξ0^2 /2))
 
 # work in basis (n,m,ky0) that goes as (n=0,ky=ky0), (0,ky0+2π/a), ..., (0,ky0+(p-1)2π/a), (1,ky0),.....
 # hamiltonian is composed of A(on diagional) and B matrices that are nonzero on the 3 diagonals
