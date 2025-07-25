@@ -124,7 +124,11 @@ npzwrite(joinpath(data_save_folder_path, "LB_S_U$U0-a$a_in_angstr-q$q-phi$startp
 
 
 end_time_plot = time();
-elapsed_time_plot = round(end_time_plot - start_time_plot; digits = 3);
+elapsed_time_plot = rosort!(energies)
+
+# gaps = diff(energies)
+# gappos = findfirst(x-> x>U0/2, gaps)
+# energies_LB = energies[1:gappos]und(end_time_plot - start_time_plot; digits = 3);
 println("All plotting done in $elapsed_time_plot seconds.")
 elapsed_time_all = round(end_time_plot - start_time_init; digits = 3);
 println("Code finished running in $elapsed_time_all seconds. Output files can be found in $plot_save_folder_path.")

@@ -12,7 +12,7 @@ const ħ = 6.62607015e-34/(2π);  # Planck constant [J s]
 const e = 1.602176634e-19;      # elementary charge [C]
 const m_e = 9.1093837139e-31;   # electron mass [kg];
 
-U0 = 0.02 # potential strenght in eV
+U0 = 0.015 # potential strenght in eV
 a = 5e-9; # lattice constant
 m = m_e; # electron/particle mass
 
@@ -35,7 +35,7 @@ function get_Hk(BZ_kpoint::Tuple{Float64,Float64}, BZ_centers::Vector{Tuple{Floa
     for i in eachindex(BZ_centers)
         for j in eachindex(BZ_centers)
             if abs(norm(BZ_centers[i] .- BZ_centers[j]) - G) < ϵ
-                Hk[i,j] = U0
+                Hk[i,j] = U0/2
             end
         end
     end
@@ -97,7 +97,7 @@ end
 bins, freqs = histogram_data(energies_LB, 25)
 
 p1 = Plots.plot(bins,freqs,
-    label = "", framestyle=:box, xlabel="E [eV]", ylabel="DOS", color = :blue,
+    label = "", framestyle=:box, xlabel="E [eV]", ylabel="DOS", color = :red,
     ylims=(0,maximum(freqs)), title = "U₀ = $U0 eV, a = $(a*1e10) Å")
 
 #save plot
