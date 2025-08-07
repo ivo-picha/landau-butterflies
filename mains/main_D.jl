@@ -22,12 +22,12 @@ using Base.Threads
 nt = nthreads()
 
 plot_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/densities"
-data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/N1/test/"
+data_save_folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/local/newdens/U0.05_varyphi/"
 #plot_save_folder_path = "/users/ivoga/lh/plts/densities"
 #data_save_folder_path = "/users/ivoga/lh/data"
 
-#args = ARGS
-args = ["[10, 10, 0.029, 50, 14, 1., 1]"]
+args = ARGS
+#args = ["[1, 1, 0.05, 50, 15, 1., 1]"]
 
 # get parameters from ARGS
 p, q, U0, a_in_angstr, NLL, np, TK = Params.parse_arguments_D(args)
@@ -37,9 +37,9 @@ phi = p/q                                   # unit flux per unit cell
 xi0 = sqrt(2π / phi)
 
 # get lists of ky0 and Y values to iterate over
-Nky = 33;                                   # number of ky* points; independent calculations; variation on scale of U0
+Nky = 32;                                   # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 33;
+NY = Nky;
 Y_list = Params.get_Y_list(NY)
 
 # message for time it took to initialise

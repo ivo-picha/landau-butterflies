@@ -297,7 +297,7 @@ density_options = (
 
 
 function plot_density(xgrid::Vector{Float64}, ygrid::Vector{Float64}, density_grid::Matrix{Float64}, a::Float64, nu::Number)
-    plot1 = heatmap(xgrid./a, ygrid./a, density_grid; density_options..., clim = (clamp((nu-1.0), 0.0, nu), nu+1.5))#clim = (clamp((nu-1.0), 0.0, nu), nu+1.5) 
+    plot1 = Plots.heatmap(xgrid./a, ygrid./a, density_grid; density_options..., clim = (0,6))#clim = (clamp((nu-1.0), 0.0, nu), nu+1.5) 
 
     # xsteps = xgrid[1]:a:xgrid[end]
     # xticklist = [string(i,"a") for i in eachindex(xsteps)]

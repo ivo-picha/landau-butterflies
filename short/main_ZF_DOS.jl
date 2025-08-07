@@ -12,7 +12,7 @@ const ħ = 6.62607015e-34/(2π);  # Planck constant [J s]
 const e = 1.602176634e-19;      # elementary charge [C]
 const m_e = 9.1093837139e-31;   # electron mass [kg];
 
-U0 = 0.015 # potential strenght in eV
+U0 = 0.05 # potential strenght in eV
 a = 5e-9; # lattice constant
 m = m_e; # electron/particle mass
 
@@ -20,7 +20,7 @@ G = 2π/a # recip scat vec
 # nu = 1.0; # filling
 # EF = (ħ^2 /e)* 2π*(nu/a^2)/(2*m) 
 
-Nk = 64; # sqrt of number of momentum states in BZ
+Nk = 100; # sqrt of number of momentum states in BZ
 NBZ = 5; # number of BZs in each dimension / 2
 
 BZ_centers = reshape(collect(Base.product(G.*(-NBZ:NBZ), G.*(-NBZ:NBZ))), :)
@@ -101,5 +101,5 @@ p1 = Plots.plot(bins,freqs,
     ylims=(0,maximum(freqs)), title = "U₀ = $U0 eV, a = $(a*1e10) Å")
 
 #save plot
-plot_name = "DOS_ZF_U$U0.png"
-savefig(p1, joinpath(plot_folder,plot_name))
+# plot_name = "DOS_ZF_U$U0.png"
+# savefig(p1, joinpath(plot_folder,plot_name))

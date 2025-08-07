@@ -5,6 +5,7 @@ using Dierckx
 using Peaks
 using Interpolations
 using Statistics: mean, std, cor
+using ProgressMeter
 
 # Fermi-Dirac distribution
 function fermi_dirac(en::Float64, eF::Float64, eT::Float64)
@@ -34,9 +35,26 @@ function discard_high_energies_smear(states_vec_sorted::Vector{Tuple{Float64, Fl
     end
 end
 
+# define functions which can handle big factorials and powers beyond Int128
+function bigfac(n::Int)
+    if n > 10
+        return factorial(big(n))
+    else
+        return factorial(n)
+    end    
+end
+
+function bigpw2(n::Int)
+        if n > 10
+        return big(2)^n
+    else
+        return 2^n
+    end    
+end
+
 
 # recursively define a hermite polynomial
-function hermite_r(x::Float64, n::Int)::Float64
+function hermite_r(x::Number, n::Int)::Float64
     if n == 0
         return 1.0
     elseif n == 1
@@ -47,25 +65,27 @@ function hermite_r(x::Float64, n::Int)::Float64
 end
 
 # orthogonal hermite function
-function hermite_function(x::Float64, n::Int64)
-    An = 1/sqrt(2^n * factorial(n) * sqrt(π))
-    return An * hermite_r(x,n) * exp(-x^2 /2)
+function hermite_function(x::Number, n::Int64)
+    An = 1/sqrt(bigpw2(n) * bigfac(n) * big(sqrt(π)))
+    return An * hermite_r(big(x),n) * exp(-x^2 /2)
 end
 
 function landau_lvl_wf(x::Float64, y::Float64, n::Int, m::Int, ky0::Float64, Ky::Int, phi::Float64, a::Float64, p::Int)::ComplexF64
     lB = a / sqrt(2π * phi)
     ky = ky0 + 2π*m/a + 2π*p*Ky/a
     xix = x/lB - ky*lB
-    return 1/a * hermite_function(xix, n) * exp(im * ky * y)
+    return 1/a * hermite_function(big(xix), n) * exp(im * ky * y)
 end
 
 
-function get_density_list(xyplotlist::Vector{Tuple{Float64,Float64}}, state::Tuple{Float64, Float64, Float64, Vector{ComplexF64}}, nm_list::Vector{Tuple{Int,Int}}, phi::Float64, a::Float64, p::Int, NKy::Int=2)
+function get_density_list(xyplotlist::Vector{Tuple{Float64,Float64}}, state::Tuple{Float64, Float64, Float64, Vector{ComplexF64}}, nm_list::Vector{Tuple{Int,Int}}, phi::Float64, a::Float64, p::Int, NKy::Int=4)
     dens_list = Float64[];
-    for xy in xyplotlist
+
+    println("Calculating electronic densities...")
+    @showprogress for xy in xyplotlist
         x = xy[1]
         y = xy[2]
-        wf = sum([state[4][j] * exp(-im*Ky*state[3]) * landau_lvl_wf(x,y,nm_list[j][1],nm_list[j][2],state[2],Int(Ky),phi,a,p) for j in eachindex(nm_list) for Ky = -NKy:NKy])
+        wf = sum([state[4][j] * exp(-im*Ky*state[3]) * exp(-im*state[3]*nm_list[j][2]/p) * landau_lvl_wf(x,y,nm_list[j][1],nm_list[j][2],state[2],Int(Ky),phi,a,p) for j in eachindex(nm_list) for Ky = -1:NKy])
         push!(dens_list, real(wf*conj(wf)))
     end
     return dens_list

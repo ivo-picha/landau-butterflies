@@ -15,13 +15,27 @@ using Plots
 using Statistics
 
 
-plot_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/random"
+plot_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/DOS/"
 #plot_folder = "/users/ivoga/lh-short/plts"
 
-U0 = 0.06# potential strenght in eV
+#number of bins in histograms
+Nbins = 50
+
+U0 = 0.03 # potential strenght in eV
+
+# FOR FLUX 1
 p = 1
 q = 1
-NLL = 40
+NLL = 20
+phi = p/q                                   # unit flux per unit cell
+xi0 = sqrt(2π / phi)
+
+# FOR FLUX 2
+p2 = 2
+q2 = 1
+NLL2 = 20
+phi2 = p2/q2                                  # unit flux per unit cell
+xi02 = sqrt(2π / phi2)
 
 a_in_angstr = 50
 a = a_in_angstr * 1e-10                     # lattice const in meters
@@ -29,17 +43,15 @@ m = 9.1093837139e-31; # electron/particle mass
 
 # ============== nonzero field numerical parameters ============
 
-phi = p/q                                   # unit flux per unit cell
-xi0 = sqrt(2π / phi)
 # get lists of ky0 and Y values to iterate over
-Nky = 32;                                   # number of ky* points; independent calculations; variation on scale of U0
+Nky = 150;                                   # number of ky* points; independent calculations; variation on scale of U0
 ky_list = Params.get_ky_list(a, Nky)
-NY = 32;
+NY = Nky;
 Y_list = Params.get_Y_list(NY)
 
 # ============== zero field calc ===================
 G = 2π/a # recip scat vec
-Nk = 64; # sqrt of number of momentum states in BZ
+Nk = 200; # sqrt of number of momentum states in BZ
 NBZ = 5; # number of BZs in each dimension / 2
 BZ_centers = reshape(collect(Base.product(G.*(-NBZ:NBZ), G.*(-NBZ:NBZ))), :)
 BZ_kpoints = reshape(collect(Base.product(range(-G/2,G/2,Nk), range(-G/2,G/2,Nk))), :)
@@ -111,7 +123,7 @@ function histogram_data(data::Vector{Float64}, N::Int, norm::Float64=1.0)
     return (bin_centers, frequencies)
 end
 
-bins_zf, freqs_zf = histogram_data(energies_zf_LB, 25)
+bins_zf, freqs_zf = histogram_data(energies_zf_LB, Nbins)
 
 
 # ================== nonzero field calculations ===============
@@ -131,7 +143,27 @@ end
 sort!(energies_f)
 energies_fs = energies_f[1:(q*(Nky-1)*(NY-1))]
 
-bins_f, freqs_f = histogram_data(energies_fs, 25)
+bins_f, freqs_f = histogram_data(energies_fs, Nbins)
+
+
+# ================== nonzero field 2 calculations ===============
+println("Calculating nonzero field spectrum...")
+
+
+energies_f2 = Float64[];
+
+@showprogress for Y in Y_list
+    for ky0 in ky_list
+
+        H = Hamil.get_full_ham(xi02, ky0, Y, U0, a, p2, NLL2)
+        evalsH = eigvals(H)
+        append!(energies_f2, evalsH)
+    end
+end
+sort!(energies_f2)
+energies_fs2 = energies_f2[1:(q2*(Nky-1)*(NY-1))]
+
+bins_f2, freqs_f2 = histogram_data(energies_fs2, Nbins)
 
 # ============== plotting ===================
 
@@ -140,12 +172,14 @@ bins_f, freqs_f = histogram_data(energies_fs, 25)
 p1 = Plots.plot(bins_zf,freqs_zf,
     label = "ϕ = 0", framestyle=:box, xlabel="E [eV]", ylabel="DOS", color = :red, title = "U₀ = $U0 eV, a = $a_in_angstr Å")
 
-p2 = Plots.plot!(p1,bins_f, freqs_f ,label = "ϕ = $p/$q", color = :blue)
+Plots.plot!(p1,bins_f, freqs_f ,label = "ϕ = $p/$q", color = :blue)
 
-ylims!(p2, (0, maximum([freqs_f;freqs_zf])))
-xlims!(p2, (minimum([bins_f[1],bins_zf[1]]), maximum([bins_f[end],bins_zf[end]])))
+Plots.plot!(p1,bins_f2, freqs_f2 ,label = "ϕ = $p2/$q2", color = :green)
+
+ylims!(p1, (0, maximum([freqs_f;freqs_zf])))
+xlims!(p1, (minimum([bins_f2[1],bins_zf[1]]), maximum([bins_f2[end],bins_zf[end]])))
 
 
 #save plot
-plot_name = "DOS_compare_U$U0-f$phi-N$NLL.png"
-savefig(p2, joinpath(plot_folder,plot_name))
+plot_name = "DOS_compare_U$U0-f$phi-f2$phi2-N$NLL.png"
+savefig(p1, joinpath(plot_folder,plot_name))
