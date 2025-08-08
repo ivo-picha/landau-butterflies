@@ -9,7 +9,7 @@ using NPZ
 using ProgressMeter
 using LaTeXStrings
 
-folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/newdens_compare_aug6/"
+folder_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/newdens_U0.1_aug8/"
 
 function extract_data(file_path::String)
     if splitext(file_path)[2] != ".npz"
@@ -44,7 +44,7 @@ end
 
 ################ ADD HERE MANUALLY SOME PARAMETERS
 # available NLLs
-Ulist = [0.01,0.03,0.05]
+Ulist = [0.01]
 xax = L"\phi"
 xl = (0.0,2.0)
 plots_save_path = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/random"
@@ -85,7 +85,7 @@ for j in eachindex(Ulist)
 end
 
 
-name_plots_base = "varyphi_0to3_U0.5_14Ns_"
+name_plots_base = "varyphi_0to2_U0.1_14Ns_"
 savefig(plt_sR, joinpath(plots_save_path, string(name_plots_base, "sR.png")))
 savefig(plt_dr, joinpath(plots_save_path, string(name_plots_base, "dr.png")))
 savefig(plt_rs, joinpath(plots_save_path, string(name_plots_base, "rs.png")))

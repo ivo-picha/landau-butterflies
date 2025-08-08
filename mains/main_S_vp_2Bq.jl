@@ -124,7 +124,7 @@ npzwrite(joinpath(data_save_folder_path, "2B_S_U$U0-a$a_in_angstr-q$q-phi$startp
 
 
 end_time_plot = time();
-elapsed_time_plot = rosort!(energies)
+elapsed_time_plot = end_time_plot - start_time_plot
 
 # gaps = diff(energies)
 # gappos = findfirst(x-> x>U0/2, gaps)
