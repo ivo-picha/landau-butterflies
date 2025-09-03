@@ -20,7 +20,7 @@ G = 2π/a # recip scat vec
 # nu = 1.0; # filling
 # EF = (ħ^2 /e)* 2π*(nu/a^2)/(2*m) 
 
-Nk = 100; # sqrt of number of momentum states in BZ
+Nk = 50; # sqrt of number of momentum states in BZ
 NBZ = 5; # number of BZs in each dimension / 2
 
 BZ_centers = reshape(collect(Base.product(G.*(-NBZ:NBZ), G.*(-NBZ:NBZ))), :)
@@ -54,8 +54,11 @@ ktots = Float64[];
     append!(ktots,[ktot for _ in eachindex(evals)])
 end
 
-pbs = scatter(ktots,energies, msw=0, color = :red, label = "", ms = 0.7, ylims = (-0.1,0.65), framestyle = :box, xlabel = "|k|", ylabel = "ε")
+pbs = scatter(ktots,energies, msw=0, color = :red, label = "", ms = 0.7, ylims = (minimum(energies),0.65), framestyle = :box, xlabel = "|k|", ylabel = "ε")
 title!(pbs, "U₀ = $U0 eV, a = $(a*1e9) nm")
 #save plot
 plot_name = "BS_ZF_U$U0.png"
 savefig(pbs, joinpath(plot_folder,plot_name))
+
+mask = -0.1 .< energies .< 0.0
+enzf = energies[mask]

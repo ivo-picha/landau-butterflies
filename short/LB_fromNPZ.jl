@@ -4,15 +4,15 @@ using Measures
 using Statistics:mean
 
 
-folder_path_in = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/LB_BFs/U0.15-ph1-2/"
-folder_path_out = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/S_LB_npz/"
+folder_path_in = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/data/mafalda/2B/U0.15/"
+folder_path_out = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl/plots/local/S_2B_npz/"
 
 #specify manually parameters
 U0 = 0.15;
 a_aa = 50;
 q = 120;
 
-NLL = 40;
+NLL = 80;
 
 read_folder = readdir(folder_path_in)
 energies_v = [Vector{Float64}() for _ in 1:length(read_folder)]
@@ -44,7 +44,7 @@ spectrum_bare_options = (
     label = "",
     xlabel = "ϕ = p/q",
     ylabel = "E [eV]",
-    title = "Lowest Band Spectrum; U₀ = $U0 eV, a = $a_aa Å, Nₗ = $NLL",
+    title = "Second Band Spectrum; U₀ = $U0 eV, a = $a_aa Å, Nₗ = $NLL",
     framestyle = :box,
     size = (1200,800),
     tickfontsize = 16,
@@ -55,8 +55,11 @@ spectrum_bare_options = (
 
 plt_s = scatter(phis, energies; spectrum_bare_options...);
 
-xlims!(plt_s, (0.99,2.01))
+xlims!(plt_s, (-0.02,2.01));
 #ylims!(plt_s, (-0.4, 0.0))
 
-plt_name = "LB_npz_hLL_sphi$startphi-ephi$endphi-U0$U0-a$a_aa-q$q-N$NLL.png"
+#enzf loaded from ZF bands jl
+scatter!(plt_s, zeros(length(enzf)), enzf, ms = 0.5, msw = 0, color = :red, label = "");
+
+plt_name = "2B_npz_sphi$startphi-ephi$endphi-U0$U0-a$a_aa-q$q-N$NLL.png"
 savefig(plt_s, joinpath(folder_path_out, plt_name))

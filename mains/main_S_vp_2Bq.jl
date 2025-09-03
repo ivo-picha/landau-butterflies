@@ -29,12 +29,13 @@ args = ARGS
 startphi, endphi, U0, a_in_angstr, q, NLL = Params.parse_arguments_vp_LBq(args)
 a = a_in_angstr * 1e-10                     # lattice const in meters
 
-# get lists of q, ky0 and Y values to iterate over
+#list of p values to iterate over phis
 p_list = unique(Int.(collect(range(round(q*startphi),round(q*endphi)))))
-Nky = 16;                                    # number of ky* points; independent calculations; variation on scale of U0
-ky_list = Params.get_ky_list(a, Nky)
-NY = Nky;
-Y_list = Params.get_Y_list(NY)
+
+# put here ky and Y lists if you dont want dynamic updating of their lengths
+# function to generate list sizes
+maxNky = 100
+get_Nky(Q) = Int(round(maxNky* Q^(-log(q,maxNky))))
 
 
 # empty lists to store coordinates for plot
@@ -63,23 +64,12 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
     xi0 = sqrt(2π / phi)
     energies_at_phi = Float64[];            # to be appended to global energies list
 
-    # # set up list for each thread
-    # tlists = [Vector{Float64}() for _ in 1:nt]
-
-    # @threads for ky in ky_list
-    #     tid = threadid()
-
-    #     for Y in Y_list
-
-    #     H = Hamil.get_full_ham(xi0, ky, Y, U0, a, pn, NLL)
-    #     evalsH = eigvals(H)
-    #     append!(tlists[tid], evalsH) #add eigenvalues to list of energies
-
-    #     end
-    # end
-
-    # # combine buffer lists
-    # energies_at_phi = reduce(vcat, tlists)
+    # get lists of ky0 and Y values to iterate over
+    # make it such that at max qn, there is only 1 and at qn=1, there are 100 
+    Nky = get_Nky(qn)                                   # number of ky* points; independent calculations; variation on scale of U0
+    ky_list = Params.get_ky_list(a, Nky)
+    NY = Nky;
+    Y_list = Params.get_Y_list(NY)
 
     for ky in ky_list
         for Y in Y_list
@@ -92,7 +82,9 @@ start_time_diag = time();                   # set up a clock to monitor elapsed 
     end
 
     sort!(energies_at_phi)
-    energies_at_phi_2B = energies_at_phi[(qn*(Nky-1)*(NY-1) + 1):(2*qn*(Nky-1)*(NY-1))]
+    
+    cutoff = phi<1 ? qn : pn # take qn below phi=1 and pn above
+    energies_at_phi_2B = energies_at_phi[1:(2*cutoff*(Nky-1)*(NY-1))]
 
     global energies_2B
     append!(energies_2B, energies_at_phi_2B)
@@ -110,7 +102,7 @@ start_time_plot = time();
 plots_title = string("U₀=$U0 eV,  a=$a_in_angstr Å")
 
 # save data so it can be accessed later; npz format, readable by python as well
-npzwrite(joinpath(data_save_folder_path, "2B_S_U$U0-a$a_in_angstr-q$q-phi$startphi-phf$endphi-N$NLL.npz"),
+npzwrite(joinpath(data_save_folder_path, "2LB_vNk_S_U$U0-a$a_in_angstr-q$q-phi$startphi-phf$endphi-N$NLL.npz"),
         Dict("x" => phis, "y" => energies_2B))
 
 # # plot only the spectrum

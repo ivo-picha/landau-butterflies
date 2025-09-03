@@ -2,24 +2,26 @@
 # arguments should be in the format [start_phi_inv, end_phi_inv, U0_in_eV, a_in_Å, p_bands, N_LLs, gap_factor]
 # cuts the x axis and breaks it down into different jobs
 
-Nxjobs = 14;
+Nxjobs = 25;
 
-startphi = 0.05
-endphi = 1.0
+startphi = 0.25
+endphi = 3.0
 
 U0 = 0.05
 a = 50.0
-q = 120
-NLL = 60
+q = 240
+
 
 phis_bd = round.(collect(range(startphi,endphi,Nxjobs+1)); digits = 4)
 # make the jobs non-overlapping at the boundaries
 plist = round.(phis_bd .* q)
 endphis_p = round.((plist.-1)./q ; digits = 4)
 
+NLLlist = Int.(clamp.(round.(400*U0 ./phis_bd),15,120))
+
 param_list_tuple = Tuple[];
 for j in 1:Nxjobs
-    push!(param_list_tuple, (phis_bd[j], endphis_p[j+1], U0, a, q, NLL))
+    push!(param_list_tuple, (phis_bd[j], endphis_p[j+1], U0, a, q, NLLlist[j]))
 end
 param_list_str = replace.(string.(param_list_tuple), "(" => "[", ")" => "]")
 
@@ -46,7 +48,7 @@ for params in param_list_str
         write(job, "#\$ -v JULIA_NUM_THREADS=$n_cpus \n\n")
 
         #run file
-        write(job, "julia -t $n_cpus ../mains/main_S_vp_LBq.jl \"$params\" \n")
+        write(job, "julia -t $n_cpus ../mains/main_S_vp_2Bq.jl \"$params\" \n")
     end
 
     run(`qsub $path_job`)    # could be replaced by $jobname if working in same folder
