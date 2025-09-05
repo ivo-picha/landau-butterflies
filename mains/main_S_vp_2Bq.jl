@@ -35,7 +35,7 @@ p_list = unique(Int.(collect(range(round(q*startphi),round(q*endphi)))))
 # put here ky and Y lists if you dont want dynamic updating of their lengths
 # function to generate list sizes
 maxNky = 100
-get_Nky(Q) = Int(round(maxNky* Q^(-log(q,maxNky))))
+get_Nky(Q) = Int(round(maxNky* Q^(-log(q,maxNky)))) +1 
 
 
 # empty lists to store coordinates for plot
