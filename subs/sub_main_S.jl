@@ -1,5 +1,4 @@
-# job file that runs the main_SCWC.jl for sets of parameters
-# arguments should be in the format [start_phi_inv, end_phi_inv, U0_in_eV, a_in_Å, p_bands, N_LLs, gap_factor]
+# job file that submits jobs of main_S.jl for sets of parameters
 
 list_U0 = round.(collect(range(0.0010, 0.02, step = 0.0003)); digits=4)
 #list_U0 = [0.015]
@@ -36,7 +35,7 @@ for (j,params) in enumerate(param_list_tuple)
         write(job, "#\$ -v JULIA_NUM_THREADS=$n_cpus \n\n")
 
         #run file -------------------------------------------------------------------------------------------------------- OPTIONS GO BELOW ----------
-        write(job, "julia ../mains/main_S.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 2 -p -w -l \n")
+        write(job, "julia --project=.. ../mains/main_S.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 2 -p -w -l \n")
     end
 
     run(`qsub $path_job`)   

@@ -8,11 +8,11 @@
 # using 32-bit floats for memory efficiency and faster diagonalization
 
 args = ARGS;
-args = ["0.02", "5", "20", "120", "0.2", "1.1", "--XBF", "2", "-p", "-w", "-l"]; # for visual studio code testing
+#args = ["0.02", "5", "20", "120", "0.2", "1.1", "--XBF", "2", "-p", "-w", "-l"]; # for visual studio code testing
 
 # -OUTPUT FOLDER!-
-outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-# outfolder = "/users/ivoga/lh/out" # cluster path
+# outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
@@ -159,7 +159,3 @@ if plotQ
 end
 
 
-
-# testing
-# wannier_dict[(0f0,1f0)]
-minimum(vcat(out_energies...))
