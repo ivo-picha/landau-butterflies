@@ -7,7 +7,7 @@ using ProgressMeter
 # outputs list of particle densities below a gap and a list of corresponding gap sizes
 function get_densities_gaps(energy_list::Vector{Float32}, flux::Float32, pn::Int64, NXY::Int64)
 
-    min_gap_size_eV = (energy_list[end] - energy_list[1])/1f2 # minimum gap size to consider significant -- 1% of total plot energy width
+    min_gap_size_eV = (energy_list[end] - energy_list[1])/2f2 # minimum gap size to consider significant -- 1% of total plot energy width
 
     list_big_gaps = Float32[]
     list_densities = Float32[]

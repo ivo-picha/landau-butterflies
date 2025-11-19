@@ -8,15 +8,20 @@ If you want to submit to cluster, use the submission files from the */subs/* fol
 
 When running, the packages need to be activated before being used. So execute the code from Terminal like 
 >   julia --project=/path/to/MyProject main_X.jl
+
 which tells julia to look for packages in the .toml files.
 
 ### running on the cluster
 make sure to initialize packages from the .toml files on the cluster version by running in julia on the cluster
 
 >   julia> cd("path/to/project")
+>
 >   julia> ]
+>
 >   pkg> activate .
+>
 >   pkg> resolve
+>
 >   pkg> instantiate()
 
 ## main_S.jl
@@ -43,4 +48,5 @@ The optional arguments are:
 
 ### Example usage
 >   julia --project=/path/to/MyProject main_S.jl 0.02 5 50 240 0.25 2.0 --XBF 1 -p -w -l -z
+
 

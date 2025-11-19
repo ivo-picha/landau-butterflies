@@ -174,7 +174,7 @@ function cut_spectrum(XLL,XBF,num_fluxes,phi_list,qn_list,NLL_list,NXY_list,Elis
         for j in 1:num_fluxes
             qn = qn_list[j]
             pn = Int64(round(qn*phi_list[j]))
-            cutoff = phi<1 ? qn : pn # take qn below phi=1 and pn above
+            cutoff = phi_list[j]<1 ? qn : pn # take qn below phi=1 and pn above
             larger = Int(max(min(XLL,(NLL_list[j]+1)), XBF))
             E_out[j] = Elist[j][1:larger*cutoff*NXY_list[j]^2]
         end

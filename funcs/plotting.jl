@@ -29,7 +29,7 @@ function plot_bare_spectrum(out_energies::Vector{Vector{Float32}}, phi_list::Vec
         xs = [phi_list[j] for i = 1:length(ens)]
         Plots.scatter!(plt, xs, ens; spectrum_bare_options...)
     end
-    miny, maxy = minimum(vcat(out_energies...)_), maximum(vcat(out_energies...))
+    miny, maxy = minimum(vcat(out_energies...)), maximum(vcat(out_energies...))
     Plots.ylims!(plt, miny - 0.05f0*(maxy - miny), maxy + 0.05f0*(maxy - miny))
     return plt
 end
