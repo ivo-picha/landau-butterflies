@@ -35,7 +35,8 @@ for (j,params) in enumerate(param_list_tuple)
         write(job, "#\$ -v JULIA_NUM_THREADS=$n_cpus \n\n")
 
         #run file -------------------------------------------------------------------------------------------------------- OPTIONS GO BELOW ----------
-        write(job, "julia --project=.. ../mains/main_S.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 2 -p -w -l \n")
+        write(job, "cd /users/ivoga/lh/code/ \n") # change to project directory with .toml files
+        write(job, "julia --project=. ./mains/main_S.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 2 -p -w -l \n")
     end
 
     run(`qsub $path_job`)   
