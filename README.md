@@ -22,7 +22,7 @@ make sure to initialize packages from the .toml files on the cluster version by 
 >
 >   pkg> resolve
 >
->   pkg> instantiate()
+>   pkg> instantiate
 
 ## main_S.jl
 This is the main file, which can be executed to compute the energy spectrum and optionally perform a Wannier analysis and color the gaps in the spectrum according to Chern number.**EDIT THE OUTPUT FOLDER DIRECTLY IN THE FILE!**

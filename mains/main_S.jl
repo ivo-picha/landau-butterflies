@@ -29,6 +29,7 @@ using Plots
 using Base.Threads
 using Primes
 using ProgressMeter
+using Printf
 
 
 # modules -------------
@@ -118,7 +119,8 @@ out_energies = Aux.cut_spectrum(XLL, XBF, num_fluxes, phi_list, qn_list, NLL_lis
 # OUTPUT PLOTS AND/OR DATA FILES ============================================
 
 # name to attach to filenames, giving the input arguments
-param_str = "U0_$(U0)_a_$(a_nm)_LL_$(LLmax)_q_$(q)_ps_$(phi_s)_pf_$(phi_f)_XLL_$(XLL)_XBF_$(XBF)"
+lup = varyNLLQ ? "vLL" : "fLL"
+param_str = "U0_$(@sprintf("%.5f", U0))_a_$(a_nm)_LL_$(LLmax)_q_$(q)_ps_$(phi_s)_pf_$(phi_f)_XLL_$(XLL)_XBF_$(XBF)_$lup"
 
 if dataQ
     # save energies

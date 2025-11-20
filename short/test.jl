@@ -1,6 +1,5 @@
-using LinearAlgebra
+using Plots
 
-mat1 = [1.0 2.0im 3.0; 4.0 5.0im 6.0; 7.0 8.0im 9.0]
-
-Hermitian(mat1)
+q = [1,2,3,4,5,6]
+Uc = [0.0151,0.0083,0.0058,0.0047,0.0032,0.0026]
 
