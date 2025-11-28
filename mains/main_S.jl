@@ -7,18 +7,17 @@
 
 # using 32-bit floats for memory efficiency and faster diagonalization
 
-args = ARGS;
-#args = ["0.02", "5", "20", "120", "0.2", "1.1", "--XBF", "2", "-p", "-w", "-l"]; # for visual studio code testing
+#args = ARGS;
+args = ["0.021", "5", "8", "120", "0.25", "1", "-p", "-w"]; # for visual studio code testing # "--XBF", "2"
 
 # -OUTPUT FOLDER!-
-# outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-outfolder = "/users/ivoga/lh/out" # cluster path
+outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+#outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
 mkpath(outfolder_plots)
 mkpath(outfolder_data)
-
 
 
 # PACKAGES AND MODULES ===================================================
@@ -159,5 +158,6 @@ if plotQ
     # save spectrum plot
     savefig(plot_spectrum, joinpath(outfolder_plots, string("spectrum_",param_str,".png")))
 end
+
 
 

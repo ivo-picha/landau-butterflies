@@ -50,7 +50,7 @@ E_LL(n::Int64, phi::Float32, a::Float32) = Float32((n + 0.5) * ħ^2 * 2π * phi 
 # matrix elements (Θ in overleaf)
 T(n::Int64, m::Int64, phi::Float32) = Float32(exp(-Float32(π)/(Float32(2.0)*phi)) * sqrt(bigfac(min(n,m))/bigfac(max(n,m))) * (Float32(π)/phi)^(abs(n-m)/2) * mylaguerre2big(abs(n-m),min(n,m),Float32(π)/phi))
 
-# work in basis (n,m,ky0) that goes as (n=0,ky=ky0), (0,ky0+2π/a), ..., (0,ky0+(p-1)2π/a), (1,ky0),.....
+# work in basis (n,m) that goes as (n=0,m=0), (0,1), ..., (0,(p-1)), (1,0),.....
 # hamiltonian is composed of A(on diagional) and B matrices that are nonzero on the 3 diagonals
 
 # block matrices on the diagonal -- correspond to (n,k)*(n,k') elements
@@ -64,10 +64,11 @@ function matA(n::Int64, phi::Float32, X::Float32, Y::Float32, U0::Float32, a::Fl
 
     # elements on the two second diagonals
     f = exp(-im*Y/Float32(p)) * TnnU / Float32(2.0)
+    fc = conj(f)
 
     #construct matrix
-    mat::Matrix{ComplexF32} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => conj(f) * ones(p-1))
-    mat[1, p] += conj(f)
+    mat::Matrix{ComplexF32} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => fc * ones(p-1))
+    mat[1, p] += fc
     mat[p, 1] += f
 
     return mat
@@ -79,17 +80,17 @@ function matB(n::Int64, m::Int64, phi::Float32, X::Float32, Y::Float32, U0::Floa
     TnmU = T(n,m,phi) * U0
 
     # diagonal elements
-    d(j) = TnmU * cos(X/Float32(p) + j* Float32(2π)/phi + abs(m-n)*Float32(π)/Float32(2.0))
+    d(j) = TnmU * cos(X/Float32(p) + j*Float32(2π)/phi + abs(m-n)*Float32(π)/Float32(2.0))
 
     # elements on the two second diagonals
     
-    fm = exp(im*Y/Float32(p)) * TnmU / Float32(2.0) 
-    fp = conj(fm) * (-1)^(m-n)
+    f = exp(-im*Y/Float32(p)) * TnmU / Float32(2.0)*(-1)^(m-n)      # upper off diagonal
+    fc = conj(f) * (-1)^(m-n)                                       # lower off diagonal
 
     #construct matrix
-    mat::Matrix{ComplexF32} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => fp * ones(p-1), -1 => fm * ones(p-1))
-    mat[1, p] += fm
-    mat[p, 1] += fp
+    mat::Matrix{ComplexF32} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => fc * ones(p-1))
+    mat[1, p] += fc
+    mat[p, 1] += f
 
     return mat
 end
