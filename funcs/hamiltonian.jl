@@ -84,8 +84,11 @@ function matB(n::Int64, m::Int64, phi::Float32, X::Float32, Y::Float32, U0::Floa
 
     # elements on the two second diagonals
     
-    f = exp(-im*Y/Float32(p)) * TnmU / Float32(2.0)*(-1)^(m-n)      # upper off diagonal
+    f = exp(-im*Y/Float32(p)) * TnmU / Float32(2.0)*(-1)^((m-n+abs(m-n))/2)      # upper off diagonal
     fc = conj(f) * (-1)^(m-n)                                       # lower off diagonal
+
+    # f = exp(-im*Y/Float32(p)) * TnmU / Float32(2.0)*(-1)^(m-n)      # upper off diagonal
+    # fc = conj(f) * (-1)^(m-n)                                       # lower off diagonal
 
     #construct matrix
     mat::Matrix{ComplexF32} = diagm(0 => [d(j) for j = 0:(p-1)], 1 => f * ones(p-1), -1 => fc * ones(p-1))

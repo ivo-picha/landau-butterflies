@@ -3,8 +3,8 @@
 list_U0 = round.(collect(range(0.0010, 0.02, step = 0.0003)); digits=4)
 #list_U0 = [0.015]
 list_a = [5]
-list_LLmax = [80]
-list_q = [240]
+list_LLmax = [75]
+list_q = [120]
 list_startphi = [0.16]
 list_endphi = [1.05]
 
@@ -37,7 +37,7 @@ for (j,params) in enumerate(param_list_tuple)
 
         #run file -------------------------------------------------------------------------------------------------------- OPTIONS GO BELOW ----------
         write(job, "cd /users/ivoga/lh/code/ \n") # change to project directory with .toml files
-        write(job, "julia --project=. ./mains/main_S.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 2 -p -w \n")
+        write(job, "julia --project=. ./mains/main_S.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 2 -p -w -l\n")
     end
 
     run(`qsub $path_job`)   
