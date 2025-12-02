@@ -7,12 +7,12 @@
 
 # using 32-bit floats for memory efficiency and faster diagonalization
 
-args = ARGS;
-#args = ["0.02", "5", "8", "120", "0.25", "1", "-p", "-w"]; # for visual studio code testing # "--XBF", "2"
+#args = ARGS;
+args = ["0.03", "5", "10", "120", "0.25", "3", "-p", "-w", "-l"]; # for visual studio code testing # "--XBF", "2"
 
 # -OUTPUT FOLDER!-
-#outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-outfolder = "/users/ivoga/lh/out" # cluster path
+outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+#outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
@@ -147,7 +147,7 @@ if wannierQ
         savefig(plot_wannier, joinpath(outfolder_plots, string("wannier_",param_str,".png")))
     end
     if plotQ
-        Plt.color_gaps_eq!(plot_spectrum, wannier_dict, phi_list, 14)        
+        Plt.color_gaps_eq2!(plot_spectrum, wannier_dict, phi_list, 14)        
     end
 end
 
@@ -161,3 +161,4 @@ end
 
 
 
+(Hamil.E_LL(1,1f0,5f-9) - Hamil.E_LL(0,1f0,5f-9))*exp(π/2)/(2π)

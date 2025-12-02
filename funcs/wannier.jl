@@ -7,7 +7,7 @@ using ProgressMeter
 # outputs list of particle densities below a gap and a list of corresponding gap sizes
 function get_densities_gaps(energy_list::Vector{Float32}, flux::Float32, pn::Int64, NXY::Int64)
 
-    min_gap_size_eV = (energy_list[end] - energy_list[1])/2f2 # minimum gap size to consider significant -- 1% of total plot energy width
+    min_gap_size_eV = (energy_list[end] - energy_list[1])/1f2 # minimum gap size to consider significant -- 1% of total plot energy width
 
     list_big_gaps = Float32[]
     list_densities = Float32[]
@@ -45,7 +45,7 @@ function get_points_distance_sq(p1::Tuple, p2::Tuple)
     d_sq = (p2[1]-p1[1])^2 + (p2[2]-p1[2])^2
     return d_sq
 end
-const PRECISION = 4 # slope and intercept precision
+const PRECISION = 3 # slope and intercept precision
 function get_slope_intercept_tuple(p1::Tuple, p2::Tuple, precision = PRECISION)
     slope = round( (p2[2]-p1[2])/(p2[1]-p1[1]) ; digits = precision)
     intercept = round( p1[2] - slope*p1[1] ; digits = precision)
@@ -72,34 +72,40 @@ function identify_lines(lines_dict::Dict, unique_phis::Vector{Float32}, datapoin
 
             for p2 in points_at_n
                 # initialize with some absurd values
-                # changing to 1 closest point ===============================
-                nearest_p1_dist = 1f6  # List to store the smallest and second smallest distances
-                nearest_p1 = (0f0, 0f0, 0f0, 0f0)  # List to store the corresponding points
+                nearest_p1_dist = [1f6,1f6]  # List to store the smallest and second smallest distances
+                nearest_p1 = [(0f0, 0f0, 0f0, 0f0),(0f0, 0f0, 0f0, 0f0)]  # List to store the corresponding points
             
                 for p1 in points_at_n_prev
                     d_sq = get_points_distance_sq(p1, p2)
             
-                    # update the nearest points based on the current distance
-                    if d_sq < nearest_p1_dist
+                    # update the nearest 2 points based on the current distance
+                    if d_sq < nearest_p1_dist[1]
                         # if d_sq is smaller than the smallest distance
-                        nearest_p1_dist = d_sq
-                        nearest_p1 = p1
+                        nearest_p1_dist[2] = nearest_p1_dist[1]
+                        nearest_p1[2] = nearest_p1[1]
+                        nearest_p1_dist[1] = d_sq
+                        nearest_p1[1] = p1
+                    elseif d_sq < nearest_p1_dist[2]
+                        # if d_sq is smaller than the second smallest distance but larger than the smallest
+                        nearest_p1_dist[2] = d_sq
+                        nearest_p1[2] = p1
                     end
                 end
             
                 # add these points to lines_dict without duplicating points
-                line_key = get_slope_intercept_tuple(nearest_p1, p2) 
-        
-                if haskey(lines_dict, line_key)
-                    # check if p2 is already in the list to avoid duplicates
-                    if !(p2 in lines_dict[line_key])
-                        push!(lines_dict[line_key], p2)
+                for p1 in nearest_p1
+                    line_key = get_slope_intercept_tuple(p1, p2) 
+            
+                    if haskey(lines_dict, line_key)
+                        # check if p2 is already in the list to avoid duplicates
+                        if !(p2 in lines_dict[line_key])
+                            push!(lines_dict[line_key], p2)
+                        end
+                    else
+                        # initialize with both points if line does not exist
+                        lines_dict[line_key] = [p1, p2]
                     end
-                else
-                    # initialize with both points if line does not exist
-                    lines_dict[line_key] = [nearest_p1, p2]
                 end
-                # end of changes  ==============================================
             end
             # update list of points at previous n for the next iteration of n
             points_at_n_prev = points_at_n
