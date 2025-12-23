@@ -1,5 +1,6 @@
 # landau-butterflies
 *Writen in julia 1.12.1+0.x64.linux.gnu*
+
 Code in julia that considers electrons in a cosine periodic potential in a large magnetic field.
 
 ## Running instructions

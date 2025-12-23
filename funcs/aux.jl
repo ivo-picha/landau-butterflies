@@ -47,7 +47,7 @@ function my_parse(args::Vector{String})
             arg_type = Int
             default = 30
         "q"
-            help = "Denominator of flux fraction phi = p/q"
+            help = "Denominator of flux fraction phi = p/q. Replaced by q_max in main_S_q.jl -- maximum denominator."
             arg_type = Int
             default = 120
         "phi_s"
