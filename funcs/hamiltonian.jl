@@ -7,36 +7,6 @@ const e = 1.602176634e-19;      # elementary charge [C]
 const m_e = 9.1093837139e-31;   # electron mass [kg];
 
 
-# define functions which can handle big factorials and powers beyond Int128
-function bigfac(n::Int)
-    if n > 20
-        return factorial(big(n))
-    else
-        return factorial(n)
-    end    
-end
-
-function bigbinomial(n::Int, m::Int)
-        if n > 30
-        return binomial(big(n),big(m))
-    else
-        return binomial(n,m)
-    end    
-end
-
-function bigpw2(n::Int)
-        if n > 30
-        return big(2)^n
-    else
-        return 2^n
-    end    
-end
-
-# define an easier to use laguerre polynomial which can handle big numbers without overflow
-function mylaguerre2big(α::Number, n::Int64, x::Number)
-    return sum([(-1)^k * bigbinomial(n+α,n-k) * big(x)^k /(bigfac(k)) for k=0:n])    
-end
-
 # recursive laguerre that doesn't need large memory allocation
 function laguerre_recursive(α::Number, n::Int64, x::Number)
     if n == 0
@@ -86,12 +56,67 @@ function sqrt_factorial_ratio(n::Int64, m::Int64)
     return r
 end
 
+# LOG SCALE LAGUERRE function
+function log_laguerre_scaled(n::Int, m::Int, x::Number)
+    k = min(n, m)
+    K = max(n, m)
+    d = K - k
+
+    logx = log(x)
+    log_prefactor = (d / 2) * logx
+
+    if k == 0
+        return log_prefactor, 1.0
+    end
+
+    if k == 1
+        val = -x + d + 1
+        return log_prefactor + log(abs(val)), sign(val)
+    end
+
+    # Store (log|L|, sign(L))
+    logLjm2, signLjm2 = 0.0, 1.0          # corresponds to L₀ = 1
+    logLjm1, signLjm1 = log(abs(-x + d + 1)), sign(-x + d + 1)
+
+    for j in 2:k
+        a = (2j - 1 + d - x)
+        b = (j - 1 + d)
+
+        # Compute term1 = a * Ljm1
+        logt1 = log(abs(a)) + logLjm1
+        signt1 = sign(a) * signLjm1
+
+        # Compute term2 = b * Ljm2
+        logt2 = log(b) + logLjm2
+        signt2 = signLjm2
+
+        # term = term1 - term2
+        if logt1 > logt2
+            logLj = logt1 + log1p(-signt2 * signt1 * exp(logt2 - logt1))
+            signLj = signt1
+        else
+            logLj = logt2 + log1p(-signt1 * signt2 * exp(logt1 - logt2))
+            signLj = -signt2
+        end
+
+        # divide by j
+        logLj -= log(j)
+
+        logLjm2, signLjm2 = logLjm1, signLjm1
+        logLjm1, signLjm1 = logLj, signLj
+    end
+
+    return log_prefactor + logLjm1, signLjm1
+end
+
+
 # matrix elements (Θ in overleaf)
 #T(n::Int64, m::Int64, phi::Float32) = Float32(exp(-Float32(π)/(Float32(2.0)*phi)) * sqrt(bigfac(min(n,m))/bigfac(max(n,m))) * (Float32(π)/phi)^(abs(n-m)/2) * mylaguerre2big(abs(n-m),min(n,m),Float32(π)/phi))
 function T(n::Int64, m::Int64, phi::Float32)
     tt = exp(-Float32(π)/(Float32(2.0)*phi))
     tt *= sqrt_factorial_ratio(n,m)
-    tt *= laguerre_scaled(n, m, Float32(π)/phi)
+    lls = log_laguerre_scaled(n, m, Float32(π)/phi)
+    tt *= exp(lls[1]) * lls[2]
     return Float32(tt)
 end
 

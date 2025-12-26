@@ -26,4 +26,43 @@ using Plots
 
 [Hamil.T(q-1,q-1,Float32.(1/q))-Hamil.T(q,q,Float32.(1/q)) for q in 1:10]
 
-Float32(π)^(70)
+# laguerre with the pi/phi ^ n-m/2 factor in the recursion
+function laguerre_scaled(n::Int64, m::Int64, x::Number)
+    k = min(n,m)
+    K = max(n,m)
+    d = K - k
+    if k == 0
+        return x^(d/2)
+    elseif k == 1
+        return (-x + d + 1) * x^(d/2)
+    else
+        Ljm2 = x^(d/2)
+        Ljm1 = (-x + d + 1) * x^(d/2)
+        Lj = 0.0
+        for j in 2:k
+            Lj = ((2j - 1 + d - x) * Ljm1 - (j - 1 + d) * Ljm2) / j
+            Ljm2 = Ljm1
+            Ljm1 = Lj
+        end
+        return Lj
+    end
+end
+
+function sqrt_factorial_ratio(n::Int64, m::Int64)
+    r = 1.0
+    for k in (min(n,m)+1):max(n,m)
+        r /= sqrt(k)
+    end
+    return r
+end
+
+# matrix elements (Θ in overleaf)
+#T(n::Int64, m::Int64, phi::Float32) = Float32(exp(-Float32(π)/(Float32(2.0)*phi)) * sqrt(bigfac(min(n,m))/bigfac(max(n,m))) * (Float32(π)/phi)^(abs(n-m)/2) * mylaguerre2big(abs(n-m),min(n,m),Float32(π)/phi))
+function T(n::Int64, m::Int64, phi::Float32)
+    tt = exp(-Float32(π)/(Float32(2.0)*phi))
+    tt *= sqrt_factorial_ratio(n,m)
+    tt *= laguerre_scaled(n, m, Float32(π)/phi)
+    return Float32(tt)
+end
+
+T(20,300,1f0)
