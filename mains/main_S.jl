@@ -12,7 +12,7 @@ args = ["0.03", "5", "10", "60", "0.25", "2", "-p", "-w", "-l"]; # for visual st
 
 # -OUTPUT FOLDER!-
 outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-outfolder = "/users/ivoga/lh/out" # cluster path
+#outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
@@ -158,7 +158,3 @@ if plotQ
     # save spectrum plot
     savefig(plot_spectrum, joinpath(outfolder_plots, string("spectrum_",param_str,".png")))
 end
-
-
-
-(Hamil.E_LL(1,1f0,5f-9) - Hamil.E_LL(0,1f0,5f-9))*exp(π/2)/(2π)

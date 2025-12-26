@@ -25,3 +25,5 @@ using Plots
 
 
 [Hamil.T(q-1,q-1,Float32.(1/q))-Hamil.T(q,q,Float32.(1/q)) for q in 1:10]
+
+Float32(π)^(70)

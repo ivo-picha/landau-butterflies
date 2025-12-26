@@ -6,12 +6,12 @@
 
 # using 32-bit floats for memory efficiency and faster diagonalization
 
-#args = ARGS;
-args = ["0.01", "5", "4"]; # for visual studio code testing 
+args = ARGS;
+#args = ["0.01", "5", "4"]; # for visual studio code testing 
 
 # -OUTPUT FOLDER!-
-outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-#outfolder = "/users/ivoga/lh/out" # cluster path
+#outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
@@ -62,7 +62,7 @@ println("\nCalculating spectrum over flux range using $nthreads thread(s) for pa
     X_list = Y_list.*Float32(qn)
 
     #get maximum Landau level index to use
-    NLL = Int64(clamp(10*qn, 0,300))
+    NLL = Int64(clamp(10*qn, 0,500))
 
     for X in X_list
         for Y in Y_list
@@ -83,7 +83,7 @@ E_list = E_list[sorted_indices]
 
 #PLOTTING ==============================================================
 spectrum_bare_options = (
-    markersize = 3,
+    markersize = 2,
     color = :black,
     label = "",
     xlabel = "q",

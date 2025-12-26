@@ -9,7 +9,7 @@ ip = collect(Base.product(list_U0, list_a, list_q))
 param_list_tuple = reshape(ip, :)
 param_list_str = replace.(string.(param_list_tuple), "(" => "[", ")" => "]")
 
-n_cpus = 2 #number of cpus per job
+n_cpus = 1 #number of cpus per job
 
 folder_path = "/users/ivoga/lh/jobs"
 output_msgs_path = "/users/ivoga/lh/msgs"
