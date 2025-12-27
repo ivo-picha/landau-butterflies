@@ -56,6 +56,14 @@ function sqrt_factorial_ratio(n::Int64, m::Int64)
     return r
 end
 
+function log_sqrt_factorial_ratio(n::Int64, m::Int64)
+    lr = 0.0
+    for k in (min(n,m)+1):max(n,m)
+        lr -= log(sqrt(k))
+    end
+    return lr
+end
+
 # LOG SCALE LAGUERRE function
 function log_laguerre_scaled(n::Int, m::Int, x::Number)
     k = min(n, m)
@@ -114,9 +122,9 @@ end
 #T(n::Int64, m::Int64, phi::Float32) = Float32(exp(-Float32(π)/(Float32(2.0)*phi)) * sqrt(bigfac(min(n,m))/bigfac(max(n,m))) * (Float32(π)/phi)^(abs(n-m)/2) * mylaguerre2big(abs(n-m),min(n,m),Float32(π)/phi))
 function T(n::Int64, m::Int64, phi::Float32)
     tt = exp(-Float32(π)/(Float32(2.0)*phi))
-    tt *= sqrt_factorial_ratio(n,m)
     lls = log_laguerre_scaled(n, m, Float32(π)/phi)
-    tt *= exp(lls[1]) * lls[2]
+    exparg = lls[1] + log_sqrt_factorial_ratio(n,m)
+    tt *= exp(exparg) * lls[2]
     return Float32(tt)
 end
 
