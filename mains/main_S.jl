@@ -8,7 +8,7 @@
 # using 32-bit floats for memory efficiency and faster diagonalization
 
 #args = ARGS;
-args = ["0.03", "5", "10", "60", "0.25", "2", "-p", "-w", "-l"]; # for visual studio code testing # "--XBF", "2"
+args = ["0.000001", "4", "4", "480", "0.01", "1", "-p", "-w"]; # for visual studio code testing # "--XBF", "2"
 
 # -OUTPUT FOLDER!-
 outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"

@@ -91,8 +91,8 @@ function gradient_color_plasma(value::Int, max_value::Int) # thanks chatGPT, not
     if standardized_value == 0
         color = colorant"green"
     else
-        normalized_value = (1 + standardized_value)/2
-        color = get(ColorSchemes.hsv, normalized_value)
+        normalized_value = (1 - standardized_value)/2
+        color = ColorSchemes.get(ColorSchemes.balance, normalized_value)
     end
     
     # Return the color as an RGB tuple
@@ -185,7 +185,7 @@ function color_gaps_eq2!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phi
     # min distance under which lists of points aren't broken in sublists
     phi_spacing = round(unique_phis[2] - unique_phis[1]; digits = 4)
     # set a limit of Chern numbers to be colored
-    max_colored_chern = clamp(Int(NLL)+3, 5, 10)
+    max_colored_chern = 5 #clamp(Int(NLL)+3, 5, 10)
 
     for (line_key, points) in lines_dict
         if length(points) > min_line_points
