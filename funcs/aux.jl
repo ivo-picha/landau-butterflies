@@ -158,8 +158,15 @@ function cut_spectrum(XLL,XBF,num_fluxes,phi_list,qn_list,NLL_list,NXY_list,Elis
         for j in 1:num_fluxes
             qn = qn_list[j]
             pn = Int64(round(qn*phi_list[j]))
-            if pn < (NLL_list[j]+1) # cant request more LLs than available at this flux
-                E_out[j] = Elist[j][1:XLL*pn*NXY_list[j]^2]
+            # determine how many LLs are actually available at this flux
+            available_LL = min(XLL, NLL_list[j] + 1)
+            # compute target number of states, guard against out-of-bounds
+            if pn <= 0 || isempty(Elist[j])
+                E_out[j] = Float32[]
+            else
+                desired = Int(available_LL * pn * NXY_list[j]^2)
+                desired = clamp(desired, 0, length(Elist[j]))
+                E_out[j] = Elist[j][1:desired]
             end
         end
     elseif XLL == 0 && XBF != 0
@@ -167,7 +174,13 @@ function cut_spectrum(XLL,XBF,num_fluxes,phi_list,qn_list,NLL_list,NXY_list,Elis
         for j in 1:num_fluxes
             qn = qn_list[j]
             pn = Int64(round(qn*phi_list[j]))
-            E_out[j] = Elist[j][1:Int(min(XBF*qn,pn*(NLL_list[j]+1))*NXY_list[j]^2)]
+            if isempty(Elist[j]) || pn <= 0
+                E_out[j] = Float32[]
+            else
+                desired = Int(min(XBF*qn, pn*(NLL_list[j]+1)) * NXY_list[j]^2)
+                desired = clamp(desired, 0, length(Elist[j]))
+                E_out[j] = Elist[j][1:desired]
+            end
         end
     elseif XLL != 0 && XBF != 0
         println("Cutting spectrum to specified LLs above phi=1 and butterflies below...\n")
@@ -176,7 +189,12 @@ function cut_spectrum(XLL,XBF,num_fluxes,phi_list,qn_list,NLL_list,NXY_list,Elis
             pn = Int64(round(qn*phi_list[j]))
             cutoff = phi_list[j]<1 ? qn : pn # take qn below phi=1 and pn above
             larger = Int(max(min(XLL,(NLL_list[j]+1)), XBF))
-            E_out[j] = Elist[j][1:larger*cutoff*NXY_list[j]^2]
+            if isempty(Elist[j]) || cutoff <= 0
+                E_out[j] = Float32[]
+            else
+                desired = clamp(larger * cutoff * NXY_list[j]^2, 0, length(Elist[j]))
+                E_out[j] = Elist[j][1:desired]
+            end
         end
     else
         for j in 1:num_fluxes
