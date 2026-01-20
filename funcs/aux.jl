@@ -143,7 +143,7 @@ end
 function get_NLL_at_flux(LLmax::Int64, phi_s::Float32, phi::Float32, LLmin::Int64=Int64(10))
     NLL = LLmin
     Emax = (LLmax + Float32(0.5)) * phi_s # dimensionless max energy at starting flux
-    while (NLL + Float32(0.5)) * phi * 0.9 < Emax && NLL < LLmax
+    while (NLL + Float32(0.5)) * phi < Emax && NLL < LLmax
         NLL += 1
     end
     return NLL

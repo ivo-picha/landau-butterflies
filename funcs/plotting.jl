@@ -185,7 +185,7 @@ function color_gaps_eq2!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phi
     # min distance under which lists of points aren't broken in sublists
     phi_spacing = round(unique_phis[2] - unique_phis[1]; digits = 4)
     # set a limit of Chern numbers to be colored
-    max_colored_chern = 5 #clamp(Int(NLL)+3, 5, 10)
+    max_colored_chern = 6 #clamp(Int(NLL)+3, 5, 10)
 
     for (line_key, points) in lines_dict
         if length(points) > min_line_points
@@ -219,7 +219,7 @@ function color_gaps_eq2!(plot_spectrum::Plots.Plot, lines_dict::Dict, unique_phi
                     
                     if (phi2-phi1 < 2f0*phi_spacing) && (gu2>gl1) && (gl2<gu1) && (abs(gu2-gu1)<en_spacing) && (abs(gl2-gl1)<en_spacing)
                         Plots.plot!(plot_spectrum, [phi1-0.0001,phi2+0.0001], [gl1,gl2], fillrange = [gu1,gu2],
-                        color = gradient_color_plasma(Int(chern), max_colored_chern), fillalpha = 0.8, lw = 0, label = "")
+                        color = gradient_color_plasma(Int(chern), max_colored_chern), fillalpha = 0.7, lw = 0, label = "")
                     end
                 end
             end
