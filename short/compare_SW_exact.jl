@@ -1,3 +1,5 @@
+# compare exact Hofstadter bands with Schrieffer-Wolff approximation
+
 include(joinpath(dirname(@__DIR__),"funcs/hamiltonian.jl"))
 using .Hamil                        # build a Hamiltonian matrix in a Landau level basis
 using Plots

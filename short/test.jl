@@ -24,3 +24,13 @@ include(joinpath(dirname(@__DIR__),"funcs/hamiltonian.jl"))
 using .Hamil 
 using LinearAlgebra
 eigvals(Hamil.get_full_ham(0.1f0, 0f0, 0f0, 0.01f0, 5f-9, 1, 1500))
+
+
+
+n(idx,p) = fld(idx, p)
+m(idx,p) = idx%p
+
+pp = 5
+for idx in 1:(pp*3)
+    println("idx=$idx -> n=$(n(idx,pp)), m=$(m(idx,pp))")
+end
