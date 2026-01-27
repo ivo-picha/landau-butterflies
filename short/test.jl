@@ -34,3 +34,29 @@ pp = 5
 for idx in 1:(pp*3)
     println("idx=$idx -> n=$(n(idx,pp)), m=$(m(idx,pp))")
 end
+
+
+
+# visualizing eigenstates
+
+# wf_real = real.(wf)
+# wf_imag = imag.(wf)
+# wf_abs2 = abs2.(wf)
+# wf_arg = angle.(wf)
+
+# wf_real ./= (norm/a^2) # make dimensionless by dividing by a^2
+# wf_imag ./= (norm/a^2)
+# wf_abs2 ./= (norm/a^2)
+# wfr_grid = reshape(wf_real, (Ngrid, Ngrid))
+# wfi_grid = reshape(wf_imag, (Ngrid, Ngrid))
+# wfa_grid = reshape(wf_abs2, (Ngrid, Ngrid))
+
+## plot wavefunction components
+# plt_r = heatmap(xplotrange./a, yplotrange./a, wfr_grid', xlabel="x/a", ylabel="y/a", title="Re(ψ)", aspect_ratio=1, size=(500,500), legend = false)
+# plt_i = heatmap(xplotrange./a, yplotrange./a, wfi_grid', xlabel="x/a", ylabel="y/a", title="Im(ψ)", aspect_ratio=1, size=(500,500), legend = false)
+# plt_a = heatmap(xplotrange./a, yplotrange./a, sqrt.(wfa_grid)', xlabel="x/a", ylabel="y/a", title="|ψ|", aspect_ratio=1, size=(500,500), legend = false)
+# plt_th = heatmap(xplotrange./a, yplotrange./a, reshape(angle.(wf), (Ngrid, Ngrid))', xlabel="x/a", ylabel="y/a", title="arg(ψ)", aspect_ratio=1, size=(500,500), legend = false)
+# plt_combo = plot(plt_r, plt_i, plt_a, plt_th, layout = grid(2, 2, hgap = 2mm, vgap = 2mm),
+#     aspect_ratio = 1,
+#     size = (800,800),
+#     margin = 1mm, plot_title="ϕ=$(p)/$(q), U0=$(U0) eV, state #$(ss)")
