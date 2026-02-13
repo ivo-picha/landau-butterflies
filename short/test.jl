@@ -60,3 +60,16 @@ end
 #     aspect_ratio = 1,
 #     size = (800,800),
 #     margin = 1mm, plot_title="ϕ=$(p)/$(q), U0=$(U0) eV, state #$(ss)")
+
+
+##
+U0 = 0.05
+a = 5e-9
+e = 1.60217662e-19
+m_e = 9.10938356e-31
+h = 6.62607015e-34
+phi = 1.0
+
+fh = sqrt(4f0 * Float32(π^2) * U0 * e / (m_e * a^2)) # harmonic frequency squared
+fc = phi * h / (4f0 * m_e * a^2)
+

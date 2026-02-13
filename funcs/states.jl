@@ -82,6 +82,21 @@ function gaussian(x::Float32,y::Float32,X::Float32,Y::Float32,σ::Float32)
     return exp(-((x-X)^2 + (y-Y)^2)/(2*σ^2))
 end
 
+# Landau gauge ground state of harmonic + magnetic; adds phase Bxy
+function gaussian_LG(x::Float32,y::Float32,X::Float32,Y::Float32, phi::Float32, U0::Float32, a::Float32)
+    phi = Float64(phi)
+    U0 = Float64(U0)
+    a = Float64(a)
+    h = 6.62607015e-34;  # Planck constant [J s]
+    e = 1.602176634e-19;      # elementary charge [C]
+    m_e = 9.1093837139e-31;   # electron mass [kg]
+    # gaussian trial orbital wavefunction for wannierization
+    ωhsq = 4.0 * π^2 * abs(U0) * e / (m_e * a^2) # harmonic frequency squared
+    ωcsq4 = phi^2 * h^2 / (16.0 * m_e^2 * a^4)
+    σsq = h / (2π * m_e * sqrt(ωhsq + ωcsq4))
+    return exp(-((x-X)^2 + (y-Y)^2)/(2*σsq)) * exp(-im*Float32(π)*phi*x*y/(a^2))
+end
+
 
 # calculate wannier function at (x,y) and centre R
 function get_wannier_array(q::Int, Rx::Float32, Ry::Float32, loewdin_array::Array{ComplexF32,4}, X_list::Vector{Float32}, Y_list::Vector{Float32})
@@ -91,13 +106,14 @@ function get_wannier_array(q::Int, Rx::Float32, Ry::Float32, loewdin_array::Arra
             ws = 0f0 + im*0f0
             for (Xidx,X) in enumerate(X_list)
                 for (Yidx,Y) in enumerate(Y_list)
-                    ws += loewdin_array[i,j,Xidx,Yidx] * exp(-im*(X*Ry + Y*Rx)/q)
+                    ws += loewdin_array[i,j,Xidx,Yidx] * exp(im*(-X*Ry + Y*Rx)/q)
                 end
             end
             wannier_array[i,j] = ws / (length(X_list)*length(Y_list))
         end
     end
-    return wannier_array # still needs normalization a^2/(2pi)^2 or similar
+    norm = sum(abs.(wannier_array))
+    return wannier_array ./ norm # still needs normalization a^2/(2pi)^2 or similar
 end
 
 
@@ -122,9 +138,9 @@ function plot_wannier(wannier_array::Array{ComplexF32,2}, xplotrange::Vector{Flo
 end
 
 
-function get_derivative_x(array::Array{ComplexF32,2}, dx::Number)::Array{ComplexF32,2}
+function get_derivative_x(array::Array{ComplexF64,2}, dx::Number)::Array{ComplexF64,2}
     Ngridx, Ngridy = size(array)
-    deriv_array = Array{ComplexF32}(undef, Ngridx, Ngridy)
+    deriv_array = Array{ComplexF64}(undef, Ngridx, Ngridy)
     for j in 1:Ngridy
         for i in 1:Ngridx
             if i == 1
@@ -139,9 +155,9 @@ function get_derivative_x(array::Array{ComplexF32,2}, dx::Number)::Array{Complex
     return deriv_array
 end
 
-function get_derivative_y(array::Array{ComplexF32,2}, dy::Number)::Array{ComplexF32,2}
+function get_derivative_y(array::Array{ComplexF64,2}, dy::Number)::Array{ComplexF64,2}
     Ngridx, Ngridy = size(array)
-    deriv_array = Array{ComplexF32}(undef, Ngridx, Ngridy)
+    deriv_array = Array{ComplexF64}(undef, Ngridx, Ngridy)
     for i in 1:Ngridx
         for j in 1:Ngridy
             if j == 1
@@ -161,6 +177,14 @@ end
 # eB/ħ = ϕ /(2π a^2)
 function H_on_wannier(wannier_array::Array{ComplexF32,2}, xrange::Vector{Float32}, yrange::Vector{Float32}, phi::Float32, U0::Float32, a::Float32)::Array{ComplexF32}
     
+    # work in 64 bit precision
+    phi = Float64(phi)
+    U0 = Float64(U0)
+    a = Float64(a)
+    xrange = Float64.(xrange)
+    yrange = Float64.(yrange)
+    wannier_array = ComplexF64.(wannier_array)
+
     ħ = 6.62607015e-34/(2π);  # Planck constant [J s]
     e = 1.602176634e-19;      # elementary charge [C]
     m_e = 9.1093837139e-31;   # electron mass [kg]
@@ -170,7 +194,7 @@ function H_on_wannier(wannier_array::Array{ComplexF32,2}, xrange::Vector{Float32
     Ngridx, Ngridy = size(wannier_array)
 
     # init empty array; add term by term, then multiply
-    h_wannier = zeros(ComplexF32, Ngridx, Ngridy)
+    h_wannier = zeros(ComplexF64, Ngridx, Ngridy)
 
     #derivatives
     wdx = get_derivative_x(wannier_array, dx)
@@ -179,14 +203,14 @@ function H_on_wannier(wannier_array::Array{ComplexF32,2}, xrange::Vector{Float32
     wdy2 = get_derivative_y(wdy, dy)
 
     # arrays of x values
-    x_array = Array{Float32}(undef, Ngridx, Ngridy)
+    x_array = Array{Float64}(undef, Ngridx, Ngridy)
     for i = 1:Ngridx
         for j = 1:Ngridy
             x_array[i,j] = xrange[i]
         end
     end
 
-    y_array = Array{Float32}(undef, Ngridx, Ngridy)
+    y_array = Array{Float64}(undef, Ngridx, Ngridy)
     for i = 1:Ngridx
         for j = 1:Ngridy
             y_array[i,j] = yrange[j]
@@ -197,24 +221,25 @@ function H_on_wannier(wannier_array::Array{ComplexF32,2}, xrange::Vector{Float32
     x2_array = x_array.^2
 
     # eB/ħ
-    ebh = Float32(phi / (2π * a^2))
+    ebh = Float32(2π * phi / (a^2)) # 2pi up or down?
 
-    h_wannier += -1f0.*wdx2
-    h_wannier += -1f0.*wdy2
-    h_wannier += 2f0*im*ebh.* (x_array .* wdy)
+    h_wannier += -1.0.*wdx2
+    h_wannier += -1.0.*wdy2
+    h_wannier += 2.0*im*ebh.* (x_array .* wdy)
     h_wannier += ebh^2 .* (x2_array .* wannier_array)
-    h_wannier *= Float32(ħ^2 /(2 * m_e * e)) # divide by e to get energy in eV
+    h_wannier *= ħ^2 /(2 * m_e)
+    h_wannier ./= e # divide by e to get energy in eV
 
     # add potential term
-    pot = cos.(x_array.*Float32(2π/a)) 
-    pot += cos.(y_array.*Float32(2π/a))
-    pot = ComplexF32.(pot)
+    pot = cos.(x_array.*Float64(2π/a)) 
+    pot += cos.(y_array.*Float64(2π/a))
+    pot = ComplexF64.(pot)
     pot .*= wannier_array
     pot *= U0
 
     h_wannier += pot
 
-    return h_wannier
+    return h_wannier 
 end
 
 

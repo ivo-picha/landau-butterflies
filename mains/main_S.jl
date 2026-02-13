@@ -7,12 +7,12 @@
 
 # using 32-bit floats for memory efficiency and faster diagonalization
 
-args = ARGS;
-#args = ["0.008", "5", "10", "120", "0.01", "1", "-p", "-w", "--XBF", "4"]; # for visual studio code testing # "--XBF", "2"
+#args = ARGS;
+args = ["0.01", "5", "0", "360", "0.01", "1", "-p"]; # for visual studio code testing # "--XBF", "2"
 
 # -OUTPUT FOLDER!-
-#outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-outfolder = "/users/ivoga/lh/out" # cluster path
+outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+#outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
