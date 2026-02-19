@@ -13,7 +13,7 @@ using .Hamil                        # build a Hamiltonian matrix in a Landau lev
 include(joinpath(dirname(@__DIR__),"funcs/states.jl"))
 using .States                        # build a Hamiltonian matrix in a Landau level basis
 
-p = 1
+p = 2
 q = 1 # don't change
 a_nm = 5.0 # lattice constant in nm
 NXY = 256 # number of k-points in each direction
@@ -56,7 +56,7 @@ for state in states
 end
 
 # compute and plot density in one magnetic unit cell for a given state
-Ngrid = 200
+Ngrid = 128
 xplotrange = range(-1.5*a*q, 1.5*a*q, Ngrid)
 yplotrange = range(-1.5*a, 1.5*a, Ngrid)
 dx = step(xplotrange)
@@ -120,11 +120,11 @@ println("Calculating Wannier functions...")
 Rx_list = Float32.(collect(-1q:1:1q))
 Ry_list = Float32.(collect(-1:1:1))
 Rxy_list = reshape(collect(Base.product(Rx_list, Ry_list)),:)
-wannier_vector = Array{Matrix{ComplexF32}}(undef, length(Rxy_list))
+wannier_vector = Matrix{ComplexF32}[];
 # hwannier_vector = Matrix{ComplexF32}[]
-@showprogress @threads for (j,(Rx, Ry)) in enumerate(Rxy_list)
+@showprogress for (j,(Rx, Ry)) in enumerate(Rxy_list)
     wannier_array = States.get_wannier_array(q, Rx, Ry, wf_array, X_list, Y_list)
-    wannier_vector[j] = wannier_array .* sqrt(dx * dy) # cleaning up normalization
+    push!(wannier_vector, wannier_array ./ sqrt(dx * dy)) # cleaning up normalization
 end
 
 wf_array = nothing # free memory
@@ -222,15 +222,25 @@ whw_matrix00, t_ft_matrix00 = get_wHw_matrix((0f0,0f0))
 whw_matrix10, t_ft_matrix10 = get_wHw_matrix((1f0,0f0))
 whw_matrix01, t_ft_matrix01 = get_wHw_matrix((0f0,1f0)) 
 
-
+whw_tx_rescaled = whw_matrix00[3,2] * t_ft_matrix00[2,2] / whw_matrix00[2,2]
+whw_ty_rescaled = whw_matrix00[2,3] * t_ft_matrix00[2,2] / whw_matrix00[2,2]
 # save matrices as one text file in folder
 whw_matrices_path = joinpath(output_folder, "whw_and_ft_matrices.txt")
 
 matrices = transpose.([whw_matrix00, t_ft_matrix00, whw_matrix10, t_ft_matrix10, whw_matrix01, t_ft_matrix01])
 descriptions = [
     "^\n|\ny\nx-->\n\n Center at (0,0)\nFrom overlap <wᵣ|H|w₀,₀>\n",
-    "From energy FT:\n",
-    "\n\nCenter at (1,0)\nFrom overlap <wᵣ|H|w₁,₀>\n",
+    "Rescaled tₓ: $whw_tx_rescaled\nRescaled t_y: $whw_ty_rescaled\nFrom energy FT:\n",
+    "\n\nCenter at (1,0)\nFrom overlap <wᵣ|H|w₁,₀>t_ft_matrix = zeros(ComplexF32, length(Rx_list), length(Ry_list))
+    for (i,(Rxi,Ryi)) in enumerate(Rxy_list)
+        tR = 0f0 + im*0f0
+        for (i,(X,Y)) in enumerate(XYs)
+            tR += energies[i] * exp(-im*(X*(Ryi-wR[2]) - Y*(Rxi-wR[1]))/q)
+        end
+        n = findfirst(x -> x == Rxi, Rx_list)
+        m = findfirst(x -> x == Ryi, Ry_list)
+        t_ft_matrix[n,m] = tR * q / NXY^2
+    end\n",
     "From energy FT:\n",
     "\n\nCenter at (0,1)\nFrom overlap <wᵣ|H|w₀,₁>\n",
     "From energy FT:\n",
@@ -268,3 +278,4 @@ open(whw_matrices_path, "w") do io
 end
 println("Saved whw and tR from FT matrices to $whw_matrices_path")
 
+## 

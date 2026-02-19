@@ -57,9 +57,27 @@ function basis_state(x::Float32,y::Float32,n::Int,m::Int,X::Number,Y::Number,p::
 end
 
 
-# get the full eigenstate wavefunction at (x,y) given the eigenvector in LL basis
+# get the full eigenstate wavefunction at (x,y) given the eigenvector in LL basis; for phi 1 use
 function get_eigenstate(x::Float32, y::Float32, state::Tuple{Float32, Vector{ComplexF32}, Float32, Float32}, p::Int, q::Int, a::Number, LLmax::Int)::ComplexF32
     en, evec, X, Y = state
+    n_states = length(evec)
+    n_LL = LLmax + 1
+    if n_LL*p != n_states
+        error("Number of states in eigenvector does not match number of Landau levels times p.")
+    end
+    psi = 0f0 + im*0f0
+    for idx in 0:n_states-1
+        n = fld(idx, p)
+        m = idx%p
+        bs = basis_state(x, y, n, m, X, Y, p, q, a)
+        psi += evec[idx+1]*bs
+    end
+    return psi
+end
+
+# get the full eigenstate wavefunction at (x,y) given the eigenvector in LL basis; for general use
+function get_eigenstate_XY(x::Float32, y::Float32, state::Tuple{Float32, Vector{ComplexF32}}, X::Float32, Y::Float32, p::Int, q::Int, a::Number, LLmax::Int)::ComplexF32
+    en, evec = state
     n_states = length(evec)
     n_LL = LLmax + 1
     if n_LL*p != n_states
