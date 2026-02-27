@@ -17,8 +17,8 @@ p = 1
 q = 2 
 U0 = -0.05f0 # keep negative (energy minimum at origin)
 a_nm = 5.0 # lattice constant in nm
-NXY = 256 # number of k-points in each direction
-LLmax = q*25
+NXY = 32 # number of k-points in each direction
+LLmax = 25
 
 a = Float32(a_nm*1f-9) # in m
 phi = Float32(p/q)
@@ -32,11 +32,10 @@ XY_list = reshape(collect(Base.product(X_list, Y_list)),:)
 output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out/ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY"
 # cluster path
 #output_folder = "/users/ivoga/lh/out/wannier_out/ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY"
-mkpath(output_folder)
 
 
 # real space grid
-Ngrid = 100
+Ngrid = 50
 x_grid = Float32.(collect(range(-a*(q+0.5), a*(q+0.5), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-1.5*a, 1.5*a, length = Ngrid)))
 
@@ -45,6 +44,7 @@ println("Generating trial wavefunctions...")
 g_array = Array{ComplexF32}(undef, Ngrid*q, Ngrid, q)
 normg = 0f0
 for m in 1:q
+    global normg
     for (i,x) in enumerate(x_grid)
         for (j,y) in enumerate(y_grid)
             g_xy = States.gaussian_LG(x,y,Float32(m-1)*a,0f0*a,phi,U0,a)
@@ -52,7 +52,6 @@ for m in 1:q
             normg += abs2(g_xy)
         end
     end
-    global normg
     normg *= (x_grid[2] - x_grid[1])*(y_grid[2] - y_grid[1])
     normg = sqrt(normg)
     g_array[:,:,m] ./= normg
@@ -83,8 +82,8 @@ println("Calculating eigenstates for U0 = $(abs(U0)) at ϕ = $p/$q...")
 
         # array to store wavefunctions
         wf_array = Array{ComplexF32}(undef, Ngrid*q, Ngrid, q)
-        norm = 0f0
         for m in 1:q
+            norm = 0f0
             for (i,x) in enumerate(x_grid)
                 for (j,y) in enumerate(y_grid)
                     wf_xy = States.get_eigenstate_XY(x,y,states[m],X,Y,p,q,a,LLmax)
@@ -160,6 +159,7 @@ wR_list = [(Float32(i), 0f0) for i = 0:(q-1)]
 nR_list = collect(1:q)
 
 # output
+mkpath(output_folder)
 out_path = joinpath(output_folder, "whw_and_ft_matrices.txt")
 open(out_path, "w") do io
     write(io, "Matrices for hopping amplitudes and chemical potentials on/to different sites.\n")
