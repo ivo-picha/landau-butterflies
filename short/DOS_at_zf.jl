@@ -19,7 +19,7 @@ const ħ = 6.62607015f-34/(2π);  # Planck constant [J s]
 const e = 1.602176634f-19;      # elementary charge [C]
 const m_e = 9.1093837139f-31   # electron mass [kg];
 
-U0 = 0.05f0 # potential strenght in eV
+U0 = 0.0106f0 # potential strenght in eV
 a = 5f-9; # lattice constant
 m = m_e; # electron/particle mass
 
@@ -27,8 +27,8 @@ G = Float32(2π/a) # recip scat vec
 # nu = 1.0; # filling
 # EF = (ħ^2 /e)* 2π*(nu/a^2)/(2*m) 
 
-Nk = 100; # sqrt of number of momentum states in BZ
-NBZ = 5; # number of BZs in each dimension / 2
+Nk = 200; # sqrt of number of momentum states in BZ
+NBZ = 6; # number of BZs in each dimension / 2
 
 BZ_centers = reshape(collect(Base.product(G.*(-NBZ:NBZ), G.*(-NBZ:NBZ))), :)
 BZ_kpoints = reshape(collect(Base.product(range(-G/2,G/2,Nk), range(-G/2,G/2,Nk))), :)
@@ -77,14 +77,16 @@ ktots = Float64[];
 end
 
 sort!(energies)
+energies = unique(energies) # remove duplicates from different k-points
+energies = energies[1:Int(round(length(energies)/(1.5*NBZ^2)))] # focus on low-energy part of spectrum
+# gaps = diff(energies)
+# gappos = findfirst(x-> x>U0/2, gaps)
+# energies[gappos-1]
+# energies_LB = energies[1:gappos]
 
-gaps = diff(energies)
-gappos = findfirst(x-> x>U0/2, gaps)
-energies[gappos-1]
-energies_LB = energies[1:gappos]
-
-eta = (maximum(energies_LB)-minimum(energies_LB))/100         # broadening for DOS [eV]
-kd = kde(energies_LB, bandwidth = eta)
+# changes for full DOS
+eta = (maximum(energies)-minimum(energies))/300         # broadening for DOS [eV]
+kd = kde(energies, bandwidth = eta)
 
 # PLOTTING AND OUTPUT ====================================================
 plt = plot(
@@ -104,6 +106,6 @@ plt = plot(
 png_filename = joinpath(outfolder_plots, "ZFDOS_U0=$(U0)_a=$(a*1f9).png")
 savefig(plt, png_filename)
 
-# save data
+#save data
 data_filename = joinpath(outfolder_data, "ZFDOS_U0=$(U0)_a=$(a*1f9).npy")
 npzwrite(data_filename, energies_LB)

@@ -13,12 +13,12 @@ using .Hamil                        # build a Hamiltonian matrix in a Landau lev
 include(joinpath(dirname(@__DIR__),"funcs/states.jl"))
 using .States                        # build a Hamiltonian matrix in a Landau level basis
 
-p = 1
+p = 3
 q = 2 
 U0 = -0.05f0 # keep negative (energy minimum at origin)
 a_nm = 5.0 # lattice constant in nm
-NXY = 32 # number of k-points in each direction
-LLmax = 25
+NXY = 30 # number of k-points in each direction
+LLmax = 15
 
 a = Float32(a_nm*1f-9) # in m
 phi = Float32(p/q)
@@ -29,13 +29,13 @@ Y_list = collect(range(0f0, Float32(2π), length = NXY+1))[1:end-1]
 XY_list = reshape(collect(Base.product(X_list, Y_list)),:)
 
 #output folder
-output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out/ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY"
+output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out"
 # cluster path
 #output_folder = "/users/ivoga/lh/out/wannier_out/ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY"
 
 
 # real space grid
-Ngrid = 50
+Ngrid = 40
 x_grid = Float32.(collect(range(-a*(q+0.5), a*(q+0.5), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-1.5*a, 1.5*a, length = Ngrid)))
 
@@ -59,7 +59,7 @@ end
 
 # loop over XY
 C_array = Array{ComplexF32}(undef, q, q, NXY, NXY)
-println("Calculating eigenstates for U0 = $(abs(U0)) at ϕ = $p/$q...")
+println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
 
 @showprogress @threads for i = 1:NXY
     X = X_list[i]
@@ -105,20 +105,35 @@ println("Calculating eigenstates for U0 = $(abs(U0)) at ϕ = $p/$q...")
             end
         end
 
+        #test
+        # svds = svdvals(Amat)
+        # if any(svds .< 1e-3)
+        #     println("Warning: SVD values of A matrix are near zero at X=$X, Y=$Y")
+        # end
+
         # overlap matrix S = A†.A
         Smat = Hermitian(Amat' * Amat)
         Smat_inv_sqrt = inv(sqrt(Smat))
-        ASinv_sqrt = Amat * Smat_inv_sqrt
-        Cmat = ASinv_sqrt' * diagm(energies) * ASinv_sqrt
+        Umat = Amat * Smat_inv_sqrt
+        Cmat = Umat' * diagm(energies) * Umat
+
+        #test
+        # Ucheck = norm(Umat'*Umat - I)
+        # if Ucheck > 1e-4
+        #     println("Warning: U matrix is not unitary at X=$X, Y=$Y, norm: $Ucheck")
+        # end
+
 
         C_array[:,:,i,j] = Cmat
     end
 end
 
+
+
 # wR: Wannier centre; set to zero for FT approach
 # nR: wannier state number (within unit cell); up to q
 function get_hops(wR::Tuple{Real,Real},nR::Integer)
-    Rxy_list = [wR .+ ((i-2)*1f0,(j-2)*1f0) for i in 1:3 for j in 1:3] # list of 8 NN coordinates = 4 NNs + 4 diagonals; + origin for chem potential
+    Rxy_list = [wR .+ ((j-2)*1f0,(i-2)*1f0) for i in 1:3 for j in 1:3] # list of 8 NN coordinates = 4 NNs + 4 diagonals; + origin for chem potential
     # list of wannier state numbers at the coordinates above
     mR_list = [mod1(nR-1,q), mod1(nR,q), mod1(nR+1,q), mod1(nR-1,q), mod1(nR,q), mod1(nR+1,q), mod1(nR-1,q), mod1(nR,q), mod1(nR+1,q)]
 
@@ -155,12 +170,33 @@ function write_matrix_aligned(io, mat)
     end
 end
 
+
+# test
+# tR = 0f0 + im*0f0
+# n = 2
+# wR = (0f0, 0f0)
+# Rxn, Ryn = (0f0, 0f0)
+# m = 1
+# for (i,X) in enumerate(X_list)
+#     for (j,Y) in enumerate(Y_list)
+#         tR += C_array[n,m,i,j] * exp(-im*(X*(wR[2]-Ryn) - Y*(wR[1]-Rxn))/q)
+#     end
+# end
+# tR /= NXY^2
+# println("abs(tR) = ", abs(tR))
+# println("angle(tR)/(2π) = ", angle(-tR)/(2π))
+
+
+
+
+
+
 wR_list = [(Float32(i), 0f0) for i = 0:(q-1)]
 nR_list = collect(1:q)
 
 # output
 mkpath(output_folder)
-out_path = joinpath(output_folder, "whw_and_ft_matrices.txt")
+out_path = joinpath(output_folder, "whw_and_ft_matrices-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY.txt")
 open(out_path, "w") do io
     write(io, "Matrices for hopping amplitudes and chemical potentials on/to different sites.\n")
     write(io, "Each Wannier centre is at the centre of the matrix. Others are one lattice constant apart.\n")
@@ -179,3 +215,4 @@ open(out_path, "w") do io
 end
 
 println("Done! Hopping matrices written to $out_path.")
+

@@ -34,7 +34,9 @@ plot!(plt,q,log.(Uc);
 # scatter(log.(q),log.(Uc); 
 #     xlabel="ln q", ylabel="ln Uc", title="Critical potential", markershape=:diamond, label="vLL", color=:red)
 
-
+# zero field critical potential
+Uczf = 0.0106
+hline!(plt, [log(Uczf)], label="ϕ=0", color=:black, linestyle=:dot, lw=2)
 
 
 ## 
