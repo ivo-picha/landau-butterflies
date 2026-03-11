@@ -23,7 +23,7 @@ Uc_2b = get_Uc_2b.(q)
 #     xlabel="1/q", ylabel="Uc", title="Critical potential", markershape=:diamond, label="vLL", color=:red, xlims=(0,1), ylims=(0,0.02))
 tf = 18
 lf = 20
-plt = plot(xlabel="q", ylabel="log(Critical U₀)", framestyle=:box,size = (950,500), legend=:topleft, xtickfont = tf, ytickfont = tf, guidefont = lf, legendfont = tf-5, margin = 6mm)
+plt = plot(xlabel="q = 1/ϕ", ylabel="log(Critical U₀)", framestyle=:box,size = (950,500), legend=:topleft, xtickfont = tf, ytickfont = tf, guidefont = lf, legendfont = tf-5, margin = 6mm)
 
 plot!(plt,q,log.(Uc_2b);
     color=1, label="2-LL; analytical", markershape=:diamond, linestyle = :dash, lw=2, ms = 8)
@@ -33,6 +33,15 @@ plot!(plt,q,log.(Uc);
 
 # scatter(log.(q),log.(Uc); 
 #     xlabel="ln q", ylabel="ln Uc", title="Critical potential", markershape=:diamond, label="vLL", color=:red)
+
+
+# 4 band calculation
+Uc4 = [0.0082, 0.0059, 0.0048, 0.0041, 0.0035, 0.0033, 0.0032, 0.0032, 0.0031, 0.0034, 0.0043, 0.006, 0.007, 0.0064, 0.0061, 0.006, 0.0067, 0.0075, 0.0048, 0.0037, 0.003, 0.0026, 0.0022, 0.0021, 0.0021, 0.002, 0.002, 0.0017, 0.0018, missing, missing, missing, missing, missing, 0.004, 0.0047, 0.0045, 0.004, 0.0021]
+Uc4 = [0.0082, 0.0059, 0.0048, 0.0041, 0.0035, 0.0033, 0.0032, 0.0032, 0.00335, 0.0036, 0.004, 0.0047, 0.0046, 0.0043, 0.0042, 0.004, 0.0041, 0.0041, 0.0042, 0.0033, 0.0027, 0.0023, 0.0021, 0.0019, 0.0018, 0.0017, 0.0017, 0.0016, 0.0017, 0.0018, 0.0019, 0.0021, 0.0025, 0.003, 0.0031, 0.0029, 0.0028, 0.0028, 0.0029]
+q4 = collect(2:50)[1:length(Uc4)]
+
+plot!(plt,q4,log.(Uc4); 
+    markershape=:diamond, label="4-LL; numerical", color=3, lw=2, ms = 8)
 
 # zero field critical potential
 Uczf = 0.0106

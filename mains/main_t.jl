@@ -13,12 +13,20 @@ using .Hamil                        # build a Hamiltonian matrix in a Landau lev
 include(joinpath(dirname(@__DIR__),"funcs/states.jl"))
 using .States                        # build a Hamiltonian matrix in a Landau level basis
 
-p = 3
-q = 2 
-U0 = -0.05f0 # keep negative (energy minimum at origin)
+args = ARGS
+if length(ARGS) != 4
+    println("USAGE: main_t.jl p q U0 LLmax")
+end
+
+p = parse(Int, args[1])
+q = parse(Int, args[2])
+U0 = -parse(Float32, args[3])
+LLmax = parse(Int, args[4])
+
+
 a_nm = 5.0 # lattice constant in nm
-NXY = 30 # number of k-points in each direction
-LLmax = 15
+NXY = 64 # number of k-points in each direction
+
 
 a = Float32(a_nm*1f-9) # in m
 phi = Float32(p/q)
@@ -35,7 +43,7 @@ output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier
 
 
 # real space grid
-Ngrid = 40
+Ngrid = 50
 x_grid = Float32.(collect(range(-a*(q+0.5), a*(q+0.5), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-1.5*a, 1.5*a, length = Ngrid)))
 
@@ -77,7 +85,7 @@ println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
         end
 
         # sort states by energy
-        sort!(energies)
+        # sort!(energies)
         sort!(states, by = first)
 
         # array to store wavefunctions
@@ -100,7 +108,7 @@ println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
         Amat = Array{ComplexF32}(undef, q, q)
         for m in 1:q
             for n in 1:q
-                Amn = sum(g_array[:,:,m] .* conj.(wf_array[:,:,n])) * (x_grid[2] - x_grid[1])*(y_grid[2] - y_grid[1])
+                Amn = sum(g_array[:,:,n] .* conj.(wf_array[:,:,m])) * (x_grid[2] - x_grid[1])*(y_grid[2] - y_grid[1])
                 Amat[m,n] = Amn
             end
         end
