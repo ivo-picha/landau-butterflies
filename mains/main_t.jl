@@ -25,7 +25,7 @@ LLmax = parse(Int, args[4])
 
 
 a_nm = 5.0 # lattice constant in nm
-NXY = 64 # number of k-points in each direction
+NXY = 96 # number of k-points in each direction
 
 
 a = Float32(a_nm*1f-9) # in m
@@ -39,11 +39,11 @@ XY_list = reshape(collect(Base.product(X_list, Y_list)),:)
 #output folder
 output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out"
 # cluster path
-#output_folder = "/users/ivoga/lh/out/wannier_out/ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY"
+#output_folder = "/users/ivoga/lh/out/wannier_out"
 
 
 # real space grid
-Ngrid = 50
+Ngrid = 64
 x_grid = Float32.(collect(range(-a*(q+0.5), a*(q+0.5), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-1.5*a, 1.5*a, length = Ngrid)))
 
@@ -158,6 +158,7 @@ function get_hops(wR::Tuple{Real,Real},nR::Integer)
     end
 
     absmat = reshape(abs.(t_ft_list), 3, 3)
+    absmat[2,2] = real(reshape(t_ft_list, 3, 3)[2,2]) # set chem potential to the actual value, not the abs value
     argmat = reshape(round.(mod.(angle.(-1.0 .* t_ft_list)/(2π) .+0.5 ,1.0) .- 0.5;digits = 5), 3, 3)
     return absmat, argmat
 end
@@ -204,11 +205,12 @@ nR_list = collect(1:q)
 
 # output
 mkpath(output_folder)
-out_path = joinpath(output_folder, "whw_and_ft_matrices-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY.txt")
+out_path = joinpath(output_folder, "hopping_amps-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY.txt")
 open(out_path, "w") do io
     write(io, "Matrices for hopping amplitudes and chemical potentials on/to different sites.\n")
     write(io, "Each Wannier centre is at the centre of the matrix. Others are one lattice constant apart.\n")
     write(io, "x↓ y→\n")
+    write(io, "U₀=$(abs(U0)), ϕ=$p/$q, a=$(a_nm)nm, LLmax=$LLmax, NXY=$NXY, Ngrid=$Ngrid\n")
     write(io, "================\n\n")
     for nR in nR_list
         wR = wR_list[nR]
