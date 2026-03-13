@@ -25,7 +25,7 @@ LLmax = parse(Int, args[4])
 
 
 a_nm = 5.0 # lattice constant in nm
-NXY = 96 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
+NXY = 20 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
 
 
 a = Float32(a_nm*1f-9) # in m
@@ -37,13 +37,14 @@ Y_list = collect(range(0f0, Float32(2π), length = NXY+1))[1:end-1]
 XY_list = reshape(collect(Base.product(X_list, Y_list)),:)
 
 #output folder
-#output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out"
+output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out"
 # cluster path
-output_folder = "/users/ivoga/lh/out/wannier_out"
+#output_folder = "/users/ivoga/lh/out/wannier_out"
 
+mkpath(output_folder)
 
 # real space grid
-Ngrid = 64
+Ngrid = 20
 x_grid = Float32.(collect(range(-a*(q+0.5), a*(q+0.5), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-1.5*a, 1.5*a, length = Ngrid)))
 
@@ -121,8 +122,21 @@ println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
 
         # overlap matrix S = A†.A
         Smat = Hermitian(Amat' * Amat)
-        Smat_inv_sqrt = inv(sqrt(Smat))
+        #Smat_inv_sqrt = inv(sqrt(Smat))
+        #Umat = Amat * Smat_inv_sqrt
+        #
+        F = eigen(Hermitian(Smat))
+        λ = real.(F.values)
+
+        tol = 1e-12 * maximum(λ)
+        if minimum(λ) < tol
+            @warn "Overlap matrix nearly singular" minimum(λ) maximum(λ)
+        end
+
+        inv_sqrt_λ = [x > tol ? 1 / sqrt(x) : 0.0 for x in λ]
+        Smat_inv_sqrt = F.vectors * Diagonal(inv_sqrt_λ) * F.vectors'
         Umat = Amat * Smat_inv_sqrt
+        #
         Cmat = Umat' * diagm(energies) * Umat
 
         #test
@@ -204,9 +218,8 @@ wR_list = [(Float32(i), 0f0) for i = 0:(q-1)]
 nR_list = collect(1:q)
 
 # output
-mkpath(output_folder)
-out_path = joinpath(output_folder, "hopping_amps-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY.txt")
-open(out_path, "w") do io
+out_path1 = joinpath(output_folder, "testhopping_amps_mats-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY.txt")
+open(out_path1, "w") do io
     write(io, "Matrices for hopping amplitudes and chemical potentials on/to different sites.\n")
     write(io, "Each Wannier centre is at the centre of the matrix. Others are one lattice constant apart.\n")
     write(io, "x↓ y→\n")
@@ -224,5 +237,38 @@ open(out_path, "w") do io
     end
 end
 
-println("Done! Hopping matrices written to $out_path.")
+println("Done! Hopping matrices written to $out_path1.")
+
+
+# write output in a wannier90 style: every hopping is included 
+out_path2 = joinpath(output_folder, "all_hops-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY.txt")
+open(out_path2, "w") do io
+    write(io, "Hopping amplitudes and chemical potentials (eV) for:\nU₀=$(abs(U0)), ϕ=$p/$q, a=$(a_nm)nm, LLmax=$LLmax, NXY=$NXY, Ngrid=$Ngrid.\n\n")
+    write(io, "----------------------------\nChemical potentials\n----------------------------\n")
+    write(io, "Rx   Ry  μ[eV]\n")
+    #Calculate chemical potentials
+    for m in 1:q
+        mu_m = sum(C_array[m,m,:,:])
+        write(io, "$(m-1)    0    $(real(mu_m))\n")
+    end
+    write(io, "\n\n----------------------------\nHopping amplitudes\n----------------------------\n")
+    write(io, "From: Rx  Ry  n  To: Rx' Ry'  m          |t|[eV]      arg(t)/2π\n")
+    Rto_list = [(ux+m,uy) for ux=-1:1 for uy=-2:2 for m=0:q-1]
+    Rfrom_list = [(m,0) for m=0:q-1]
+    for Rfrom in Rfrom_list
+        n = Rfrom[1]
+        for Rto in Rto_list
+            m = mod(Rto[1],q)
+            Rto == Rfrom && continue
+            t = 0f0 + im*0f0
+            for (i,X) in enumerate(X_list)
+                for (j,Y) in enumerate(Y_list)
+                    t += C_array[n+1,m+1,i,j] * exp(-im*(X*(Rfrom[2]-Rto[2]) - Y*(Rfrom[1]-Rto[1]))/q)
+                end
+            end
+            # check minus in front of t here
+            write(io, "      $(Rfrom[1])   $(Rfrom[2])   $n      $(Rto[1])   $(Rto[2])   $m        $(abs(t))      $(mod.(angle.(-1.0 .* t)/(2π) .+0.5 ,1.0))\n")
+        end
+    end
+end
 
