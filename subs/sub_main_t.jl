@@ -1,8 +1,8 @@
 # job file that submits jobs of main_S.jl for sets of parameters
 
 #list_U0 = round.(collect(range(0.003, 0.03, 8)); digits=4)
-list_U0 = [0.05, 0.03]
-list_p = collect(1:10)
+list_U0 = [0.05]
+list_p = collect(1:4)
 list_q = list_p
 
 list_used_phis = Tuple{Float32,Float32}[];
@@ -11,7 +11,7 @@ ip = collect(Base.product(list_U0, list_p, list_q))
 param_list_tuple = reshape(ip, :)
 param_list_str = replace.(string.(param_list_tuple), "(" => "[", ")" => "]")
 
-n_cpus = 8 #number of cpus per job
+n_cpus = 16 #number of cpus per job
 
 folder_path = "/users/ivoga/lh/jobs"
 output_msgs_path = "/users/ivoga/lh/msgs"

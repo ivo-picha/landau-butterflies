@@ -271,7 +271,7 @@ open(out_path2, "w") do io
             end
             t /= (NXY^2 * q)
             # check minus in front of t here
-            write(io, "      $(Rfrom[1])   $(Rfrom[2])   $n      $(Rto[1])   $(Rto[2])   $m        $(abs(t))      $(mod.(angle.(-1.0 .* t)/(2π) .+0.5 ,1.0))\n")
+            write(io, "      $(Rfrom[1])   $(Rfrom[2])   $n      $(Rto[1])   $(Rto[2])   $m        $(abs(t))      $(round(mod.(angle.(-1.0 .* t)/(2π) .+0.5 ,1.0)-0.5;digits=5))\n")
         end
     end
     write(io, "##hopping-amplitudes\n")
