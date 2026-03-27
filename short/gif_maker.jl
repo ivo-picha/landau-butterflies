@@ -4,7 +4,7 @@ using FileIO
 using ColorTypes
 using ImageCore
 
-in_folder = "out_loc/wannier_states"
+in_folder = "out_loc/hof_nnn"
 out_folder = "out_loc/gifs"
 
 file_list = readdir(in_folder; join=true)
@@ -15,6 +15,6 @@ files_quoted = join(["'$(f)'" for f in file_list], " ")
 #frames_wrapped = [ImageCore.Image(frame) for frame in frames]
 #save(joinpath(out_folder, "spectrum_evolution_2BFs.gif"), frames; fps=6, loop=true)
 
-cmd = "convert -delay 80 -loop 0 $files_quoted '$out_folder/wannier_states_circling.gif'"
+cmd = "convert -delay 80 -loop 0 $files_quoted '$out_folder/1BF-to-2BF.gif'"
 println("Running: $cmd")
 run(`sh -c $cmd`)
