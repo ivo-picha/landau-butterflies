@@ -15,7 +15,7 @@ spectrum_bare_options = (
     color = :black,
     label = "",
     xlabel = "ϕ = p/q",
-    ylabel = "E [meV]",
+    ylabel = "E [eV]",
     framestyle = :box,
     size = (1200,800),
     tickfontsize = 16,

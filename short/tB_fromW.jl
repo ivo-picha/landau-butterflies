@@ -5,14 +5,14 @@ using LinearAlgebra
 using ProgressMeter
 using Measures
 
-#input = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_maf/22mar26_t_limited/all_hops-ph3-2-U-0.05-a5.0-LL25-NXY128.txt"
-args = ARGS
-if length(args) != 1
-    println("USAGE: \$0 <all hops txt file>")
-    exit(1)
-end
+input = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_maf/22mar26_t_limited/all_hops-ph3-2-U-0.05-a5.0-LL25-NXY128.txt"
+# args = ARGS
+# if length(args) != 1
+#     println("USAGE: \$0 <all hops txt file>")
+#     exit(1)
+# end
 
-input = args[1]
+# input = args[1]
 
 # ---------------- read file contents and store values
 pots = Vector{Float64}[];
@@ -90,7 +90,7 @@ using KernelDensity
 # list of Rmax to be compared
 maxRlist = [1,sqrt(2),2,3,Inf]
 
-NXY = 64
+NXY = 128
 Xrange = range(0,2π*q,q*NXY+1)[1:end-1]
 Yrange = range(0,2π,NXY+1)[1:end-1]
 energies = Array{Float64}(undef, q^2*NXY^2,length(maxRlist))

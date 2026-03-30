@@ -7,12 +7,12 @@
 
 # using 32-bit floats for memory efficiency and faster diagonalization
 
-#args = ARGS;
-args = ["0.01", "5", "0", "360", "0.01", "1", "-p"]; # for visual studio code testing # "--XBF", "2"
+args = ARGS;
+#args = ["0.01", "5", "0", "360", "0.01", "1", "-p"]; # for visual studio code testing # "--XBF", "2"
 
 # -OUTPUT FOLDER!-
-outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-#outfolder = "/users/ivoga/lh/out" # cluster path
+#outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
@@ -132,7 +132,7 @@ if dataQ
 end
 if plotQ
     plot_spectrum = Plt.plot_bare_spectrum(out_energies, phi_list)
-    Plt.plot_add_LL_guide!(plot_spectrum, phi_s, phi_f, a, LLmax) # saved later in case it needs coloring
+    Plt.plot_add_LL_guide!(plot_spectrum, phi_s, phi_f, a, XLL) # saved later in case it needs coloring
 end
 
 # WANNIER ANALYSIS (optional) ==============================================
@@ -144,7 +144,7 @@ if wannierQ
     end
     if plotWQ
         plot_wannier = Plt.plot_wannier_all(wannier_dict, phi_f, LLmax)
-        savefig(plot_wannier, joinpath(outfolder_plots, string("wannier_",param_str,".png")))
+        savefig(plot_wannier, joinpath(outfolder_plots, string("wannier_",param_str,".pdf")))
     end
     if plotQ
         Plt.color_gaps_eq2!(plot_spectrum, wannier_dict, phi_list, 14)        
@@ -156,5 +156,5 @@ end
 # SAVE FINAL PLOT ==========================================================
 if plotQ
     # save spectrum plot
-    savefig(plot_spectrum, joinpath(outfolder_plots, string("spectrum_",param_str,".png")))
+    savefig(plot_spectrum, joinpath(outfolder_plots, string("spectrum_",param_str,".pdf")))
 end

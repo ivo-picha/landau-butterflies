@@ -11,7 +11,7 @@ using DelimitedFiles
 include(joinpath(dirname(@__DIR__),"funcs/hamiltonian.jl"))
 using .Hamil                        # build a Hamiltonian matrix in a Landau level basis
 include(joinpath(dirname(@__DIR__),"funcs/states.jl"))
-using .States                        # build a Hamiltonian matrix in a Landau level basis
+using .States                        # wannier state analysis
 
 args = ARGS
 if length(ARGS) != 4
@@ -25,7 +25,7 @@ LLmax = parse(Int, args[4])
 
 
 a_nm = 5.0 # lattice constant in nm
-NXY = 128 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
+NXY = 256 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
 
 
 a = Float32(a_nm*1f-9) # in m
@@ -44,9 +44,9 @@ output_folder = "/users/ivoga/lh/out/wannier_out"
 mkpath(output_folder)
 
 # real space grid
-Ngrid = 64
-x_grid = Float32.(collect(range(-a*(q+0.5), a*(q+0.5), length = Ngrid*q)))
-y_grid = Float32.(collect(range(-1.5*a, 1.5*a, length = Ngrid)))
+Ngrid = 128
+x_grid = Float32.(collect(range(-a*(q+1), a*(q+1), length = Ngrid*q)))
+y_grid = Float32.(collect(range(-2*a, 2*a, length = Ngrid)))
 
 # trial wavefunctions
 println("Generating trial wavefunctions...")
@@ -271,7 +271,7 @@ open(out_path2, "w") do io
             end
             t /= (NXY^2 * q)
             # check minus in front of t here
-            write(io, "      $(Rfrom[1])   $(Rfrom[2])   $n      $(Rto[1])   $(Rto[2])   $m        $(abs(t))      $(round(mod.(angle.(-1.0 .* t)/(2π) .+0.5 ,1.0)-0.5;digits=5))\n")
+            write(io, "      $(Rfrom[1])   $(Rfrom[2])   $n      $(Rto[1])   $(Rto[2])   $m        $(abs(t))      $(mod.(angle.(-1.0 .* t)/(2π) .+0.5 ,1.0)-0.5)\n")
         end
     end
     write(io, "##hopping-amplitudes\n")
