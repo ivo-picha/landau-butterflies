@@ -20,7 +20,8 @@ spectrum_bare_options = (
     size = (1200,800),
     tickfontsize = 16,
     guidefontsize = 18,
-    margin = 9mm
+    margin = 9mm,
+    dpi=900,
 )
 
 function plot_bare_spectrum(out_energies::Vector{Vector{Float32}}, phi_list::Vector{Float32})
@@ -73,7 +74,8 @@ wannier_bare_options = (
     tickfontsize = 16,
     guidefontsize = 18,
     margin = 9mm,
-    ylims = (0,2)
+    ylims = (0,2),
+    dpi=600,
     #yticks = false
 )
 

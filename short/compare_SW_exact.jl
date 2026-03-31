@@ -6,7 +6,7 @@ using Plots
 using LinearAlgebra
 
 
-r = 0.001 # ratio U0/ΔE
+r = 0.1 # ratio U0/ΔE
 
 a = 5.0e-9
 p = 2
@@ -59,10 +59,11 @@ plt = Plots.plot(tickfontsize = 15,   # increase tick label size
 )
 xticks!(plt,[0,Nk,2*Nk,3*Nk,4*Nk],["Γ","Xʸ","M","Γ","Xˣ"])
 yticks!(plt,[0],[""])
-ylabel!(plt, "Energy")
-for j = 1:p
-    plot!(plt, bandes[j,:], label = "B$j, exact", framestyle = :box, color = j,lw = 2, legend=:right)
-end
+#ylabel!(plt, "Energy")
+
+plot!(plt, bandes[1,:], label = "", framestyle = :box, color = 1,lw = 2, legend=:right)
+plot!(plt, bandes[2,:], label = "", framestyle = :box, color = 2,lw = 2)
+
 
 
 
@@ -89,11 +90,11 @@ for (k1,k2) in kpath
 end
 bandesSW = hcat(ensSW...)
 
-for j = 1:p
-    plot!(plt, bandesSW[j,:], label = "B$j, S-W", framestyle = :box, linestyle = :dot, color = j, lw = 2)
-end
+plot!(plt, bandesSW[1,:], label = "", framestyle = :box, linestyle = :dot, color = 1, lw = 2)
+plot!(plt, bandesSW[2,:], label = "", framestyle = :box, linestyle = :dot, color = 2, lw = 2)
+
 title!(plt, "U₀/Δε = $r")
 
 #plt
-savefig(plt, joinpath(dirname(@__DIR__),"/home/ivoga/Documents/PhD/Landau_Hofstadter/figs/Schrieffer-Wolff-phi2/bands_r$r.png"))
+savefig(plt, joinpath(dirname(@__DIR__),"/home/ivoga/Documents/PhD/Landau_Hofstadter/figs/Schrieffer-Wolff-phi2/bands_r$r.pdf"))
 

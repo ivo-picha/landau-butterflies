@@ -144,7 +144,7 @@ if wannierQ
     end
     if plotWQ
         plot_wannier = Plt.plot_wannier_all(wannier_dict, phi_f, LLmax)
-        savefig(plot_wannier, joinpath(outfolder_plots, string("wannier_",param_str,".pdf")))
+        savefig(plot_wannier, joinpath(outfolder_plots, string("wannier_",param_str,".png")))
     end
     if plotQ
         Plt.color_gaps_eq2!(plot_spectrum, wannier_dict, phi_list, 14)        
@@ -156,5 +156,5 @@ end
 # SAVE FINAL PLOT ==========================================================
 if plotQ
     # save spectrum plot
-    savefig(plot_spectrum, joinpath(outfolder_plots, string("spectrum_",param_str,".pdf")))
+    savefig(plot_spectrum, joinpath(outfolder_plots, string("spectrum_",param_str,".png")))
 end

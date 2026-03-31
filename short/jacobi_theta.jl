@@ -8,7 +8,7 @@ mkpath(outfolder)
 
 # parameters
 q = 1
-X = 0
+X = π
 Y = X
 
 # ---------------------------------------------
@@ -49,5 +49,7 @@ lf = font(20)
 plt = heatmap(xrange, yrange, abs.(psi_array)', aspect_ratio=1,
 xlabel="x/a", ylabel="y/a", title="|ψ| @ ϕ=1/$q, X=Y=$X", 
 size=(475,500), xtickfont = tf, ytickfont = tf, guidefont = lf,
-legend=false, #clims=(0.2, 0.4)
+legend=false, framestyle=:box, #clims=(0.2, 0.4)
 )
+
+savefig(plt, joinpath(outfolder, "psi_phi1_over_$q-X$X-Y$Y.pdf"))
