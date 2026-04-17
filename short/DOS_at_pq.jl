@@ -23,9 +23,9 @@ mkpath(outfolder_data)
 
 # PARAMETERS ============================================================
 
-p = 1
-q = 2
-U0 = 0.05f0          # potential strength [eV]
+p = 2
+q = 1
+U0 = 0.03f0          # potential strength [eV]
 a_nm = 5.0f0         # lattice constant [nm]
 NLL = Int64(q/p * 30)              # number of Landau levels to include + 1
 

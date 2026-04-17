@@ -52,7 +52,7 @@ plot!(plt,q4,log.(Uc4./umklappe);
 Uczf = 0.0106
 hline!(plt, [log(Uczf./umklappe)], label="ϕ=0", color=:black, linestyle=:dot, lw=2)
 
-savefig(plt, "Ucrit_compare.pdf")
+#savefig(plt, "Ucrit_compare.pdf")
 ## 
 # function f4(q::Integer,U0::Real)
 #     if q<2

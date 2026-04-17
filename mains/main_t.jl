@@ -14,8 +14,9 @@ include(joinpath(dirname(@__DIR__),"funcs/states.jl"))
 using .States                        # wannier state analysis
 
 args = ARGS
-if length(ARGS) != 4
+if length(ARGS) != 4 || ARGS[1] == "--help" || ARGS[1] == "-h"
     println("USAGE: main_t.jl <p> <q> <U0> <LLmax>")
+    exit(1)
 end
 
 p = parse(Int, args[1])
@@ -25,7 +26,7 @@ LLmax = parse(Int, args[4])
 
 
 a_nm = 5.0 # lattice constant in nm
-NXY = 256 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
+NXY = 64 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
 
 
 a = Float32(a_nm*1f-9) # in m
@@ -37,14 +38,14 @@ Y_list = collect(range(0f0, Float32(2π), length = NXY+1))[1:end-1]
 XY_list = reshape(collect(Base.product(X_list, Y_list)),:)
 
 #output folder
-#output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out"
+output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out"
 # cluster path
-output_folder = "/users/ivoga/lh/out/wannier_out"
+#output_folder = "/users/ivoga/lh/out/wannier_out"
 
 mkpath(output_folder)
 
 # real space grid
-Ngrid = 128
+Ngrid = 32
 x_grid = Float32.(collect(range(-a*(q+1), a*(q+1), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-2*a, 2*a, length = Ngrid)))
 

@@ -35,6 +35,82 @@ function plot_bare_spectrum(out_energies::Vector{Vector{Float32}}, phi_list::Vec
     return plt
 end
 
+spectrum_bare_options_mainfig = (
+    markersize = 0.8,
+    color = :black,
+    label = "",
+    xaxis = false,
+    yaxis = false,
+    grid = false,
+    framestyle = :box,
+    size = (1200,800),
+    tickfontsize = 16,
+    guidefontsize = 18,
+    margin = 9mm,
+    dpi=1200,
+)
+
+
+function color_gaps_eq2_mainfig(lines_dict::Dict, unique_phis::Vector{Float32})
+    println("Coloring gaps on the spectrum according to Chern number.")
+    plot_spectrum = Plots.Plot()    # empty plot
+
+    # min distance under which lists of points aren't broken in sublists
+    phi_spacing = round(unique_phis[2] - unique_phis[1]; digits = 4)
+    # set a limit of Chern numbers to be colored
+    max_colored_chern = 6 #clamp(Int(NLL)+3, 5, 10)
+
+    for (line_key, points) in lines_dict
+        if length(points) > min_line_points
+            chern = round(line_key[1]; digits = 2)
+            if isinteger(chern) && chern != 0
+                gap_lower_energy = Float32[]
+                gap_upper_energy = Float32[]
+                phis_overlay = Float32[]
+                for point in points
+                    push!(gap_lower_energy, Float32.(point[4]))
+                    upper_energy = point[4] + point[3]
+                    push!(gap_upper_energy, Float32.(upper_energy))
+                    push!(phis_overlay, Float32.(point[1]))
+                end
+
+                # sort lists by phi
+                perm = sortperm(phis_overlay)
+                phis_overlay = phis_overlay[perm]
+                gap_lower_energy = gap_lower_energy[perm]
+                gap_upper_energy = gap_upper_energy[perm]
+
+                en_spacing = (maximum(gap_upper_energy)-minimum(gap_lower_energy))/2f1
+
+                for j in 1:(length(phis_overlay)-1)
+                    phi1 = phis_overlay[j]
+                    phi2 = phis_overlay[j+1]
+                    gl1 = gap_lower_energy[j]
+                    gl2 = gap_lower_energy[j+1]
+                    gu1 = gap_upper_energy[j]
+                    gu2 = gap_upper_energy[j+1]
+                    
+                    if (phi2-phi1 < 2f0*phi_spacing) && (gu2>gl1) && (gl2<gu1) && (abs(gu2-gu1)<en_spacing) && (abs(gl2-gl1)<en_spacing)
+                        Plots.plot!(plot_spectrum, [phi1-0.0001,phi2+0.0001], [gl1,gl2], fillrange = [gu1,gu2],
+                        color = gradient_color_plasma(Int(chern), max_colored_chern), fillalpha = 0.7, lw = 0, label = "")
+                    end
+                end
+            end
+        end
+    end
+    return plot_spectrum
+end
+
+# plot this after so the dots are over the colored gaps
+function plot_bare_spectrum_mainfig!(plt::Plots.Plot,out_energies::Vector{Vector{Float32}}, phi_list::Vector{Float32})
+    for (j,ens) in enumerate(out_energies)
+        xs = [phi_list[j] for i = 1:length(ens)]
+        Plots.scatter!(plt, xs, ens; spectrum_bare_options_mainfig...)
+    end
+    miny, maxy = minimum(vcat(out_energies...)), maximum(vcat(out_energies...))
+    Plots.ylims!(plt, miny - 0.05f0*(maxy - miny), maxy + 0.05f0*(maxy - miny))
+end
+
 
 
 # add LL guides to spectrum plot
@@ -127,7 +203,7 @@ function plot_wannier_all(lines_dict::Dict{Tuple{Float32, Float32}, Vector{NTupl
     Plots.title!(plot_w, plots_title)
 
     # set a limit of Chern numbers to be colored
-    max_colored_chern = clamp(Int(NLL) + 3, 5, 10)
+    max_colored_chern = 6 #clamp(Int(NLL)+3, 5, 10)
 
     # point size scaling based on gap sizes
     ggmax = maximum(gaps_global)

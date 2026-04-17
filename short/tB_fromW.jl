@@ -76,13 +76,12 @@ function get_tb_h(X::Real, Y::Real, q::Integer, maxR::Real=10)
         dR = [Rxto-Rxfrom,Ryto-Ryfrom]
         # add terms
         if norm(dR) <= maxR 
-            h[mto+1,mfrom+1] += tabs*exp(im*targ*2π) * exp(im*(X*dR[2] - Y*dR[1])/q)
+            h[mto+1,mfrom+1] += -tabs*exp(im*targ*2π) * exp(im*(X*dR[2] - Y*dR[1])/q)
         end
     end
     return Hermitian(h)
 end
 # ----------------
-
 
 # ---------------- plot density of states comparisons
 using KernelDensity
@@ -140,5 +139,5 @@ plot!(plt,kdo.x,kdo.density, label = "original", color = :black, style = :dash)
 
 
 display(plt)
-savefig(plt, joinpath(dirname(input),"DOS_compare_p-$p-q-$q-U0-$U0.png"))
+#savefig(plt, joinpath(dirname(input),"DOS_compare_p-$p-q-$q-U0-$U0.png"))
 

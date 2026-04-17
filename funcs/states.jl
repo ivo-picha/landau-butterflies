@@ -75,6 +75,23 @@ function get_eigenstate(x::Float32, y::Float32, state::Tuple{Float32, Vector{Com
     return psi
 end
 
+# get the full eigenstate wavefunction at (x,y) given the eigenvector in LL basis; for phi 1 use
+function get_eigenstate_from_evec(evec::Vector{ComplexF32}, x::Float32, y::Float32, X::Real, Y::Real, p::Int, q::Int, a::Number, LLmax::Int)::ComplexF32
+    n_states = length(evec)
+    n_LL = LLmax + 1
+    if n_LL*p != n_states
+        error("Number of states in eigenvector does not match number of Landau levels times p.")
+    end
+    psi = 0f0 + im*0f0
+    for idx in 0:n_states-1
+        n = fld(idx, p)
+        m = idx%p
+        bs = basis_state(x, y, n, m, X, Y, p, q, a)
+        psi += evec[idx+1]*bs
+    end
+    return psi
+end
+
 # get the full eigenstate wavefunction at (x,y) given the eigenvector in LL basis; for general use
 function get_eigenstate_XY(x::Float32, y::Float32, state::Tuple{Float32, Vector{ComplexF32}}, X::Float32, Y::Float32, p::Int, q::Int, a::Number, LLmax::Int)::ComplexF32
     en, evec = state
@@ -112,7 +129,7 @@ function gaussian_LG(x::Float32,y::Float32,X::Float32,Y::Float32, phi::Float32, 
     ωhsq = 4.0 * π^2 * abs(U0) * e / (m_e * a^2) # harmonic frequency squared
     ωcsq4 = phi^2 * h^2 / (16.0 * m_e^2 * a^4)
     σsq = h / (2π * m_e * sqrt(ωhsq + ωcsq4))
-    return exp(-((x-X)^2 + (y-Y)^2)/(2*σsq)) * exp(-im*Float32(π)*phi*x*y/(a^2))
+    return exp(-((x-X)^2 + (y-Y)^2)/(2*σsq)) * exp(im*Float32(2π)*phi*x*y/(a^2))
 end
 
 

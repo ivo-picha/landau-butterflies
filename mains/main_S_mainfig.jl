@@ -1,18 +1,11 @@
-# calculates the spectrum of a system of a set number of Landau levels (NLL+1)
-# in a square cosine periodic potential of given strength U0 [eV] and lattice constant a [m]
-# for a given range of rational magnetic flux per unit cell phi = p/q
+# same as main_S.jl but aimed to create a figure for a DQMP poster
 
-# arguments can include options for outputting plots and/or data files, performing Wannier analysis,
-# simplifying the p/q when possible, varying the number of LLs used at higher fluxes
-
-# using 32-bit floats for memory efficiency and faster diagonalization
-
-#args = ARGS;
-args = ["0.03", "5", "5", "20", "0.5", "1", "-p", "-w", "-z"]; # for visual studio code testing # "--XBF", "2"
+args = ARGS;
+#args = ["0.03", "5", "15", "180", "1", "2", "-p", "-l", "-w", "--XBF", "1"]; # for visual studio code testing # "--XBF", "2"
 
 # -OUTPUT FOLDER!-
-outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-#outfolder = "/users/ivoga/lh/out" # cluster path
+#outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")
@@ -130,31 +123,14 @@ if dataQ
                                                            "NXY_list" => NXY_list,
                                                            "NLL_list" => NLL_list))
 end
-if plotQ
-    plot_spectrum = Plt.plot_bare_spectrum(out_energies, phi_list)
-    Plt.plot_add_LL_guide!(plot_spectrum, phi_s, phi_f, a, XLL) # saved later in case it needs coloring
-end
+
 
 # WANNIER ANALYSIS (optional) ==============================================
-if wannierQ
-    wannier_dict = Wannier.mainW(out_energies, phi_list, qn_list, NXY_list)
-    # save wannier data
-    if dataQ
-        npzwrite(joinpath(outfolder_data, "wannier_lines_dict.npz"), wannier_dict)
-    end
-    if plotWQ
-        plot_wannier = Plt.plot_wannier_all(wannier_dict, phi_f, LLmax)
-        savefig(plot_wannier, joinpath(outfolder_plots, string("wannier_",param_str,".png")))
-    end
-    if plotQ
-        Plt.color_gaps_eq2!(plot_spectrum, wannier_dict, phi_list, 14)        
-    end
-end
+wannier_dict = Wannier.mainW(out_energies, phi_list, qn_list, NXY_list)
+plot_spectrum = Plt.color_gaps_eq2_mainfig(wannier_dict, phi_list)
+Plt.plot_bare_spectrum_mainfig!(plot_spectrum, out_energies, phi_list)    
 
 
 
 # SAVE FINAL PLOT ==========================================================
-if plotQ
-    # save spectrum plot
-    savefig(plot_spectrum, joinpath(outfolder_plots, string("spectrum_",param_str,".png")))
-end
+savefig(plot_spectrum, joinpath(outfolder_plots, string("ARTSY_",param_str,".png")))

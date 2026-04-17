@@ -7,7 +7,7 @@ using Measures
 # parameters
 a = 50e-10; # lattice constant [m]
 a_in_angstr = a*1e10
-U0 = 0.01; # strength of periodic potential [eV]
+U0 = 0.002; # strength of periodic potential [eV]
 
 # physical constants
 ħ = 6.62607015e-34/(2π); # Planck constant [J s]
@@ -22,7 +22,7 @@ end
 
 # list of q values to iterate over
 Nq = 400; #number of desired steps of q 
-q_list = unique(Int.(round.(range(p_set, 3*p_set, Nq))))
+q_list = unique(Int.(round.(range(1, 2*p_set, Nq))))
 
 #set up list of ky* values to iterate over
 Nky = 65;
@@ -84,8 +84,22 @@ end
 Npoints = length(energies)
 println("plotting $Npoints number of points")
 
-plot1 = scatter(phis, energies,title = "U₀ = $U0 eV, a = $a_in_angstr Å", markersize = 0.4, color = :black, label = "", 
-    xlabel = "1/ϕ = q/p", ylabel = "E - ε(ϕ) [eV]", framestyle = :box, size = (1000,500), tickfontsize = 16, guidefontsize = 18, margin=9mm,
+spectrum_bare_options = (
+    markersize = 0.8,
+    color = :black,
+    label = "",
+    xlabel = "ϕ = p/q",
+    ylabel = "E [eV]",
+    framestyle = :box,
+    size = (1200,800),
+    tickfontsize = 16,
+    guidefontsize = 18,
+    margin = 9mm,
+    dpi=900,
+)
+
+plot1 = scatter(phis, energies, markersize = 0.8, color = :black, label = "", 
+    xlabel = "1/ϕ = q/p", ylabel = "E - ε(ϕ) [eV]", framestyle = :box, size = (1200,800), tickfontsize = 16, guidefontsize = 18, margin=9mm, dpi=900,
     yticks = false);
 
 
