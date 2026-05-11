@@ -43,7 +43,7 @@ function basis_state(x::Float32,y::Float32,n::Int,m::Int,X::Number,Y::Number,p::
     phi = Float32(p/q)
     lb = Float32(a / sqrt(2π*phi))
 
-    bs = 0f0
+    bs = 0f0 + im*0f0
     for Ky in -Kymax:Kymax
         ky = Float32(X/(q*a) + 2π*p*Ky/a + 2π*m/a)
         xi = x/lb - ky*lb
@@ -118,7 +118,7 @@ function gaussian(x::Float32,y::Float32,X::Float32,Y::Float32,σ::Float32)
 end
 
 # Landau gauge ground state of harmonic + magnetic; adds phase Bxy
-function gaussian_LG(x::Float32,y::Float32,X::Float32,Y::Float32, phi::Float32, U0::Float32, a::Float32)
+function gaussian_LG(x::Float32,y::Float32,Rx::Float32,Ry::Float32, phi::Float32, U0::Float32, a::Float32)
     phi = Float64(phi)
     U0 = Float64(U0)
     a = Float64(a)
@@ -129,7 +129,7 @@ function gaussian_LG(x::Float32,y::Float32,X::Float32,Y::Float32, phi::Float32, 
     ωhsq = 4.0 * π^2 * abs(U0) * e / (m_e * a^2) # harmonic frequency squared
     ωcsq4 = phi^2 * h^2 / (16.0 * m_e^2 * a^4)
     σsq = h / (2π * m_e * sqrt(ωhsq + ωcsq4))
-    return exp(-((x-X)^2 + (y-Y)^2)/(2*σsq)) * exp(im*Float32(2π)*phi*x*y/(a^2))
+    return exp(-((x-Rx)^2 + (y-Ry)^2)/(2*σsq)) #* exp(im*Float32(2π)*phi*x*y/(a^2))
 end
 
 

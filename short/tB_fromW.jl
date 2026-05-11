@@ -5,7 +5,7 @@ using LinearAlgebra
 using ProgressMeter
 using Measures
 
-input = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_maf/22mar26_t_limited/all_hops-ph3-2-U-0.05-a5.0-LL25-NXY128.txt"
+input = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out/all_hops-ph1-2-U-0.05-a5.0-LL35-NXY120.txt"
 # args = ARGS
 # if length(args) != 1
 #     println("USAGE: \$0 <all hops txt file>")
@@ -136,6 +136,48 @@ energieso = sort(reshape(energieso, :,))
 etao = (maximum(energieso)-minimum(energieso))/70
 kdo = kde(energieso, bandwidth = etao)
 plot!(plt,kdo.x,kdo.density, label = "original", color = :black, style = :dash)
+
+
+# add NN + d-NNN with manual hopping amplitudes; taken from hof_nnn.jl
+
+mu = -0.030815335; # chemical potential
+t1_1 = 0.0006249442; # NN hopping; band 1
+t1_2 = 0.0006239659 # band 2
+t2 = 2.3053037e-5; # diagonal NNN hopping
+
+t1_list = [t1_1, t1_2]
+
+function get_hof_nnn_h(X::Real, Y::Real, p::Integer, q::Integer, t1_list::Vector, t2::Real, mu::Real)
+    kx = Y/(a*q)
+    ky = X/(a*q)
+    phi = p/q
+    h = zeros(ComplexF64, q, q)
+    h += diagm([mu/2 for j=1:q])  
+    # NN terms
+    h += diagm([-t1_list[mod1(m+1,q)] * exp(im*(2π*phi*m-ky)) for m = 0:q-1]) # y hopping
+    h += -(t1_list[1]).*diagm(-1 => [exp(-im*kx) for m = 0:q-2]) # x hopping
+    h[1,q] += -(t1_list[1])*exp(-im*kx)
+    # NNN terms
+    h += -t2.*diagm(-1 => [exp(im*(2π*phi*(m+0.5) - kx - ky)) for m = 0:q-2])
+    h[1,q] += -t2*exp(im*(2π*phi*(q-1+0.5) - kx - ky))
+    h += -t2.*diagm(1 => [exp(im*(2π*phi*(m-0.5) + kx - ky)) for m = 1:q-1])
+    h[q,1] += -t2*exp(im*(2π*phi*(0-0.5) + kx - ky))
+    # + h.c.
+    h = h + h'
+    return Hermitian(h)
+end
+
+energies_hof = Float64[];
+println("Calculating Hofstadter model with NN and d-NNN hoppings...")
+@showprogress for X in Xrange
+    for Y in Yrange
+        h = get_hof_nnn_h(X,Y,p,q,t1_list,t2,mu)
+        append!(energies_hof,eigvals(h))
+    end
+end
+etahof = (maximum(energies_hof)-minimum(energies_hof))/70
+kdhof = kde(energies_hof, bandwidth = etahof)
+plot!(plt,kdhof.x,kdhof.density, label = "artificial", color = :red, style = :dash, legend = :top, dpi = 200)
 
 
 display(plt)

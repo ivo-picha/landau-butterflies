@@ -26,7 +26,7 @@ LLmax = parse(Int, args[4])
 
 
 a_nm = 5.0 # lattice constant in nm
-NXY = 64 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
+NXY = 120 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
 
 
 a = Float32(a_nm*1f-9) # in m
@@ -45,7 +45,7 @@ output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier
 mkpath(output_folder)
 
 # real space grid
-Ngrid = 32
+Ngrid = 50
 x_grid = Float32.(collect(range(-a*(q+1), a*(q+1), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-2*a, 2*a, length = Ngrid)))
 
@@ -71,6 +71,8 @@ end
 C_array = Array{ComplexF32}(undef, q, q, q*NXY, NXY)
 println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
 
+pi32 = Float32(π)
+
 @showprogress @threads for i = 1:NXY*q
     X = X_list[i]
     for j = 1:NXY
@@ -90,6 +92,10 @@ println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
         # sort!(energies)
         sort!(states, by = first)
 
+        # momenta for convenience
+        ky = X/(a*q)
+        kx = Y/(a*q)
+
         # array to store wavefunctions
         wf_array = Array{ComplexF32}(undef, Ngrid*q, Ngrid, q)
         for m in 1:q
@@ -97,6 +103,11 @@ println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
             for (i,x) in enumerate(x_grid)
                 for (j,y) in enumerate(y_grid)
                     wf_xy = States.get_eigenstate_XY(x,y,states[m],X,Y,p,q,a,LLmax)
+                    # stripping factor to reduce to periodic function in magnetic UC
+                    peel = exp(-im*ky*y)
+                    peel *= exp(im*kx*a*q*floor(x/(a*q)))
+                    peel *= exp(-im*2*pi32*(y/a)*floor(x/(a*q)))
+                    wf_xy *= peel
                     wf_array[i,j,m] = wf_xy
                     norm += abs2(wf_xy)
                 end
