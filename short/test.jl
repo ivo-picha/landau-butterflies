@@ -1,24 +1,3 @@
-using Plots
-using Measures
+tm = ComplexF32[-0.012231598f0 + 1.1952276f-9im -0.27266547f0 - 3.5605024f-10im; 7.744514f-8 - 1.761785f-8im 2.3046722f-7 - 1.3121628f-8im]
 
-
-spectrum_bare_options = (
-    markersize = 0.8,
-    color = :black,
-    label = "",
-    xlabel = "ϕ = p/q",
-    ylabel = "E [eV]",
-    framestyle = :box,
-    size = (1200,800),
-    tickfontsize = 16,
-    guidefontsize = 18,
-    margin = 9mm,
-    dpi=900,
-)
-
-plt = plot(randn(20);
-     spectrum_bare_options...
-     )
-
-savefig(plt, "test.png")
-
+tm = round.(tm; digits=6)

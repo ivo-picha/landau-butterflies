@@ -26,7 +26,7 @@ LLmax = parse(Int, args[4])
 
 
 a_nm = 5.0 # lattice constant in nm
-NXY = 120 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
+NXY = 12*10 # number of k-points in each direction; for larger p and q consider using this for every 2pi in X
 
 
 a = Float32(a_nm*1f-9) # in m
@@ -45,7 +45,7 @@ output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier
 mkpath(output_folder)
 
 # real space grid
-Ngrid = 50
+Ngrid = 60
 x_grid = Float32.(collect(range(-a*(q+1), a*(q+1), length = Ngrid*q)))
 y_grid = Float32.(collect(range(-2*a, 2*a, length = Ngrid)))
 
@@ -69,7 +69,7 @@ end
 
 # loop over XY
 C_array = Array{ComplexF32}(undef, q, q, q*NXY, NXY)
-println("Calculating eigenstates for U₀ = $(abs(U0)) at ϕ = $p/$q...")
+println("Calculating eigenstates and gauge transformations for U₀ = $(abs(U0)) at ϕ = $p/$q...")
 
 pi32 = Float32(π)
 
@@ -104,7 +104,8 @@ pi32 = Float32(π)
                 for (j,y) in enumerate(y_grid)
                     wf_xy = States.get_eigenstate_XY(x,y,states[m],X,Y,p,q,a,LLmax)
                     # stripping factor to reduce to periodic function in magnetic UC
-                    peel = exp(-im*ky*y)
+                    peel = 1
+                    peel *= exp(-im*ky*y)
                     peel *= exp(im*kx*a*q*floor(x/(a*q)))
                     peel *= exp(-im*2*pi32*(y/a)*floor(x/(a*q)))
                     wf_xy *= peel
@@ -151,18 +152,23 @@ pi32 = Float32(π)
         #
         Cmat = Umat' * diagm(energies) * Umat
 
-        #test
-        # Ucheck = norm(Umat'*Umat - I)
-        # if Ucheck > 1e-4
-        #     println("Warning: U matrix is not unitary at X=$X, Y=$Y, norm: $Ucheck")
-        # end
+        # test
+        Ucheck = norm(Umat'*Umat - I)
+        if Ucheck > 1e-4
+            println("Warning: U matrix is not unitary at X=$X, Y=$Y, norm: $Ucheck")
+            println(Umat'*Umat)
+            println("A matrix:")
+            println(round.(Amat;digits=6))
+            println("Energies:")
+            println(round.(energies;digits=8))
+        end
 
 
         C_array[:,:,i,j] = Cmat
     end
 end
 
-
+println("Calculating hopping amplitudes and chemical potentials.")
 
 # wR: Wannier centre; set to zero for FT approach
 # nR: wannier state number (within unit cell); up to q
@@ -268,7 +274,7 @@ open(out_path2, "w") do io
     write(io, "\n\n----------------------------\nHopping amplitudes\n----------------------------\n")
     write(io, "From: Rx  Ry  n  To: Rx' Ry'  m          |t|[eV]      arg(t)/2π\n")
     write(io, "#hopping-amplitudes\n")
-    Rto_list = [(ux*q+m,uy) for ux=-1:1 for uy=-2:2 for m=0:q-1]
+    Rto_list = [(ux*q+m,uy) for ux=-6:6 for uy=-6:6 for m=0:q-1]
     Rfrom_list = [(m,0) for m=0:q-1]
     for Rfrom in Rfrom_list
         n = Rfrom[1]
@@ -289,3 +295,72 @@ open(out_path2, "w") do io
     write(io, "##hopping-amplitudes\n")
 end
 
+
+# make a plot from (0,0)
+tplot1 = plot(framestyle=:box, dpi=200, title="|t|")
+tplot2 = plot(framestyle=:box, dpi=200, title="arg(t)/2π")
+
+Rto_list = [(ux*q + m, uy) for ux=-6:6 for uy=-6:6 for m=0:q-1]
+Rfrom = (0, 0)
+
+xs = Float64[]
+ys = Float64[]
+zs = Float64[]
+zs2 = Float64[]
+
+n = 0
+
+for Rto in Rto_list
+    Rto == Rfrom && continue
+
+    m = mod(Rto[1], q)
+
+    t = 0.0 + 0.0im
+
+    for (i, X) in enumerate(X_list)
+        for (j, Y) in enumerate(Y_list)
+            t += C_array[n+1, m+1, i, j] *
+                 exp(-im * (X*(Rfrom[2] - Rto[2]) - Y*(Rfrom[1] - Rto[1])) / q)
+        end
+    end
+
+    t /= NXY^2 * q
+
+    t *= 1000 #scale
+
+    push!(xs, Rto[1])
+    push!(ys, Rto[2])
+    push!(zs, abs(t))
+    push!(zs2, angle(t)/(2π))
+end
+
+scatter!(
+    tplot1,
+    xs,
+    ys;
+    marker_z = zs,
+    markersize = 7,
+    markerstrokewidth = 1,
+    color = :plasma,
+    colorbar = true,
+    label = "",
+    aspect_ratio = :equal,
+)
+
+scatter!(
+    tplot2,
+    xs,
+    ys;
+    marker_z = zs2,
+    markersize = 7,
+    markerstrokewidth = 1,
+    color = :hsv,
+    colorbar = true,
+    label = "",
+    aspect_ratio = :equal,
+)
+
+
+
+savefig(tplot1, joinpath(output_folder,"t-plot-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY-abs.png"))
+savefig(tplot2, joinpath(output_folder,"t-plot-ph$p-$q-U$U0-a$a_nm-LL$LLmax-NXY$NXY-arg.png"))

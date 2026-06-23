@@ -16,15 +16,15 @@ using .States                        # build a Hamiltonian matrix in a Landau le
 output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/bloch_out_test"
 mkpath(output_folder)
 
-p = 1
+p = 5
 q = 2
 U0 = 0.05f0
 
 pi32 = Float32(π)
 
-X = 1f0*pi32
-Y = 2f0*pi32
-LLmax = 50
+X = 0f0*pi32
+Y = 0f0*pi32
+LLmax = 20
 
 a_nm = 5.0 # lattice constant in nm
 a = Float32(a_nm*1f-9) # in m
@@ -41,14 +41,14 @@ xrange = range(0f0, Float32(2q*a), length = Ngrid*q)
 yrange = range(0f0, Float32(2a), length = Ngrid)
 
 bloch_array = Array{ComplexF32}(undef, Ngrid, Ngrid*q, q)
-for m in 1:1
+for m in 1:q
     println("Calculating Bloch function for band $m...")
     @showprogress for (i,x) in enumerate(xrange)
         for (j,y) in enumerate(yrange)
             bloch_array[j,i,m] = States.get_eigenstate_from_evec(evecs[:,m], x, y, X, Y, p, q, a, LLmax)
             peel = exp(-im*ky*y)
             peel *= exp(im*kx*a*q*floor(x/(a*q)))
-            peel *= exp(-im*2*pi32*(y/a)*floor(x/(a*q)))
+            peel *= exp(-im*2*pi32*(y/a)*floor(x/(a*q))*p)
             bloch_array[j,i,m] *= peel
         end
     end
@@ -67,3 +67,6 @@ for m in 1:1
 end
 
 
+# peel = exp(-im*ky*y)
+# peel *= exp(im*kx*a*q*floor(x/(a*q)))
+# peel *= exp(-im*2*pi32*(y/a)*floor(x/(a*q)))

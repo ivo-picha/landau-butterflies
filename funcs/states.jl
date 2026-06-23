@@ -129,7 +129,7 @@ function gaussian_LG(x::Float32,y::Float32,Rx::Float32,Ry::Float32, phi::Float32
     ωhsq = 4.0 * π^2 * abs(U0) * e / (m_e * a^2) # harmonic frequency squared
     ωcsq4 = phi^2 * h^2 / (16.0 * m_e^2 * a^4)
     σsq = h / (2π * m_e * sqrt(ωhsq + ωcsq4))
-    return exp(-((x-Rx)^2 + (y-Ry)^2)/(2*σsq)) #* exp(im*Float32(2π)*phi*x*y/(a^2))
+    return exp(-((x-Rx)^2 + (y-Ry)^2)/(2*σsq)) * exp(im*Float32(2π)*phi*x*y/(a^2))
 end
 
 
