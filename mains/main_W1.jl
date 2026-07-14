@@ -13,10 +13,10 @@ using .Hamil                        # build a Hamiltonian matrix in a Landau lev
 include(joinpath(dirname(@__DIR__),"funcs/states.jl"))
 using .States                        # build a Hamiltonian matrix in a Landau level basis
 
-p = 2
+p = 1
 q = 1 # don't change
 a_nm = 5.0 # lattice constant in nm
-NXY = 256 # number of k-points in each direction
+NXY = 64 # number of k-points in each direction
 LLmax = 20
 
 a = Float32(a_nm*1f-9) # in m
@@ -56,7 +56,7 @@ for state in states
 end
 
 # compute and plot density in one magnetic unit cell for a given state
-Ngrid = 128
+Ngrid = 64
 xplotrange = range(-1.5*a*q, 1.5*a*q, Ngrid)
 yplotrange = range(-1.5*a, 1.5*a, Ngrid)
 dx = step(xplotrange)
@@ -139,36 +139,39 @@ wf_array = nothing # free memory
 #     "Ry_list" => Ry_list
 # ))
 
+k = 5
+plt_abs = heatmap(xplotrange./a, yplotrange./a, abs.(wannier_vector[k])', xlabel="x/a", ylabel="y/a", title="|wᵣ|", aspect_ratio=1);
+plt_arg = heatmap(xplotrange./a, yplotrange./a, angle.(wannier_vector[k])', xlabel="x/a", ylabel="y/a", title="arg(wᵣ)", aspect_ratio=1);
 
-
+plt_combi = plot(plt_abs,plt_arg, layout = (1,2), size = (800,400), dpi = 120)
 
 ## visualize all wannier functions on one plot
 
-wannier_superarray = zeros(ComplexF32, Ngrid, Ngrid)
-for (i,(Rx,Ry)) in enumerate(Rxy_list)
-    wannier_superarray .+= wannier_vector[i]
-end
-wannier_superarray ./= maximum(abs.(wannier_superarray))
-pltsize = (476,500)
-plt_real = heatmap(xplotrange./a, yplotrange./a, real.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="Re(sum(wᵣ))", aspect_ratio=1, size=pltsize)
-plt_imag = heatmap(xplotrange./a, yplotrange./a, imag.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="Im(sum(wᵣ))", aspect_ratio=1, size=pltsize)
-plt_abs = heatmap(xplotrange./a, yplotrange./a, abs.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="|sum(wᵣ)|", aspect_ratio=1, size=pltsize)
-plt_arg = heatmap(xplotrange./a, yplotrange./a, angle.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="arg(sum(wᵣ))", aspect_ratio=1, size=pltsize)
+# wannier_superarray = zeros(ComplexF32, Ngrid, Ngrid)
+# for (i,(Rx,Ry)) in enumerate(Rxy_list)
+#     wannier_superarray .+= wannier_vector[i]
+# end
+# wannier_superarray ./= maximum(abs.(wannier_superarray))
+# pltsize = (476,500)
+# plt_real = heatmap(xplotrange./a, yplotrange./a, real.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="Re(sum(wᵣ))", aspect_ratio=1, size=pltsize)
+# plt_imag = heatmap(xplotrange./a, yplotrange./a, imag.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="Im(sum(wᵣ))", aspect_ratio=1, size=pltsize)
+# plt_abs = heatmap(xplotrange./a, yplotrange./a, abs.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="|sum(wᵣ)|", aspect_ratio=1, size=pltsize)
+# plt_arg = heatmap(xplotrange./a, yplotrange./a, angle.(wannier_superarray)', xlabel="x/a", ylabel="y/a", title="arg(sum(wᵣ))", aspect_ratio=1, size=pltsize)
 
-hline!(plt_real, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
-vline!(plt_real, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
-hline!(plt_imag, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
-vline!(plt_imag, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
-hline!(plt_abs, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
-vline!(plt_abs, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
-hline!(plt_arg, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
-vline!(plt_arg, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# hline!(plt_real, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# vline!(plt_real, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# hline!(plt_imag, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# vline!(plt_imag, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# hline!(plt_abs, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# vline!(plt_abs, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# hline!(plt_arg, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
+# vline!(plt_arg, [-1.5,-0.5,0.5,1.5], color=:white, linestyle=:dash, label = "")
 
-savefig(plt_real, joinpath(output_folder, "wannier_superarray_real_ph$p-$q-U$U0.png"))
-savefig(plt_imag, joinpath(output_folder, "wannier_superarray_imag_ph$p-$q-U$U0.png"))
-savefig(plt_abs, joinpath(output_folder, "wannier_superarray_abs_ph$p-$q-U$U0.png"))
-savefig(plt_arg, joinpath(output_folder, "wannier_superarray_arg_ph$p-$q-U$U0.png"))
-println("Saved superarray plots to $output_folder")
+# savefig(plt_real, joinpath(output_folder, "wannier_superarray_real_ph$p-$q-U$U0.png"))
+# savefig(plt_imag, joinpath(output_folder, "wannier_superarray_imag_ph$p-$q-U$U0.png"))
+# savefig(plt_abs, joinpath(output_folder, "wannier_superarray_abs_ph$p-$q-U$U0.png"))
+# savefig(plt_arg, joinpath(output_folder, "wannier_superarray_arg_ph$p-$q-U$U0.png"))
+# println("Saved superarray plots to $output_folder")
 
 
 
@@ -180,102 +183,102 @@ println("Saved superarray plots to $output_folder")
 
 # get overlap of a specified H.wannier function with all wannier functions; make a matrix
 
-function get_wHw_matrix(wR::Tuple{Real,Real})
+# function get_wHw_matrix(wR::Tuple{Real,Real})
 
-    wannierR = wannier_vector[findfirst(x->x==wR, Rxy_list)]
-    hwannierR = States.H_on_wannier(wannierR, xplotrange, yplotrange, phi, U0, a)
+#     wannierR = wannier_vector[findfirst(x->x==wR, Rxy_list)]
+#     hwannierR = States.H_on_wannier(wannierR, xplotrange, yplotrange, phi, U0, a)
 
-    whw_matrix = zeros(ComplexF32, length(Rx_list), length(Ry_list))
-    for (i,(Rxi,Ryi)) in enumerate(Rxy_list)
-            whw = sum(conj.(wannier_vector[i]) .* hwannierR)
+#     whw_matrix = zeros(ComplexF32, length(Rx_list), length(Ry_list))
+#     for (i,(Rxi,Ryi)) in enumerate(Rxy_list)
+#             whw = sum(conj.(wannier_vector[i]) .* hwannierR)
 
-            n = findfirst(x -> x == Rxi, Rx_list)
-            m = findfirst(x -> x == Ryi, Ry_list)
-            whw_matrix[n,m] = whw 
-    end
-    #whw_matrix ./= maximum(abs.(whw_matrix))
-    #show(stdout, "text/plain", whw_matrix)
-    # println("Overlap matrix of wᵣ with H.w₁,₀; normalized:")
-    # show(stdout, "text/plain", round.(whw_matrix; digits = 5))
+#             n = findfirst(x -> x == Rxi, Rx_list)
+#             m = findfirst(x -> x == Ryi, Ry_list)
+#             whw_matrix[n,m] = whw 
+#     end
+#     #whw_matrix ./= maximum(abs.(whw_matrix))
+#     #show(stdout, "text/plain", whw_matrix)
+#     # println("Overlap matrix of wᵣ with H.w₁,₀; normalized:")
+#     # show(stdout, "text/plain", round.(whw_matrix; digits = 5))
 
 
-    # energy FT
+#     # energy FT
 
-    t_ft_matrix = zeros(ComplexF32, length(Rx_list), length(Ry_list))
-    for (i,(Rxi,Ryi)) in enumerate(Rxy_list)
-        tR = 0f0 + im*0f0
-        for (i,(X,Y)) in enumerate(XYs)
-            tR += energies[i] * exp(-im*(X*(Ryi-wR[2]) - Y*(Rxi-wR[1]))/q)
-        end
-        n = findfirst(x -> x == Rxi, Rx_list)
-        m = findfirst(x -> x == Ryi, Ry_list)
-        t_ft_matrix[n,m] = tR * q / NXY^2
-    end
-    #t_ft_matrix ./= maximum(abs.(t_ft_matrix))
-    # println("tR from energy FT; normalized:")
-    # show(stdout, "text/plain", t_ft_matrix; digits = 5)
+#     t_ft_matrix = zeros(ComplexF32, length(Rx_list), length(Ry_list))
+#     for (i,(Rxi,Ryi)) in enumerate(Rxy_list)
+#         tR = 0f0 + im*0f0
+#         for (i,(X,Y)) in enumerate(XYs)
+#             tR += energies[i] * exp(-im*(X*(Ryi-wR[2]) - Y*(Rxi-wR[1]))/q)
+#         end
+#         n = findfirst(x -> x == Rxi, Rx_list)
+#         m = findfirst(x -> x == Ryi, Ry_list)
+#         t_ft_matrix[n,m] = tR * q / NXY^2
+#     end
+#     #t_ft_matrix ./= maximum(abs.(t_ft_matrix))
+#     # println("tR from energy FT; normalized:")
+#     # show(stdout, "text/plain", t_ft_matrix; digits = 5)
 
-    return whw_matrix, t_ft_matrix
-end
+#     return whw_matrix, t_ft_matrix
+# end
 
-whw_matrix00, t_ft_matrix00 = get_wHw_matrix((0f0,0f0))
-whw_matrix10, t_ft_matrix10 = get_wHw_matrix((1f0,0f0))
-whw_matrix01, t_ft_matrix01 = get_wHw_matrix((0f0,1f0)) 
+# whw_matrix00, t_ft_matrix00 = get_wHw_matrix((0f0,0f0))
+# whw_matrix10, t_ft_matrix10 = get_wHw_matrix((1f0,0f0))
+# whw_matrix01, t_ft_matrix01 = get_wHw_matrix((0f0,1f0)) 
 
-whw_tx_rescaled = whw_matrix00[3,2] * t_ft_matrix00[2,2] / whw_matrix00[2,2]
-whw_ty_rescaled = whw_matrix00[2,3] * t_ft_matrix00[2,2] / whw_matrix00[2,2]
-# save matrices as one text file in folder
-whw_matrices_path = joinpath(output_folder, "whw_and_ft_matrices.txt")
+# whw_tx_rescaled = whw_matrix00[3,2] * t_ft_matrix00[2,2] / whw_matrix00[2,2]
+# whw_ty_rescaled = whw_matrix00[2,3] * t_ft_matrix00[2,2] / whw_matrix00[2,2]
+# # save matrices as one text file in folder
+# whw_matrices_path = joinpath(output_folder, "whw_and_ft_matrices.txt")
 
-matrices = transpose.([whw_matrix00, t_ft_matrix00, whw_matrix10, t_ft_matrix10, whw_matrix01, t_ft_matrix01])
-descriptions = [
-    "^\n|\ny\nx-->\n\n Center at (0,0)\nFrom overlap <wᵣ|H|w₀,₀>\n",
-    "Rescaled tₓ: $whw_tx_rescaled\nRescaled t_y: $whw_ty_rescaled\nFrom energy FT:\n",
-    "\n\nCenter at (1,0)\nFrom overlap <wᵣ|H|w₁,₀>t_ft_matrix = zeros(ComplexF32, length(Rx_list), length(Ry_list))
-    for (i,(Rxi,Ryi)) in enumerate(Rxy_list)
-        tR = 0f0 + im*0f0
-        for (i,(X,Y)) in enumerate(XYs)
-            tR += energies[i] * exp(-im*(X*(Ryi-wR[2]) - Y*(Rxi-wR[1]))/q)
-        end
-        n = findfirst(x -> x == Rxi, Rx_list)
-        m = findfirst(x -> x == Ryi, Ry_list)
-        t_ft_matrix[n,m] = tR * q / NXY^2
-    end\n",
-    "From energy FT:\n",
-    "\n\nCenter at (0,1)\nFrom overlap <wᵣ|H|w₀,₁>\n",
-    "From energy FT:\n",
-]
+# matrices = transpose.([whw_matrix00, t_ft_matrix00, whw_matrix10, t_ft_matrix10, whw_matrix01, t_ft_matrix01])
+# descriptions = [
+#     "^\n|\ny\nx-->\n\n Center at (0,0)\nFrom overlap <wᵣ|H|w₀,₀>\n",
+#     "Rescaled tₓ: $whw_tx_rescaled\nRescaled t_y: $whw_ty_rescaled\nFrom energy FT:\n",
+#     "\n\nCenter at (1,0)\nFrom overlap <wᵣ|H|w₁,₀>t_ft_matrix = zeros(ComplexF32, length(Rx_list), length(Ry_list))
+#     for (i,(Rxi,Ryi)) in enumerate(Rxy_list)
+#         tR = 0f0 + im*0f0
+#         for (i,(X,Y)) in enumerate(XYs)
+#             tR += energies[i] * exp(-im*(X*(Ryi-wR[2]) - Y*(Rxi-wR[1]))/q)
+#         end
+#         n = findfirst(x -> x == Rxi, Rx_list)
+#         m = findfirst(x -> x == Ryi, Ry_list)
+#         t_ft_matrix[n,m] = tR * q / NXY^2
+#     end\n",
+#     "From energy FT:\n",
+#     "\n\nCenter at (0,1)\nFrom overlap <wᵣ|H|w₀,₁>\n",
+#     "From energy FT:\n",
+# ]
 
-function write_matrix_aligned(io, mat)
-    rows, cols = size(mat)
-    # Determine column width based on the largest number in the matrix
-    max_width = maximum(length.(string.(mat))) + 1  # +1 for spacing
+# function write_matrix_aligned(io, mat)
+#     rows, cols = size(mat)
+#     # Determine column width based on the largest number in the matrix
+#     max_width = maximum(length.(string.(mat))) + 1  # +1 for spacing
 
-    # Optional: add column headers
-    header = "     " * join([rpad("C$j", max_width) for j in 1:cols])
-    write(io, header * "\n")
+#     # Optional: add column headers
+#     header = "     " * join([rpad("C$j", max_width) for j in 1:cols])
+#     write(io, header * "\n")
 
-    for i in 1:rows
-        line = rpad("R$i", 5) * join([rpad(string(mat[i,j]), max_width) for j in 1:cols])
-        write(io, line * "\n")
-    end
-end
-open(whw_matrices_path, "w") do io
-    for (desc, mat) in zip(descriptions, matrices)
-        write(io, desc * "\n")         # write the description
-        writedlm(io, mat)              # write the matrix
-        write(io, "\n")                # extra line for spacing
-    end
-end
-println("Saved whw and t_ft matrices to $whw_matrices_path")
-# Save all matrices to one file
-open(whw_matrices_path, "w") do io
-    for (desc, mat) in zip(descriptions, matrices)
-        write(io, desc * "\n")
-        write_matrix_aligned(io, mat)
-        write(io, "\n")
-    end
-end
-println("Saved whw and tR from FT matrices to $whw_matrices_path")
+#     for i in 1:rows
+#         line = rpad("R$i", 5) * join([rpad(string(mat[i,j]), max_width) for j in 1:cols])
+#         write(io, line * "\n")
+#     end
+# end
+# open(whw_matrices_path, "w") do io
+#     for (desc, mat) in zip(descriptions, matrices)
+#         write(io, desc * "\n")         # write the description
+#         writedlm(io, mat)              # write the matrix
+#         write(io, "\n")                # extra line for spacing
+#     end
+# end
+# println("Saved whw and t_ft matrices to $whw_matrices_path")
+# # Save all matrices to one file
+# open(whw_matrices_path, "w") do io
+#     for (desc, mat) in zip(descriptions, matrices)
+#         write(io, desc * "\n")
+#         write_matrix_aligned(io, mat)
+#         write(io, "\n")
+#     end
+# end
+# println("Saved whw and tR from FT matrices to $whw_matrices_path")
 
 ## 

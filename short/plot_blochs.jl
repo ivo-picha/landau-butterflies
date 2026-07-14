@@ -16,14 +16,14 @@ using .States                        # build a Hamiltonian matrix in a Landau le
 output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/bloch_out_test"
 mkpath(output_folder)
 
-p = 5
+p = 1
 q = 2
 U0 = 0.05f0
 
 pi32 = Float32(π)
 
-X = 0f0*pi32
-Y = 0f0*pi32
+X = 0.33f0*pi32
+Y = 0.1f0*pi32
 LLmax = 20
 
 a_nm = 5.0 # lattice constant in nm
@@ -46,9 +46,11 @@ for m in 1:q
     @showprogress for (i,x) in enumerate(xrange)
         for (j,y) in enumerate(yrange)
             bloch_array[j,i,m] = States.get_eigenstate_from_evec(evecs[:,m], x, y, X, Y, p, q, a, LLmax)
-            peel = exp(-im*ky*y)
-            peel *= exp(im*kx*a*q*floor(x/(a*q)))
-            peel *= exp(-im*2*pi32*(y/a)*floor(x/(a*q))*p)
+            peel = 1
+            peel *= exp(-im*ky*y)
+            peel *= exp(-im*kx*x)
+            peel *= exp(-im*2*pi32*p*(y/a)*floor(x/(q*a)))  # xcut; also possible to cut more with floor(2*...)/2 and so on
+            #peel *= exp(-im*2*pi32*p*(x/q/a)*(y-a*floor(y/a))/a)  # ycut
             bloch_array[j,i,m] *= peel
         end
     end

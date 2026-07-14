@@ -19,13 +19,13 @@ q = 2
 a_nm = 5.0 # lattice constant in nm
 U0 = 0.05f0 # potential strength
 
-NXY = 251 # number of k-points in each direction per BZ UC
-Ngrid = 60 # number of real space points in each lattice UC 
+NXY = 50 # number of k-points in each direction per BZ UC
+Ngrid = 40 # number of real space points in each lattice UC 
 LLmax = 40 # max LL used
 
 
 #output folder
-output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out_plots/ph$p-$q-U$(abs(U0))-a$a_nm-LL$LLmax-NXY$NXY-Ngrid$Ngrid"
+output_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out_plots/"
 mkpath(output_folder)
 
 a = Float32(a_nm*1f-9)
@@ -38,8 +38,8 @@ Y_list = collect(range(0f0, Float32(2π), length = NXY+1))[1:end-1]
 XY_list = reshape(collect(Base.product(X_list, Y_list)),:)
 
 
-xplotrange = range(-a, a*q+a, Ngrid*q) # maybe take a larger UC for better integral over "all space"
-yplotrange = range(-a, 2*a, Ngrid)
+xplotrange = range(0, 2*a*q, Ngrid*q) # maybe take a larger UC for better integral over "all space"
+yplotrange = range(0, 2*a, Ngrid)
 dx = step(xplotrange)
 dy = step(yplotrange)
 xplotrange = Float32.(collect(xplotrange))
@@ -54,7 +54,7 @@ for m in 1:q
     normg = 0f0
     for (i,x) in enumerate(xplotrange)
         for (j,y) in enumerate(yplotrange)
-            g_xy = States.gaussian_LG(x,y,Float32(m-1)*a + a/2, a/2,phi,U0,a)
+            g_xy = States.gaussian_LG(x,y,Float32(m-1)*a, 0f0,phi,U0,a)
             g_array[i,j,m] = g_xy
             normg += abs2(g_xy)
         end
@@ -103,14 +103,10 @@ println("Obtaining Wannier functions on $(Threads.nthreads()) thread(s)...")
             for (i,x) in enumerate(xplotrange)
                 for (j,y) in enumerate(yplotrange)
                     wf_xy = States.get_eigenstate_XY(x,y,states[m],X,Y,p,q,a,LLmax) # full Bloch wf here
-                    # stripping factor to reduce to periodic function in magnetic UC
+                    # stripping factor to reduce to periodic function in magnetic UC; not used atm
                     peel = 1
-                    #peel *= exp(-im*ky*y) #will be multiplied later anyways, 3 lines later
-                    peel *= exp(im*kx*a*q*floor(x/(a*q))) #not needed?
-                    peel *= exp(-im*2*pi32*(y/a)*p*floor(x/(a*q)))
+                    #peel *= exp(-im*2*pi32*p*(y/a)*floor(x/(q*a)))
                     wf_xy *= peel
-                    # reconstruct new bloch function
-                    wf_xy *= exp(im*kx*x)
                     wf_array[i,j,m] = wf_xy
                     norm += abs2(wf_xy)
                 end
@@ -169,7 +165,7 @@ println("Obtaining Wannier functions on $(Threads.nthreads()) thread(s)...")
         for (i,x) in enumerate(xplotrange)
             for (j,y) in enumerate(yplotrange)
                 for n = 1:q
-                    Rx = Float32(n-1)*a + a/2
+                    Rx = Float32(n-1)*a
                     Ry = 0f0
                     w_xy_n = 1/(q*NXY^2)
                     w_xy_n *= exp(-im*(kx*Rx - ky*Ry))
@@ -221,7 +217,7 @@ for n = 1:q
 end
 
 
-plt_combi = plot(plots_vec..., layout = (q,2), dpi = 120, size = (900,450), measures = 5mm)
+plt_combi = plot(plots_vec..., layout = (q,2), dpi = 120, size = (900,430), measures = 5mm)
 
-savefig(plt_combi, joinpath(output_folder, "test2.png"))
+savefig(plt_combi, joinpath(output_folder, "ph$p-$q-U$(abs(U0))-a$a_nm-LL$LLmax-NXY$NXY-Ngrid$Ngrid-test2.png"))
 

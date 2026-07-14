@@ -105,10 +105,12 @@ pi32 = Float32(π)
                     wf_xy = States.get_eigenstate_XY(x,y,states[m],X,Y,p,q,a,LLmax)
                     # stripping factor to reduce to periodic function in magnetic UC
                     peel = 1
-                    peel *= exp(-im*ky*y)
-                    peel *= exp(im*kx*a*q*floor(x/(a*q)))
-                    peel *= exp(-im*2*pi32*(y/a)*floor(x/(a*q)))
+                    #peel *= exp(-im*ky*y) #will be multiplied later anyways, 3 lines later
+                    peel *= exp(im*kx*a*q*floor(x/(a*q))) #not needed?
+                    peel *= exp(-im*2*pi32*(y/a)*p*floor(x/(a*q)))
                     wf_xy *= peel
+                    # reconstruct new bloch function
+                    wf_xy *= exp(im*kx*x)
                     wf_array[i,j,m] = wf_xy
                     norm += abs2(wf_xy)
                 end
