@@ -133,4 +133,4 @@ Plt.plot_bare_spectrum_mainfig!(plot_spectrum, out_energies, phi_list)
 
 
 # SAVE FINAL PLOT ==========================================================
-savefig(plot_spectrum, joinpath(outfolder_plots, string("ARTSY_",param_str,".png")))
+savefig(plot_spectrum, joinpath(outfolder_plots, string("S_mainfig_",param_str,".png")))

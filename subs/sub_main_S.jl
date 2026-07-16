@@ -1,7 +1,7 @@
 # job file that submits jobs of main_S.jl for sets of parameters
 
 #list_U0 = round.(collect(range(0.003, 0.03, 8)); digits=4)
-list_U0 = [0.03]
+list_U0 = [0.02, 0.05, 0.08, 0.01, 0.002]
 list_a = [5]
 list_LLmax = [625]
 list_q = [360]
@@ -37,7 +37,7 @@ for (j,params) in enumerate(param_list_tuple)
 
         #run file -------------------------------------------------------------------------------------------------------- OPTIONS GO BELOW ----------
         write(job, "cd /users/ivoga/lh/code/ \n") # change to project directory with .toml files
-        write(job, "julia --project=. ./mains/main_S_mainfig.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 1 -p -w -l -z\n")
+        write(job, "julia --project=. ./mains/main_S_mainfig.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $(params[5]) $(params[6]) --XBF 2 -p -w -l -z\n")
     end
 
     run(`qsub $path_job`)   

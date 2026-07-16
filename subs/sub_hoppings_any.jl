@@ -51,7 +51,7 @@ for (j,params) in enumerate(param_list_tuple)
 
         #run file -------------------------------------------------------------------------------------------------------- OPTIONS GO BELOW ----------
         write(job, "cd /users/ivoga/lh/code/ \n") # change to project directory with .toml files
-        write(job, "julia --project=. ./wannierize/hoppings_any.jl $(params[1]) $(params[2]) $(params[3]) $(params[4]) $LLmax $(params[5]) $(params[6]) \n")
+        write(job, "julia --project=. ./wannierize/hoppings_any.jl $(params[3]) $(params[4]) $(params[2]) $(params[1]) $LLmax $(params[5]) $(params[6]) \n")
     end
 
     run(`qsub $path_job`)   

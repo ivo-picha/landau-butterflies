@@ -11,8 +11,8 @@
 args = ["0.03", "5", "5", "20", "0.5", "1", "-p", "-w", "-z"]; # for visual studio code testing # "--XBF", "2"
 
 # -OUTPUT FOLDER!-
-outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
-#outfolder = "/users/ivoga/lh/out" # cluster path
+#outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc"
+outfolder = "/users/ivoga/lh/out" # cluster path
 
 outfolder_plots = joinpath(outfolder,"plots/")
 outfolder_data = joinpath(outfolder,"data/")

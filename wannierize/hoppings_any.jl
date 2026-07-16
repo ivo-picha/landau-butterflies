@@ -9,8 +9,8 @@ using Base.Threads
 using ProgressMeter
 using LinearAlgebra
 
-outdir = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out_hops/"
-#outdir = "/users/ivoga/lh/out/wannier_out" # cluster path
+#outdir = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/wannier_out_hops/"
+outdir = "/users/ivoga/lh/out/wannier_out" # cluster path
 
 mkpath(outdir)
 

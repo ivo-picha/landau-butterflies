@@ -169,7 +169,7 @@ function get_U_matrix_and_energies(p,q,X,Y,U0,a,LLmax,Nuc,xrange_muc,yrange_muc,
     evals, evecs = eigen(H)
 
 
-    bloch_wf_array_muc = Array{ComplexF32}(undef, Nuc*q, Nuc, q)
+    bloch_wf_array_muc = Array{ComplexF32}(undef, length(xrange_muc), length(yrange_muc), q)
     for m=1:q
         bloch_wf_array_muc[:,:,m] = Wannierize.get_bloch_array(xrange_muc,yrange_muc,X,Y,evecs[:,m],p,q,a,LLmax,dx,dy)
     end
@@ -203,13 +203,13 @@ function get_loewdin_array(p,q,X,Y,U0,a,LLmax,Nuc,xrange,yrange,xrange_muc,yrang
 
     Umat, ens = get_U_matrix_and_energies(p,q,X,Y,U0,a,LLmax,Nuc,xrange_muc,yrange_muc,dx,dy,trialwf)
 
-    bloch_wf_array = Array{ComplexF32}(undef, 2*Nuc*q, 2*Nuc, q)
+    bloch_wf_array = Array{ComplexF32}(undef, length(xrange), length(yrange), q)
     for m=1:q
         bloch_wf_array[:,:,m] = Wannierize.get_bloch_array(xrange,yrange,X,Y,evecs[:,m],p,q,a,LLmax,dx,dy)
     end
 
 
-    loewdin_wf_array = zeros(ComplexF32, 2*Nuc*q, 2*Nuc, q)
+    loewdin_wf_array = zeros(ComplexF32, length(xrange), length(yrange), q)
     for n=1:q
         for m=1:q
             loewdin_wf_array[:,:,n] .+= Umat[m,n] .* bloch_wf_array[:,:,m]
