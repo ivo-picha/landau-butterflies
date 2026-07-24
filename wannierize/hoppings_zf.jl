@@ -1,6 +1,7 @@
 # spectrum and states for 2d electron gas in cos potential
 using LinearAlgebra
 using ProgressMeter
+using Base.Threads
 
 
 
@@ -17,8 +18,8 @@ m = m_e; # electron/particle mass
 G = 2π/a # recip scat vec
 EF = (ħ^2 /e)* 2π*(nu/a^2)/(2*m) 
 
-Nk = 1024; # sqrt of number of momentum states in BZ
-NBZ = 4; # number of BZs in each dimension / 2
+Nk = 2048; # sqrt of number of momentum states in BZ
+NBZ = 8; # number of BZs in each dimension / 2
 
 BZ_centers = reshape(collect(Base.product(G.*(-NBZ:NBZ), G.*(-NBZ:NBZ))), :)
 BZ_kpoints = reshape(collect(Base.product(range(-G/2,G/2,Nk), range(-G/2,G/2,Nk))), :)
@@ -48,42 +49,49 @@ function get_Hk(BZ_kpoint::Tuple{Float64,Float64}, BZ_centers::Vector{Tuple{Floa
     return Hermitian(Hk)
 end
 
-mu    = 0.0
-tnnx  = 0.0 + 0.0im
-tnny  = 0.0 + 0.0im
-tnnnx = 0.0 + 0.0im
-tnnny = 0.0 + 0.0im
-tnnnd = 0.0 + 0.0im
+Nktot = length(BZ_kpoints)
+nthreads_used = Threads.nthreads()
 
-@showprogress for BZ_kpoint in BZ_kpoints
-    kx, ky = BZ_kpoint
+mu_thread    = zeros(Float64, nthreads_used)
+tnnx_thread  = zeros(ComplexF64, nthreads_used)
+tnny_thread  = zeros(ComplexF64, nthreads_used)
+tnnnx_thread = zeros(ComplexF64, nthreads_used)
+tnnny_thread = zeros(ComplexF64, nthreads_used)
+tnnnd_thread = zeros(ComplexF64, nthreads_used)
 
-    Hk = get_Hk(BZ_kpoint, BZ_centers, m, ϵ)
-    en = minimum(eigvals(Hk))
+progress = Progress(Nktot)
+
+Threads.@threads for i=1:Nktot
+    tid = Threads.threadid()
+
+    kx, ky = BZ_kpoints[i]
+
+    Hk = get_Hk(BZ_kpoints[i], BZ_centers, m, ϵ)
+    en = minimum(eigvals(Hermitian(Hk)))
 
     # R = (0, 0)
-    mu += en
+    mu_thread[tid] += en
 
     # R = (a, 0) and (0, a)
-    tnnx += en * exp(-im * kx * a)
-    tnny += en * exp(-im * ky * a)
+    tnnx_thread[tid] += en * exp(-im * kx * a)
+    tnny_thread[tid] += en * exp(-im * ky * a)
 
     # R = (2a, 0) and (0, 2a)
-    tnnnx += en * exp(-im * 2kx * a)
-    tnnny += en * exp(-im * 2ky * a)
+    tnnnx_thread[tid] += en * exp(-im * 2 * kx * a)
+    tnnny_thread[tid] += en * exp(-im * 2 * ky * a)
 
     # R = (a, a)
-    tnnnd += en * exp(-im * (kx + ky) * a)
+    tnnnd_thread[tid] += en * exp(-im * (kx + ky) * a)
+
+    ProgressMeter.next!(progress)
 end
 
-Nktot = length(BZ_kpoints)
-
-mu    /= Nktot
-tnnx  /= Nktot
-tnny  /= Nktot
-tnnnx /= Nktot
-tnnny /= Nktot
-tnnnd /= Nktot
+mu    = sum(mu_thread)    / Nktot
+tnnx  = sum(tnnx_thread)  / Nktot
+tnny  = sum(tnny_thread)  / Nktot
+tnnnx = sum(tnnnx_thread) / Nktot
+tnnny = sum(tnnny_thread) / Nktot
+tnnnd = sum(tnnnd_thread) / Nktot
 
 println("mu    = $mu")
 println("tnnx  = $tnnx")

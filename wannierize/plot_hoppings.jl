@@ -1,4 +1,5 @@
 using Plots
+using Measures
 
 #list of nonrepeating p and q that were calculated
 # list_p = [1,2,3,4,5,6,7,8]
@@ -65,13 +66,13 @@ mu5 = [-0.031030036,
        missing, -0.030194, missing, -0.029987, missing, missing, -0.029655, missing, -0.029295, -0.029079,
        -0.02891, -0.0287, -0.027963, -0.02695, -0.026367 , -0.025772, -0.024429]
 # NN hopping
-tnn5 = [0.00061797,
+tnn5 = [0.0006277,
         missing, missing, 0.000645, 0.00064, 0.000638, missing, 0.000632, missing, 0.000625, missing,
         0.000615, missing, 0.000602, missing, 0.000592, missing, 0.000582, missing, 0.000567, missing,
         missing, 0.000537, missing, 0.000497, missing, missing, 0.00046, missing, 0.000424, 0.000405,
         0.00039, 0.000373, 0.000315, 0.00026, 0.000233, 0.000206, 0.000157]
 # NNN hopping
-tnnn5 = [1.5045e-5,
+tnnn5 = [1.5045e-7,
          missing, missing, 2.0e-5, 1.4e-5, 2.0e-5, missing, 2.1e-5, missing, 2.0e-5, missing,
          1.7e-5, missing, 1.7e-5, missing, 1.4e-5, missing, 1.65e-5, missing, 1.7e-5, missing,
          missing, 2.2e-5, missing, 1.3e-5, missing, missing, 1.1e-5, missing, 3.0e-6, 9.0e-6,
@@ -89,33 +90,33 @@ mu8 = [-0.0701928,
        missing, missing, -0.07004, -0.0703, -0.07014, missing, -0.07011, missing, -0.070094, missing,
        -0.070028, missing, -0.069975, missing, -0.069925, missing, -0.06986, missing, missing, missing,
        missing, -0.069422, missing, missing, -0.06936, missing, -0.069156, missing, -0.068867, missing,
-       missing, missing, -0.06779, missing, -0.066672, missing, -0.065098]
+       missing, -0.068451, -0.06779, -0.067127, -0.066672, -0.066205, -0.065098]
 # NN hopping
-tnn8 = [0.00016716,
+tnn8 = [0.0002035504457158282,
         missing, missing, missing, 0.000241, 0.000248, missing, 0.000246, missing, 0.000244, missing,
         0.000241, missing, 0.000236, missing, 0.000235, missing, 0.000234, missing, missing, missing,
         missing, 0.000201, missing, missing, missing, missing, 0.000194, missing, 0.000185, missing,
-        missing, missing, 0.000164, missing, 0.000113, missing, 7.9e-5]
+        missing, 0.000166, 0.000164, 0.000125, 0.000113, 0.0001, 7.9e-5]
 # NNN hopping
-tnnn8 = [7.949579256338586e-5,
+tnnn8 = [4.32333950e-5,
          missing, missing, missing, 4.0e-6, 5.0e-6, missing, 2.0e-6, missing, 2.0e-6, missing,
          2.0e-6, missing, 8.0e-6, missing, 2.0e-6, missing, 5.0e-6, missing, missing, missing,
          missing, 5.2e-5, missing, missing, missing, missing, 4.0e-6, missing, 7.0e-6, missing,
-         missing, missing, 1.7e-5, missing, 1.6e-5, missing, 2.3e-5] 
+         missing, 1.0e-6, 1.7e-5, 1.0e-6, 1.6e-5, 5.0e-6, 2.3e-5] 
 # d-NNN hopping
-tdnnn8 = [4.814433585517812e-7,
+tdnnn8 = [2.814433585517812e-7,
           missing, missing, missing, 1.7e-5, 1.0e-6, missing, 2.0e-6, missing, 2.8e-5, missing,
           0.0, missing, 1.2e-5, missing, 9.0e-5, missing, 6.0e-6, missing, missing, missing,
           missing, 1.4e-5, missing, missing, missing, missing, 1.3e-5, missing, 2.0e-5, missing,
-          missing, missing, 6.0e-6, missing, 1.0e-6, missing, 2.7e-5] 
+          missing, 3.0e-6, 6.0e-6, 1.0e-6, 1.0e-6, 1.0e-6, 2.7e-5] 
 
 
 ## y NN hopping phases, multiples of pi; for U = 50 meV only
 ph_list = [
     # q = 1
-    (1, 1, [1-0.012694]),
-    (2, 1, [-0.990117]),
-    (3, 1, [1-0.002523]),
+    (1, 1, [0.012694]),
+    (2, 1, [1-0.990117]),
+    (3, 1, [0.002523]),
 
     # q = 2
     (1, 2, [0.496945, -0.496481]),
@@ -165,6 +166,8 @@ circles = plot(
     xticks=false,
     yticks=false,
     legend=:outerright,
+    dpi = 120,
+    ms = 8,
 )
 for n in 1:5
     r = 0.01 + n / 4
@@ -187,14 +190,14 @@ end
 for set in ph_list
         plot_phases!(circles, set)
 end
-savefig
+savefig("/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/phases.pdf")
 
 
 
 
 ## ---------------------- plotting 
 
-pqplotlist = [(1, 8), (1, 3), (1, 2), (2, 3),(5, 6), (1, 1), (7,6), (4, 3),  (3, 2), (7, 4), (2, 1), (7, 3), (5, 2), (8, 3), (3, 1)]
+pqplotlist = [(1, 8), (1, 3), (1, 2), (3,4), (1, 1), (7,6), (4, 3),  (3, 2), (7, 4), (2, 1), (7, 3), (5, 2), (8, 3), (3, 1)]
 phiplotlist = [pj/qj for (pj,qj) in pqplotlist]
 labellist = ["$pj/$qj" for (pj,qj) in pqplotlist]
 pushfirst!(phiplotlist, 0)
@@ -206,18 +209,23 @@ plt_opt = (
     framestyle = :box,
     xaxis = "ϕ = p/q",
     xlims = (0,3),
-    size = (480,320),
-    xticks = (phiplotlist,labellist)
+    size = (400,320),
+    xticks = (phiplotlist,labellist),
+    markers = :diamond,
+    ms = 6,
+    legend = :topright,
+    legendfont = 11,
+    guidefont = 13
 )
 
-plot_mu = scatter(philist,mu2.*1000, label= "U₀ = 20 meV";plt_opt...)
-scatter!(plot_mu,philist,mu5.*1000, label= "U₀ = 50 meV";plt_opt...)
-scatter!(plot_mu,philist,mu8.*1000, label= "U₀ = 80 meV";plt_opt...)
+plot_mu = scatter(philist,mu2.*1000, label= "";plt_opt...)
+scatter!(plot_mu,philist,mu5.*1000, label= "";plt_opt...)
+scatter!(plot_mu,philist,mu8.*1000, label= "";plt_opt...)
 yaxis!(plot_mu, "μ [meV]")
 
-plot_tnn = scatter(philist,tnn2.*1000, label= "";plt_opt...)
-scatter!(plot_tnn,philist,tnn5.*1000, label= "";plt_opt...)
-scatter!(plot_tnn,philist,tnn8.*1000, label= "";plt_opt...)
+plot_tnn = scatter(philist,tnn2.*1000, label= "U₀ = 20 meV";plt_opt...)
+scatter!(plot_tnn,philist,tnn5.*1000, label= "U₀ = 50 meV";plt_opt...)
+scatter!(plot_tnn,philist,tnn8.*1000, label= "U₀ = 80 meV";plt_opt...)
 yaxis!(plot_tnn, "|t| [meV]")
 
 plot_tnnn = scatter(philist,tnnn2.*1000, label= "";plt_opt...)
@@ -230,4 +238,39 @@ scatter!(plot_tdnnn,philist,tdnnn5.*1000, label= "";plt_opt...)
 scatter!(plot_tdnnn,philist,tdnnn8.*1000, label= "";plt_opt...)
 yaxis!(plot_tdnnn, "|t''| [meV]")
 
-plt_combi = plot(plot_mu, plot_tnn, plot_tnnn, plot_tdnnn, layout = (2,2), size = (1.6*600,500))
+plot_mu_overlay = scatter(philist,(mu2.-minimum(skipmissing(mu2))).*1000, label= "";plt_opt...)
+scatter!(plot_mu_overlay,philist,(mu5.-minimum(skipmissing(mu5))).*1000, label= "";plt_opt...)
+scatter!(plot_mu_overlay,philist,(mu8.-minimum(skipmissing(mu8))).*1000, label= "";plt_opt...)
+yaxis!(plot_mu_overlay, "μ - μ₀ [meV]")
+
+plot_tnn_log = scatter(philist,log.(tnn2.*1000), label= "";plt_opt...)
+scatter!(plot_tnn_log,philist,log.(tnn5.*1000), label= "";plt_opt...)
+scatter!(plot_tnn_log,philist,log.(tnn8.*1000), label= "";plt_opt...)
+yaxis!(plot_tnn_log, "log |t| [meV]")
+
+plt_combi = plot(plot_mu, plot_tnn, plot_tnnn, plot_tdnnn, layout = (4,1), link=:x,
+        size = (1.6*300,790), margins = 3mm, dpi = 200
+)
+
+savefig(plt_combi,"/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/hops_abs.pdf")
+
+
+
+
+## extra plots, universal?
+plot_mu_overlay = scatter(philist,(mu2.-minimum(skipmissing(mu2))).*1000, label= "";plt_opt...)
+scatter!(plot_mu_overlay,philist,(mu5.-minimum(skipmissing(mu5))).*1000, label= "";plt_opt...)
+scatter!(plot_mu_overlay,philist,(mu8.-minimum(skipmissing(mu8))).*1000, label= "";plt_opt...)
+yaxis!(plot_mu_overlay, "μ - μ₀ [meV]")
+
+plot_tnn_log = scatter(philist,log.(tnn2.*1000), label= "";plt_opt...)
+scatter!(plot_tnn_log,philist,log.(tnn5.*1000), label= "";plt_opt...)
+scatter!(plot_tnn_log,philist,log.(tnn8.*1000), label= "";plt_opt...)
+yaxis!(plot_tnn_log, "log |t| [meV]")
+
+plot_combi_extra = plt_combi = plot(plot_mu_overlay, plot_tnn_log, layout = (2,1),
+        size = (1.6*300,500), margins = 6mm, dpi = 120
+)
+
+
+savefig(plot_combi_extra,"/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/hops_abs_extra.pdf")
