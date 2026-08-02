@@ -9,10 +9,10 @@ out_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/hof_nnn"
 mkpath(out_folder)
 
 t1 = 1; # NN hopping
-t2 = 0.9; # diagonal NNN hopping
+t2 = 0.1; # diagonal NNN hopping
 Nk = 32; # size of k-grid in each dimension
 phi1 = 0; # starting flux
-phi2 = 1; # final flux; range defined
+phi2 = 2; # final flux; range defined
 q_max = 120; # maximum q value, sets resolution
 
 # bloch hamiltonian; kx ∈ [0,2π/(aq)), ky ∈ [0,2π/a) → magnetic momenta

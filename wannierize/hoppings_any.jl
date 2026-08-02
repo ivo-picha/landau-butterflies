@@ -29,16 +29,18 @@ NXY = parse(Int, args[6])
 Nuc = parse(Int, args[7])
 
 
-# # physical inputs
-# p = 1
-# q = 3
-# a_nm = 5.0f0
-# U0 = 0.05f0
 
-# # numerical inputs
-# LLmax = 60
-# NXY = 64
-# Nuc = 30
+## just see trials
+# physical inputs
+p = 7
+q = 4
+a_nm = 5.0f0
+U0 = 0.05f0
+
+# numerical inputs
+LLmax = 60
+NXY = 64
+Nuc = 30
 
 # multiple usage values
 phi = Float32(p/q)
@@ -57,7 +59,9 @@ dy = step(yrange_muc)
 # trial wfunctions
 
 trial_wfs = Wannierize.get_all_trial_wavefunctions(p,q,U0,a,LLmax,xrange_muc,yrange_muc,dx,dy)
-#Wannierize.plot_array(xrange_muc,yrange_muc, trial_wfs[:,:,5],a,q)
+Wannierize.plot_array(xrange_muc,yrange_muc, trial_wfs[:,:,4],a,q)
+
+##
 
 
 Xrange = range(0f0,2π*q,NXY*q+1)[1:end-1]

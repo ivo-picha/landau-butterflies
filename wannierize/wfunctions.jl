@@ -237,7 +237,7 @@ function gaussian_LG(x::Float32,y::Float32,Rx::Float32,Ry::Float32, phi::Float32
 end
 
 
-function write_complex_matrix_in_io(io, M::AbstractMatrix{<:Complex}; digits::Int=6)
+function write_complex_matrix_in_io(io, M::AbstractMatrix{<:Complex}; digits::Int=7)
     nrows, ncols = size(M)
 
     for i in 1:nrows

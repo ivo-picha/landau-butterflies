@@ -54,7 +54,7 @@ spectrum_bare_options_mainfig = (
 
 function color_gaps_eq2_mainfig(lines_dict::Dict, unique_phis::Vector{Float32})
     println("Coloring gaps on the spectrum according to Chern number.")
-    plot_spectrum = Plots.Plot()    # empty plot
+    plot_spectrum = Plots.plot(ylims=(nothing,0.03))    # empty plot
 
     # min distance under which lists of points aren't broken in sublists
     phi_spacing = round(unique_phis[2] - unique_phis[1]; digits = 4)
@@ -64,7 +64,7 @@ function color_gaps_eq2_mainfig(lines_dict::Dict, unique_phis::Vector{Float32})
     for (line_key, points) in lines_dict
         if length(points) > min_line_points
             chern = round(line_key[1]; digits = 2)
-            if isinteger(chern) && chern != 0
+            if isinteger(chern)
                 gap_lower_energy = Float32[]
                 gap_upper_energy = Float32[]
                 phis_overlay = Float32[]
