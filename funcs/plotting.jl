@@ -109,7 +109,15 @@ function plot_bare_spectrum_mainfig!(plt::Plots.Plot,out_energies::Vector{Vector
         Plots.scatter!(plt, xs, ens; spectrum_bare_options_mainfig...)
     end
     miny, maxy = minimum(vcat(out_energies...)), maximum(vcat(out_energies...))
-    Plots.ylims!(plt, miny - 0.05f0*(maxy - miny), maxy + 0.05f0*(maxy - miny))
+    # Only set automatic y-limits if the plot does not already have y-limits set
+    cur_ylims = try
+        Plots.ylims(plt)
+    catch
+        nothing
+    end
+    if cur_ylims === nothing || (cur_ylims isa Tuple && cur_ylims[1] === nothing && cur_ylims[2] === nothing)
+        Plots.ylims!(plt, miny - 0.05f0*(maxy - miny), maxy + 0.05f0*(maxy - miny))
+    end
 end
 
 

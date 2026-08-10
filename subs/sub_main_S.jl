@@ -1,7 +1,7 @@
 # job file that submits jobs of main_S.jl for sets of parameters
 
 #list_U0 = round.(collect(range(0.003, 0.03, 8)); digits=4)
-list_U0 = [0.015]
+list_U0 = [0.0151]
 list_a = [5]
 list_LLmax = [625]
 list_q = [360]
