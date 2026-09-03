@@ -432,8 +432,29 @@ plt_combi = plot(plot_mu, plot_tnn, plot_tnnn, plot_tdnnn, plot_tdnnn_arg, plot_
 savefig(plt_combi,"/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/hops_all2.pdf")
 
 
-
-
+## extra log plot of t diagonal
+plog_c_20 = plot(
+    framestyle=:box,
+    size = (320,320),
+    xlims = (0,2),
+    title="",
+    xlabel="ϕ = p/q",
+    ylabel="log |re( t'' )|",
+    xticks = (phiplotlist,labellist),
+    legendfont = 11,
+    guidefont = 15,
+    tickfont = 10,
+    yguidefontcolor=:blue,
+    margins=5mm,
+    dpi = 200
+)
+for j in eachindex(dnnn_abs_20)
+    scatter!(plog_c_20, (dnnn_phi_20[j],abs(real(exp(im*dnnn_arg_20[j])))*log(dnnn_abs_20[j]*1000)), color=:blue, label="",markers = :diamond,
+    ms = 6)
+end
+scatter!(twinx(),dnnn_phi_20,dnnn_arg_20, label= "",ylabel="arg(t'')/π",color=:red,markers=:circle,ms=6,guidefont=15,tickfont=10,yguidefontcolor=:red,dpi=200,xlims = (0,2))
+display(plog_c_20)
+savefig(plog_c_20,"/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/td_20_comp.pdf")
 
 ## extra plots, universal?
 plot_mu_overlay = scatter(philist,(mu2.-minimum(skipmissing(mu2))).*1000, label= "";plt_opt...)

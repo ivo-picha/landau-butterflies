@@ -1,6 +1,7 @@
 # visualize the uncoupled LLL ground state at ϕ = 1/q 
 
 using Plots
+using Measures
 
 #output folder
 outfolder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/jacobi_theta/"
@@ -8,8 +9,8 @@ mkpath(outfolder)
 
 # parameters
 q = 1
-X = π
-Y = X
+X = 3π/2
+Y = 3π/2
 
 # ---------------------------------------------
 
@@ -35,7 +36,7 @@ function wf(x::Real, y::Real, X::Real, Y::Real, q::Integer)
 end
 
 # -----------------------------------------------
-xrange = collect(range(-2.0, 2.0, length=300))
+xrange = collect(range(0, 1.0*q, length=300))
 yrange = xrange
 psi_array = Array{Complex}(undef, length(xrange), length(yrange))
 for (i,x) in enumerate(xrange)
@@ -47,9 +48,12 @@ end
 tf = font(18)
 lf = font(20)
 plt = heatmap(xrange, yrange, abs.(psi_array)', aspect_ratio=1,
-xlabel="x/a", ylabel="y/a", title="|ψ| @ ϕ=1/$q, X=Y=$X", 
-size=(475,500), xtickfont = tf, ytickfont = tf, guidefont = lf,
-legend=false, framestyle=:box, #clims=(0.2, 0.4)
+    xlabel="x/a", ylabel="y/a", title="|ψ| @ ϕ=1/$q, X=Y=$X", 
+    size=(500,500), xtickfont = tf, ytickfont = tf, guidefont = lf,
+    legend=:right, framestyle=:box, clims=(0.7, 1.0),
+    color = :viridis, margins = 5mm
 )
+
+display(plt)
 
 savefig(plt, joinpath(outfolder, "psi_phi1_over_$q-X$X-Y$Y.pdf"))

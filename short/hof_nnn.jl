@@ -9,11 +9,11 @@ out_folder = "/home/ivoga/Documents/PhD/Landau_Hofstadter/jl2/out_loc/hof_nnn"
 mkpath(out_folder)
 
 t1 = 1; # NN hopping
-t2 = 0.1; # diagonal NNN hopping
-Nk = 32; # size of k-grid in each dimension
+t2 = 0.0; # diagonal NNN hopping
+Nk = 16; # size of k-grid in each dimension
 phi1 = 0; # starting flux
 phi2 = 2; # final flux; range defined
-q_max = 120; # maximum q value, sets resolution
+q_max = 360; # maximum q value, sets resolution
 
 # bloch hamiltonian; kx ∈ [0,2π/(aq)), ky ∈ [0,2π/a) → magnetic momenta
 function get_h(kx::Real, ky::Real, p::Integer, q::Integer)
@@ -62,6 +62,7 @@ end
 
 # plot and save 
 plt = Plots.scatter(phis,energies,
-        xlabel = "ϕ = p/q", ylabel = "Energy", title = "t₁ = $t1, t₂ = $t2",
-        label = "", framestyle = :box, ms = 0.5, size = (800,600), color = :black);
+        xlabel = "ϕ = p/q", ylabel = "Energy", title = "t = $t1, t'' = $t2",
+        label = "", framestyle = :box, ms = 0.5, size = (800,600), color = :black,
+        guidefont = 15, labelfont=15, tickfont=13);
 savefig(plt,joinpath(out_folder,"hof_nnn_t1-$t1-t2-$t2-Nk-$Nk-s$phi1-f$phi2.png"))

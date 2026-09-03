@@ -30,15 +30,15 @@ mkpath(outdir)
 
 
 # physical inputs
-p = 1
-q = 1
+p = 3
+q = 2
 a_nm = 5.0f0
 U0 = 0.05f0
 
 # numerical inputs
-LLmax = 30
+LLmax = 40
 NXY = 16
-Nuc = 50
+Nuc = 60
 
 # multiple usage values
 phi = Float32(p/q)
